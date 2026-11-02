@@ -3,7 +3,9 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    exclude: ["node_modules/**"],
+    // e2e/ is Playwright's, not vitest's: its *.spec.ts files import
+    // @playwright/test and must never be collected by vitest.
+    exclude: ["node_modules/**", "e2e/**"],
   },
   resolve: {
     alias: {

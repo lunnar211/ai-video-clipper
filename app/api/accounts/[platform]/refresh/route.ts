@@ -24,7 +24,7 @@ export const runtime = "nodejs";
  */
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ platform: string }> },
 ): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
     return NextResponse.json(
@@ -32,7 +32,10 @@ export async function POST(
       { status: 429 },
     );
   }
-  const { id } = await params;
+  // Folder renamed in Phase 7 (Next.js forbids two slug names under
+  // /api/accounts): the segment value here is still the account row
+  // id, not a platform — the URL is unchanged.
+  const { platform: id } = await params;
   const db = resolvePublishDb();
   if (!db) {
     return NextResponse.json(

@@ -55,7 +55,8 @@ export async function POST(req: Request): Promise<Response> {
       clip_end: parsed.data.clipEnd,
     });
     const base =
-      process.env.NEXT_PUBLIC_SITE_URL ?? "https://ai-video-clipper.vercel.app";
+      process.env.NEXT_PUBLIC_SITE_URL ??
+      "https://ai-video-clipper-dipeshkarki8292-3476s-projects.vercel.app";
     return NextResponse.json({
       token: row.token,
       url: shareUrl(base, row.token),

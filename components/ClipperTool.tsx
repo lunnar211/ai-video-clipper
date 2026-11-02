@@ -30,6 +30,7 @@ import {
   recordRenderToday,
   shouldWatermark,
 } from "@/lib/usage/quota";
+import { takePendingUpload } from "@/lib/upload-pending";
 import type { Moment } from "@/lib/ai/highlights";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
@@ -216,6 +217,18 @@ export default function ClipperTool() {
       return URL.createObjectURL(f);
     });
   }, []);
+
+  // Hero upload handoff (Phase 7): a file chosen in the homepage hero
+  // is carried in memory to this tool exactly once (take clears it, so
+  // StrictMode's double effect invocation cannot consume it twice).
+  // Deferred past commit (queueMicrotask) so the mount handoff does
+  // not cascade renders during the commit phase.
+  useEffect(() => {
+    queueMicrotask(() => {
+      const pending = takePendingUpload();
+      if (pending) resetForFile(pending);
+    });
+  }, [resetForFile]);
 
   const onMetadata = useCallback(() => {
     const v = previewRef.current;
