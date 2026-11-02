@@ -1,0 +1,77 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  createSupabaseBrowserClient,
+  isSupabaseConfigured,
+} from "@/lib/auth/supabase";
+
+/**
+ * Sign-in/out buttons for the header. When Supabase env vars are
+ * absent, this renders an honest "not configured" note and nothing
+ * else — the tool keeps working signed-out.
+ */
+export default function AuthButtons() {
+  const [email, setEmail] = useState<string | null>(null);
+  // Unconfigured auth is ready immediately (no effect setState).
+  const [ready, setReady] = useState(() => !isSupabaseConfigured());
+
+  useEffect(() => {
+    const client = createSupabaseBrowserClient();
+    if (!client) return;
+    client.auth.getSession().then(({ data }) => {
+      setEmail(data.session?.user?.email ?? null);
+      setReady(true);
+    });
+    const { data: listener } = client.auth.onAuthStateChange(
+      (_event, session) => {
+        setEmail(session?.user?.email ?? null);
+      },
+    );
+    return () => listener.subscription.unsubscribe();
+  }, []);
+
+  if (!ready) return null;
+  if (!isSupabaseConfigured()) {
+    return (
+      <span className="text-xs text-slate-500">
+        Sign-in is not configured yet
+      </span>
+    );
+  }
+  if (email) {
+    return (
+      <span className="flex items-center gap-2 text-sm">
+        <span className="text-slate-600">{email}</span>
+        <button
+          type="button"
+          className="rounded border px-2 py-1 text-xs"
+          onClick={async () => {
+            const client = createSupabaseBrowserClient();
+            await client?.auth.signOut();
+            setEmail(null);
+          }}
+        >
+          Sign out
+        </button>
+      </span>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-white"
+      onClick={async () => {
+        const client = createSupabaseBrowserClient();
+        await client?.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+      }}
+    >
+      Sign in with Google
+    </button>
+  );
+}

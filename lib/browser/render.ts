@@ -111,6 +111,16 @@ function drawWrappedText(
   });
 }
 
+function drawWatermark(ctx: CanvasRenderingContext2D): void {
+  ctx.save();
+  ctx.font = "700 26px system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.fillText("AI Video Clipper", OUTPUT_WIDTH - 24, 24);
+  ctx.restore();
+}
+
 export type RenderOptions = {
   videoUrl: string;
   start: number;
@@ -122,6 +132,8 @@ export type RenderOptions = {
   /** Optional user-licensed background track, mixed at low volume. */
   musicUrl?: string;
   musicGain?: number;
+  /** Free-tier watermark: small brand text on every frame. */
+  watermark?: boolean;
   onProgress?: (frac: number) => void;
 };
 
@@ -268,6 +280,7 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
         segmentAtTime(opts.captions, t) ||
         null;
       if (caption) drawWrappedText(ctx, caption, OUTPUT_WIDTH - 80);
+      if (opts.watermark) drawWatermark(ctx);
       opts.onProgress?.(
         Math.min(1, Math.max(0, (t - opts.start) / (opts.end - opts.start))),
       );

@@ -11,9 +11,13 @@ export default function Pricing() {
           because paid plans are not configured yet.
         </p>
         <p className="mt-2 text-slate-700">
-          If paid plans are added later, they will be announced here first
-          with a real price. Nothing on this page is a promise of a future
-          price, and no payment details are collected anywhere on this site.
+          The free tier allows 3 rendered clips per day, and free clips
+          carry a small watermark. Sign-in (Google) is available once
+          the owner configures it; until then everyone uses the free
+          tier. If paid plans are added later, they will be announced
+          here first with a real price. Nothing on this page is a
+          promise of a future price, and no payment details are
+          collected anywhere on this site.
         </p>
       </section>
       <section className="rounded-xl bg-white p-5 shadow-sm">

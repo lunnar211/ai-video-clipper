@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import AuthButtons from "@/components/AuthButtons";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -36,6 +37,9 @@ export default function RootLayout({
             <Link href="/pricing" className="text-sm text-slate-700">
               Pricing
             </Link>
+            <span className="ml-auto">
+              <AuthButtons />
+            </span>
           </nav>
         </header>
         <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>

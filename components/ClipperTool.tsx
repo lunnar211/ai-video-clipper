@@ -11,6 +11,13 @@ import RightsConsent from "@/components/RightsConsent";
 import MusicPicker from "@/components/MusicPicker";
 import type { UserTrack } from "@/lib/music/tracks";
 import type { MusicMatch } from "@/lib/music/audd";
+import {
+  FREE_CLIPS_PER_DAY,
+  canRenderToday,
+  clipsUsedToday,
+  recordRenderToday,
+  shouldWatermark,
+} from "@/lib/usage/quota";
 import type { Moment } from "@/lib/ai/highlights";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
@@ -85,6 +92,7 @@ export default function ClipperTool() {
     Record<string, { status: "checking" | "clear" | "detected" | "unavailable"; match?: MusicMatch }>
   >({});
   const [musicAck, setMusicAck] = useState<Record<string, boolean>>({});
+  const [usedToday, setUsedToday] = useState<number>(() => clipsUsedToday());
   const previewRef = useRef<HTMLVideoElement | null>(null);
 
   const toggleRights = useCallback((checked: boolean) => {
@@ -284,6 +292,12 @@ export default function ClipperTool() {
         );
         return;
       }
+      if (!canRenderToday()) {
+        setError(
+          `Free tier limit reached: ${FREE_CLIPS_PER_DAY} clips per day. Paid tiers are not configured yet — try again tomorrow.`,
+        );
+        return;
+      }
       setError(null);
       setNotice(null);
       setRenderingId(clip.id);
@@ -316,8 +330,11 @@ export default function ClipperTool() {
           manualCaption: clip.manualCaption,
           voiceoverUrl,
           musicUrl: musicTrack?.url,
+          watermark: shouldWatermark("free"),
           onProgress: setProgress,
         });
+        recordRenderToday();
+        setUsedToday(clipsUsedToday());
         const url = URL.createObjectURL(result.blob);
         setRendered((prev) => ({
           ...prev,
@@ -625,6 +642,12 @@ export default function ClipperTool() {
             Face-centered uses on-device face detection and falls back to
             smart crop, then centre. Output is 720×1280 vertical video —
             MP4 where your browser supports it, otherwise WebM.
+          </p>
+          <p className="text-xs text-slate-500">
+            Free tier: {Math.max(0, FREE_CLIPS_PER_DAY - usedToday)} of{" "}
+            {FREE_CLIPS_PER_DAY} clips left today. Free clips carry a
+            small “AI Video Clipper” watermark; paid tiers are not
+            configured yet.
           </p>
           <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
           <ul className="space-y-4">
