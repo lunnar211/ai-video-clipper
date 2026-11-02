@@ -65,10 +65,12 @@ export async function groqTranscribe(
   throw lastError ?? new Error("Groq Whisper request failed");
 }
 
-/** Groq chat completion (text). Returns the assistant message text. */
+/** Groq chat completion (text). Returns the assistant message text.
+ * `maxTokens` defaults to 2000; metadata generation passes more. */
 export async function groqChat(
   messages: Array<{ role: string; content: string }>,
   fetchImpl: FetchImpl = fetch,
+  maxTokens = 2000,
 ): Promise<string> {
   const key = getKey("GROQ_API_KEY");
   if (!key) throw new Error("GROQ_API_KEY is not configured");
@@ -82,7 +84,7 @@ export async function groqChat(
       model: GROQ_TEXT_MODEL,
       messages,
       temperature: 0.3,
-      max_tokens: 2000,
+      max_tokens: maxTokens,
     }),
   });
   if (!res.ok) throw new Error(providerErrorMessage(res, "Groq chat"));

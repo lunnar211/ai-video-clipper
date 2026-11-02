@@ -6,6 +6,7 @@ import { segmentsToSrt } from "@/lib/captions";
 import type { CropMode } from "@/lib/crop";
 import { extractAudioWav } from "@/lib/browser/audio";
 import { renderClip } from "@/lib/browser/render";
+import MetadataCard from "@/components/MetadataCard";
 import type { Moment } from "@/lib/ai/highlights";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
@@ -569,6 +570,7 @@ export default function ClipperTool() {
                       )}
                     </div>
                   )}
+                  <MetadataCard transcript={transcript ?? []} clip={clip} />
                 </li>
               );
             })}

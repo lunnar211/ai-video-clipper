@@ -3,10 +3,12 @@ import { getKey, providerErrorMessage, type FetchImpl } from "@/lib/ai/providers
 export const GEMINI_TEXT_MODEL =
   process.env.GEMINI_TEXT_MODEL ?? "gemini-3.8-flash";
 
-/** Gemini text generation. Returns the joined candidate text. */
+/** Gemini text generation. Returns the joined candidate text.
+ * `maxTokens` defaults to 2000; metadata generation passes more. */
 export async function geminiText(
   prompt: string,
   fetchImpl: FetchImpl = fetch,
+  maxTokens = 2000,
 ): Promise<string> {
   const key = getKey("GEMINI_API_KEY");
   if (!key) throw new Error("GEMINI_API_KEY is not configured");
@@ -16,7 +18,7 @@ export async function geminiText(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 2000 },
+      generationConfig: { temperature: 0.3, maxOutputTokens: maxTokens },
     }),
   });
   if (!res.ok) throw new Error(providerErrorMessage(res, "Gemini"));

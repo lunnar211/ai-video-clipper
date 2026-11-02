@@ -10,6 +10,7 @@ export const OPENROUTER_TEXT_MODEL =
 export async function openRouterChat(
   messages: Array<{ role: string; content: string }>,
   fetchImpl: FetchImpl = fetch,
+  maxTokens = 2000,
 ): Promise<string> {
   const key = getKey("OPENROUTER_API_KEY");
   if (!key) throw new Error("OPENROUTER_API_KEY is not configured");
@@ -24,7 +25,7 @@ export async function openRouterChat(
       model: OPENROUTER_TEXT_MODEL,
       messages,
       temperature: 0.3,
-      max_tokens: 2000,
+      max_tokens: maxTokens,
     }),
   });
   if (!res.ok) throw new Error(providerErrorMessage(res, "OpenRouter"));
