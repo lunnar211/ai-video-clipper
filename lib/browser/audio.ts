@@ -77,3 +77,30 @@ export async function extractAudioWav(file: File): Promise<Blob> {
     await ctx.close().catch(() => undefined);
   }
 }
+
+/**
+ * Short audio sample for music recognition (AudD's standard endpoint
+ * analyses roughly the first 12 seconds of the sample and caps uploads
+ * at 10 MB). A 15 s, 16 kHz mono sample is ~0.5 MB — far under both.
+ */
+export async function extractAudioSampleWav(
+  file: File,
+  startSec: number,
+  seconds = 15,
+): Promise<Blob> {
+  const ctx = new AudioContext();
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const decoded = await ctx.decodeAudioData(arrayBuffer);
+    const channels: Float32Array[] = [];
+    for (let c = 0; c < decoded.numberOfChannels; c++) {
+      channels.push(decoded.getChannelData(c));
+    }
+    const mono = resampleMono(channels, decoded.sampleRate, 16000);
+    const from = Math.floor(Math.max(0, startSec) * 16000);
+    const to = Math.min(mono.length, from + Math.floor(seconds * 16000));
+    return encodeWav(mono.slice(from, to), 16000);
+  } finally {
+    await ctx.close().catch(() => undefined);
+  }
+}

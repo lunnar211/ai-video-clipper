@@ -119,6 +119,9 @@ export type RenderOptions = {
   captions: TranscriptSegment[];
   manualCaption?: string;
   voiceoverUrl?: string;
+  /** Optional user-licensed background track, mixed at low volume. */
+  musicUrl?: string;
+  musicGain?: number;
   onProgress?: (frac: number) => void;
 };
 
@@ -181,6 +184,20 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
       voiceEl = null;
     }
   }
+  let musicEl: HTMLAudioElement | null = null;
+  if (opts.musicUrl) {
+    try {
+      musicEl = new Audio(opts.musicUrl);
+      musicEl.crossOrigin = "anonymous";
+      const msource = audioCtx.createMediaElementSource(musicEl);
+      const gain = audioCtx.createGain();
+      gain.gain.value = opts.musicGain ?? 0.15;
+      msource.connect(gain);
+      gain.connect(dest);
+    } catch {
+      musicEl = null;
+    }
+  }
 
   const canvasStream = canvas.captureStream(30);
   const audioTracks = dest.stream.getAudioTracks();
@@ -225,6 +242,11 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
       },
     );
   }
+  if (musicEl) {
+    musicEl.currentTime = 0;
+    musicEl.loop = true;
+    await musicEl.play().catch(() => undefined);
+  }
   recorder.start();
 
   await new Promise<void>((resolve) => {
@@ -261,6 +283,7 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
   if (recorder.state !== "inactive") recorder.stop();
   video.pause();
   voiceEl?.pause();
+  musicEl?.pause();
   await stopped;
   await audioCtx.close().catch(() => undefined);
   const type = mimeType || "video/webm";

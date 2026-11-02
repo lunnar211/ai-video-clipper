@@ -4,9 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { TranscriptSegment } from "@/lib/captions";
 import { segmentsToSrt } from "@/lib/captions";
 import type { CropMode } from "@/lib/crop";
-import { extractAudioWav } from "@/lib/browser/audio";
+import { extractAudioWav, extractAudioSampleWav } from "@/lib/browser/audio";
 import { renderClip } from "@/lib/browser/render";
 import MetadataCard from "@/components/MetadataCard";
+import RightsConsent from "@/components/RightsConsent";
+import MusicPicker from "@/components/MusicPicker";
+import type { UserTrack } from "@/lib/music/tracks";
+import type { MusicMatch } from "@/lib/music/audd";
 import type { Moment } from "@/lib/ai/highlights";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
@@ -64,7 +68,34 @@ export default function ClipperTool() {
   const [manualTitle, setManualTitle] = useState("");
   const [manualCaption, setManualCaption] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  // Lazy initializer (no effect): sessionStorage is read once on the
+  // client; on the server it safely defaults to unchecked.
+  const [rightsOk, setRightsOk] = useState<boolean>(() => {
+    try {
+      return (
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("clipper-rights-consent") === "1"
+      );
+    } catch {
+      return false;
+    }
+  });
+  const [musicTrack, setMusicTrack] = useState<UserTrack | null>(null);
+  const [musicCheck, setMusicCheck] = useState<
+    Record<string, { status: "checking" | "clear" | "detected" | "unavailable"; match?: MusicMatch }>
+  >({});
+  const [musicAck, setMusicAck] = useState<Record<string, boolean>>({});
   const previewRef = useRef<HTMLVideoElement | null>(null);
+
+  const toggleRights = useCallback((checked: boolean) => {
+    setRightsOk(checked);
+    try {
+      if (checked) sessionStorage.setItem("clipper-rights-consent", "1");
+      else sessionStorage.removeItem("clipper-rights-consent");
+    } catch {
+      // ignore storage failures; the in-memory state still gates.
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -114,6 +145,12 @@ export default function ClipperTool() {
 
   const transcribe = useCallback(async () => {
     if (!file) return;
+    if (!rightsOk) {
+      setError(
+        "Confirm that you own or have licensed this video and its music before transcription runs.",
+      );
+      return;
+    }
     setError(null);
     setNotice(null);
     setTranscribing(true);
@@ -152,7 +189,7 @@ export default function ClipperTool() {
     } finally {
       setTranscribing(false);
     }
-  }, [file]);
+  }, [file, rightsOk]);
 
   const findHighlights = useCallback(async () => {
     if (!transcript || duration <= 0) return;
@@ -241,6 +278,12 @@ export default function ClipperTool() {
   const renderOne = useCallback(
     async (clip: Clip) => {
       if (!videoUrl) return;
+      if (!rightsOk) {
+        setError(
+          "Confirm that you own or have licensed this video and its music before rendering runs.",
+        );
+        return;
+      }
       setError(null);
       setNotice(null);
       setRenderingId(clip.id);
@@ -272,6 +315,7 @@ export default function ClipperTool() {
           captions: transcript ?? [],
           manualCaption: clip.manualCaption,
           voiceoverUrl,
+          musicUrl: musicTrack?.url,
           onProgress: setProgress,
         });
         const url = URL.createObjectURL(result.blob);
@@ -292,7 +336,63 @@ export default function ClipperTool() {
         setRenderingId(null);
       }
     },
-    [videoUrl, cropMode, transcript, voiceoverOn],
+    [videoUrl, cropMode, transcript, voiceoverOn, rightsOk, musicTrack],
+  );
+
+  const checkMusic = useCallback(
+    async (clip: Clip) => {
+      if (!file) return;
+      setMusicCheck((prev) => ({
+        ...prev,
+        [clip.id]: { status: "checking" },
+      }));
+      try {
+        const sample = await extractAudioSampleWav(file, clip.start, 15);
+        const form = new FormData();
+        form.append("audio", sample, "sample.wav");
+        const res = await fetch("/api/clips/music", {
+          method: "POST",
+          body: form,
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          detected?: boolean;
+          match?: MusicMatch;
+          error?: string;
+        };
+        if (res.status === 503) {
+          setMusicCheck((prev) => ({
+            ...prev,
+            [clip.id]: { status: "unavailable" },
+          }));
+          setNotice(
+            "Music detection is not connected yet (no recognition key on the server). No warning can be given for this clip.",
+          );
+          return;
+        }
+        if (!res.ok) {
+          setError(data.error ?? "Music detection failed.");
+          setMusicCheck((prev) => {
+            const next = { ...prev };
+            delete next[clip.id];
+            return next;
+          });
+          return;
+        }
+        setMusicCheck((prev) => ({
+          ...prev,
+          [clip.id]: data.detected
+            ? { status: "detected", match: data.match }
+            : { status: "clear" },
+        }));
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? `Could not check the music: ${err.message}`
+            : "Could not check the music.",
+        );
+      }
+    },
+    [file],
   );
 
   const downloadSrt = useCallback(
@@ -331,6 +431,14 @@ export default function ClipperTool() {
         and your video never leaves this browser except for the audio sent
         for transcription (see FAQ).
       </div>
+
+      <RightsConsent checked={rightsOk} onChange={toggleRights} />
+      {!rightsOk && (
+        <p className="text-sm text-amber-800">
+          Transcription and rendering are blocked until you confirm the
+          rights checkbox above.
+        </p>
+      )}
 
       <div
         className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-6 text-center"
@@ -397,7 +505,7 @@ export default function ClipperTool() {
             <button
               className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               onClick={transcribe}
-              disabled={transcribing}
+              disabled={transcribing || !rightsOk}
             >
               {transcribing ? "Transcribing…" : "Transcribe with AI"}
             </button>
@@ -518,6 +626,7 @@ export default function ClipperTool() {
             smart crop, then centre. Output is 720×1280 vertical video —
             MP4 where your browser supports it, otherwise WebM.
           </p>
+          <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
           <ul className="space-y-4">
             {clips.map((clip) => {
               const out = rendered[clip.id];
@@ -533,11 +642,20 @@ export default function ClipperTool() {
                     <button
                       className="rounded-lg bg-violet-600 px-3 py-1.5 font-medium text-white disabled:opacity-50"
                       onClick={() => renderOne(clip)}
-                      disabled={renderingId !== null}
+                      disabled={renderingId !== null || !rightsOk}
                     >
                       {renderingId === clip.id
                         ? `Rendering… ${Math.round(progress * 100)}%`
                         : "Render clip"}
+                    </button>
+                    <button
+                      className="rounded-lg border px-3 py-1.5"
+                      onClick={() => checkMusic(clip)}
+                      disabled={musicCheck[clip.id]?.status === "checking"}
+                    >
+                      {musicCheck[clip.id]?.status === "checking"
+                        ? "Checking music…"
+                        : "Check music"}
                     </button>
                     {transcript && (
                       <button
@@ -554,7 +672,49 @@ export default function ClipperTool() {
                       {copiedId === clip.id ? "Copied!" : "Copy title + hashtags"}
                     </button>
                   </div>
-                  {out && (
+                  {musicCheck[clip.id]?.status === "detected" && (
+                    <div className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+                      <strong>Copyrighted music detected in this clip.</strong>{" "}
+                      {musicCheck[clip.id].match
+                        ? `${musicCheck[clip.id].match!.artist} — ${musicCheck[clip.id].match!.title}. `
+                        : ""}
+                      Posting this clip with that music may get it muted,
+                      blocked, or struck. This check is a detection aid,
+                      not legal advice. The download stays hidden until
+                      you acknowledge the risk.
+                      <label className="mt-2 flex items-center gap-2 font-medium">
+                        <input
+                          type="checkbox"
+                          checked={!!musicAck[clip.id]}
+                          onChange={(e) =>
+                            setMusicAck((prev) => ({
+                              ...prev,
+                              [clip.id]: e.target.checked,
+                            }))
+                          }
+                        />
+                        I understand the risk and still want the download.
+                      </label>
+                    </div>
+                  )}
+                  {musicCheck[clip.id]?.status === "clear" && (
+                    <p className="mt-3 text-sm text-emerald-800">
+                      Music check: no known recorded music detected in this
+                      clip&apos;s sample.
+                    </p>
+                  )}
+                  {musicCheck[clip.id]?.status === "unavailable" && (
+                    <p className="mt-3 text-sm text-slate-600">
+                      Music check unavailable — no recognition key is
+                      configured on the server, so no warning can be given
+                      for this clip.
+                    </p>
+                  )}
+                  {out &&
+                    !(
+                      musicCheck[clip.id]?.status === "detected" &&
+                      !musicAck[clip.id]
+                    ) && (
                     <div className="mt-3 text-sm">
                       <a
                         className="font-medium text-violet-700 underline"

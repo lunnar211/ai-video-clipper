@@ -46,6 +46,12 @@ export default function RootLayout({
               video you clip. This tool never downloads videos from any
               platform.
             </p>
+            <p className="mt-2 flex flex-wrap gap-4">
+              <a className="underline" href="/privacy">Privacy Policy</a>
+              <a className="underline" href="/terms">Terms of Use</a>
+              <a className="underline" href="/contact">Contact</a>
+              <a className="underline" href="/copyright">Copyright / DMCA</a>
+            </p>
             <p className="mt-2">
               Face detection uses MediaPipe (Apache 2.0); content-aware
               cropping uses smartcrop (MIT). See the FAQ for what leaves
