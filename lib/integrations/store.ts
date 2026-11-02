@@ -176,8 +176,16 @@ export type WebhookEndpointPublic = Omit<
 export function toWebhookEndpointPublic(
   row: WebhookEndpointRow,
 ): WebhookEndpointPublic {
-  const { secret_enc: _secret, key_id: _keyId, ...pub } = row;
-  return pub;
+  // Explicit field pick (not rest-destructure): the secret columns
+  // must never appear in a public shape, by construction.
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    url: row.url,
+    events: row.events,
+    active: row.active,
+    created_at: row.created_at,
+  };
 }
 
 export async function listWebhookEndpoints(
@@ -319,8 +327,18 @@ export type ApiKeyRow = {
 export type ApiKeyPublic = Omit<ApiKeyRow, "key_hash">;
 
 export function toApiKeyPublic(row: ApiKeyRow): ApiKeyPublic {
-  const { key_hash: _hash, ...pub } = row;
-  return pub;
+  // Explicit field pick (not rest-destructure): the key hash must
+  // never appear in a public shape, by construction.
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    name: row.name,
+    key_prefix: row.key_prefix,
+    scopes: row.scopes,
+    revoked_at: row.revoked_at,
+    last_used_at: row.last_used_at,
+    created_at: row.created_at,
+  };
 }
 
 export async function listApiKeys(

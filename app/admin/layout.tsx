@@ -37,6 +37,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <Link href="/admin/strikes" className="text-violet-700 underline">
           Strikes queue
         </Link>
+        <Link href="/admin/integrations" className="text-violet-700 underline">
+          Integrations
+        </Link>
+        <Link href="/admin/webhooks" className="text-violet-700 underline">
+          Webhooks
+        </Link>
+        <Link href="/admin/api-keys" className="text-violet-700 underline">
+          API keys
+        </Link>
+        <Link href="/admin/api-docs" className="text-violet-700 underline">
+          API docs
+        </Link>
+        <Link href="/admin/sso" className="text-violet-700 underline">
+          SSO
+        </Link>
+        <Link href="/admin/gdpr" className="text-violet-700 underline">
+          GDPR
+        </Link>
       </nav>
       {children}
     </div>

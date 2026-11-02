@@ -38,7 +38,6 @@ import { ssoConfigSchema, ssoStatusFromRow } from "@/lib/integrations/sso";
 import {
   buildGdprArchive,
   GDPR_DELETION_ORDER,
-  GDPR_RETAINED,
   GDPR_EXPORT_COLUMNS,
 } from "@/lib/integrations/gdpr";
 
