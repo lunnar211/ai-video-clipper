@@ -11,6 +11,7 @@ import { pickThumbnail } from "@/lib/browser/thumbnails";
 import { buildZip } from "@/lib/browser/zip";
 import MetadataCard from "@/components/MetadataCard";
 import RightsConsent from "@/components/RightsConsent";
+import ComplianceChecklist from "@/components/ComplianceChecklist";
 import MusicPicker from "@/components/MusicPicker";
 import ClipEditor from "@/components/ClipEditor";
 import BrandKitPanel from "@/components/BrandKitPanel";
@@ -19,6 +20,8 @@ import { loadBrandKit, saveBrandKit } from "@/lib/brandkit";
 import { TRANSLATION_LANGUAGES } from "@/lib/ai/languages";
 import type { MomentLike } from "@/lib/pipeline/search";
 import type { UserTrack } from "@/lib/music/tracks";
+import { userTrackAttribution } from "@/lib/music/tracks";
+import { DECLARATION_TEXT_VERSION } from "@/lib/rights/declarations";
 import type { MusicMatch } from "@/lib/music/audd";
 import {
   FREE_CLIPS_PER_DAY,
@@ -97,6 +100,25 @@ export default function ClipperTool() {
     }
   });
   const [musicTrack, setMusicTrack] = useState<UserTrack | null>(null);
+  // ClipForge Phase 2: per-project declaration record. The project id
+  // is one UUID per browser session; when a database is configured,
+  // accepting the checkbox also stores an immutable server record
+  // (see /api/rights/declarations). Without one, the record stays
+  // session-only and the UI says so — never claimed otherwise.
+  const [projectId] = useState<string>(() => {
+    try {
+      const existing = sessionStorage.getItem("clipper-project-id");
+      if (existing) return existing;
+      const id = crypto.randomUUID();
+      sessionStorage.setItem("clipper-project-id", id);
+      return id;
+    } catch {
+      return crypto.randomUUID();
+    }
+  });
+  const [declarationState, setDeclarationState] = useState<
+    "unknown" | "session" | "server"
+  >("unknown");
   const [musicCheck, setMusicCheck] = useState<
     Record<string, { status: "checking" | "clear" | "detected" | "unavailable"; match?: MusicMatch }>
   >({});
@@ -120,15 +142,34 @@ export default function ClipperTool() {
   const [zipBusy, setZipBusy] = useState(false);
   const previewRef = useRef<HTMLVideoElement | null>(null);
 
-  const toggleRights = useCallback((checked: boolean) => {
-    setRightsOk(checked);
-    try {
-      if (checked) sessionStorage.setItem("clipper-rights-consent", "1");
-      else sessionStorage.removeItem("clipper-rights-consent");
-    } catch {
-      // ignore storage failures; the in-memory state still gates.
-    }
-  }, []);
+  const toggleRights = useCallback(
+    (checked: boolean) => {
+      setRightsOk(checked);
+      try {
+        if (checked) {
+          sessionStorage.setItem("clipper-rights-consent", "1");
+          // Best-effort immutable server record; a 503 (no database)
+          // leaves the session record, which the UI labels as such.
+          fetch("/api/rights/declarations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectId,
+              declarationTextVersion: DECLARATION_TEXT_VERSION,
+            }),
+          })
+            .then((res) => setDeclarationState(res.ok ? "server" : "session"))
+            .catch(() => setDeclarationState("session"));
+        } else {
+          sessionStorage.removeItem("clipper-rights-consent");
+          setDeclarationState("unknown");
+        }
+      } catch {
+        // ignore storage failures; the in-memory state still gates.
+      }
+    },
+    [projectId],
+  );
 
   useEffect(() => {
     return () => {
@@ -579,6 +620,17 @@ export default function ClipperTool() {
           });
         }
       }
+      // The music credit travels with the clips when attribution is
+      // required (ClipForge Phase 2).
+      if (musicTrack) {
+        const attribution = userTrackAttribution(musicTrack);
+        if (attribution) {
+          entries.push({
+            name: "ATTRIBUTION.txt",
+            data: new TextEncoder().encode(`${attribution}\n`),
+          });
+        }
+      }
       const zip = buildZip(entries);
       downloadBlob(
         new Blob([zip.buffer as ArrayBuffer], { type: "application/zip" }),
@@ -589,7 +641,7 @@ export default function ClipperTool() {
     } finally {
       setZipBusy(false);
     }
-  }, [clips, rendered, transcript, translatedTranscript]);
+  }, [clips, rendered, transcript, translatedTranscript, musicTrack]);
 
   const makeThumbnail = useCallback(
     async (clip: Clip) => {
@@ -699,6 +751,19 @@ export default function ClipperTool() {
       </div>
 
       <RightsConsent checked={rightsOk} onChange={toggleRights} />
+      {rightsOk && declarationState === "server" && (
+        <p className="text-sm text-emerald-800">
+          Declaration stored server-side as an immutable record for
+          this project.
+        </p>
+      )}
+      {rightsOk && declarationState !== "server" && (
+        <p className="text-sm text-slate-600">
+          Session-only record: the immutable server record activates
+          once database setup lands — until then this confirmation
+          lives only in this browser session.
+        </p>
+      )}
       {!rightsOk && (
         <p className="text-sm text-amber-800">
           Transcription and rendering are blocked until you confirm the
@@ -1171,9 +1236,9 @@ export default function ClipperTool() {
                   )}
                   {musicCheck[clip.id]?.status === "unavailable" && (
                     <p className="mt-3 text-sm text-slate-600">
-                      Music check unavailable — no recognition key is
-                      configured on the server, so no warning can be given
-                      for this clip.
+                      Not scanned — no recognition key is connected, so
+                      this clip has not been checked. Unscanned does
+                      not mean clear.
                     </p>
                   )}
                   {out &&
@@ -1202,6 +1267,15 @@ export default function ClipperTool() {
             })}
           </ul>
         </section>
+      )}
+      {clips.length > 0 && (
+        <ComplianceChecklist
+          projectId={projectId}
+          declarationAccepted={rightsOk}
+          clips={clips.map((c) => ({ id: c.id, title: c.title }))}
+          musicCheck={musicCheck}
+          musicLicence={musicTrack?.licence ?? null}
+        />
       )}
     </div>
   );

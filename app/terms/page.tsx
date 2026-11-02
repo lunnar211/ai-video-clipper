@@ -12,9 +12,14 @@ export default function Terms() {
       <p>
         You may only clip videos you own or hold a licence for,
         including any music in them. You confirm this with the rights
-        checkbox before transcription or rendering runs. You are
-        responsible for the clips you create, publish, or share, and for
-        complying with the rules of any platform you post to.
+        checkbox before transcription or rendering runs, and — once
+        database setup lands — that confirmation is also stored as an
+        immutable per-project declaration record (your account where
+        signed in, IP, timestamp, project, and declaration version).
+        You are responsible for the clips you create, publish, or
+        share, and for complying with the rules of any platform you
+        post to. Before publishing, the per-post compliance checklist
+        must be ticked for that post.
       </p>
       <h2 className="text-lg font-semibold text-slate-900">
         What the tool does not do

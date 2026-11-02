@@ -29,6 +29,12 @@ export type PolicyInput = {
   detected: boolean;
   /** Free-text licence proof (licence name, order/invoice ref, URL). */
   licenceProof: string | null;
+  /**
+   * True when the user explicitly acknowledged that no scan ran.
+   * Only then may an unscanned clip proceed — with the user, not
+   * the tool, accepting responsibility for the music.
+   */
+  notScannedAcknowledged?: boolean;
 };
 
 export type PolicyResult = {
@@ -40,6 +46,14 @@ export type PolicyResult = {
 
 export function evaluatePolicy(input: PolicyInput): PolicyResult {
   if (!input.scanned) {
+    if (input.notScannedAcknowledged === true) {
+      return {
+        outcome: "not_scanned",
+        reason:
+          "This clip has not been fingerprint-scanned, and you acknowledged the gap. You — not this tool — remain responsible for the music.",
+        mayProceed: true,
+      };
+    }
     return {
       outcome: "not_scanned",
       reason:
@@ -119,6 +133,7 @@ export function evaluatePrePublishCheck(
     scanned: draft.fingerprintScanned,
     detected: draft.fingerprintDetected,
     licenceProof: draft.licenceProof,
+    notScannedAcknowledged: draft.notScannedAcknowledged,
   });
   const items: PrePublishItem[] = [
     {

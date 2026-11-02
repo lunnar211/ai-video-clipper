@@ -13,9 +13,10 @@ export default function Copyright() {
         If your work was used without permission
       </h2>
       <p>
-        If you believe a clip created with this tool infringes your
-        copyright, send a notice to the contact address on the Contact
-        page (currently a placeholder the owner must replace) with:
+        File a notice with the Report page form (or, if the form is
+        not connected yet, send a notice to the contact address on the
+        Contact page, currently a placeholder the owner must replace)
+        with:
       </p>
       <ol className="list-decimal space-y-1 pl-5">
         <li>Identification of the copyrighted work you claim was infringed.</li>
@@ -41,18 +42,26 @@ export default function Copyright() {
         What happens next
       </h2>
       <p>
-        Valid notices are reviewed, and the owner will act on confirmed
-        infringement — including disabling the relevant account or
-        feature where applicable — and will notify the affected user
-        where contact details exist. Counter-notices with the same
-        identifying information are accepted and reviewed the same way.
+        Valid notices enter the admin review queue and move submitted
+        → under review → upheld or overturned. On a confirmed
+        infringement the owner will act — including disabling the
+        relevant account or feature where applicable — and will notify
+        the affected user where contact details exist. Appeals are
+        filed from the Report page and follow the same review path: an
+        upheld appeal means the strike stands; an overturned appeal
+        reverses it and recomputes any publishing pause it caused.
       </p>
       <h2 className="text-lg font-semibold text-slate-900">
         Repeat infringers
       </h2>
       <p>
         Accounts that repeatedly clip or publish material they do not
-        own may be limited or closed.
+        own are handled by a fixed policy, also enforced in code: 2
+        upheld strikes flag an account for admin review, and 3 upheld
+        strikes automatically pause its publishing until an admin
+        reviews it. A pause is recomputed whenever a strike is upheld
+        or overturned, so reversing a strike can lift a pause. Nothing
+        here promises any outcome for any individual case.
       </p>
     </div>
   );

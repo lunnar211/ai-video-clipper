@@ -5,6 +5,7 @@ import {
   ROYALTY_FREE_SOURCES,
   LICENSED_TRACKS,
   TRACK_LICENCES,
+  userTrackAttribution,
   type UserTrack,
 } from "@/lib/music/tracks";
 
@@ -23,6 +24,18 @@ export default function MusicPicker({
   onSelect: (track: UserTrack | null) => void;
 }) {
   const [licence, setLicence] = useState<string>(TRACK_LICENCES[0]);
+  const [copied, setCopied] = useState(false);
+  const attribution = selected ? userTrackAttribution(selected) : null;
+
+  const copyAttribution = async () => {
+    if (!attribution) return;
+    try {
+      await navigator.clipboard.writeText(attribution);
+      setCopied(true);
+    } catch {
+      // Clipboard unavailable — the text stays visible for manual copy.
+    }
+  };
 
   const onFile = (f: File | undefined) => {
     if (!f) return;
@@ -102,6 +115,25 @@ export default function MusicPicker({
         <p className="mt-2 text-slate-700">
           Selected: {selected.name} — licence: {selected.licence}
         </p>
+      )}
+      {attribution && (
+        <div className="mt-2 rounded-lg bg-slate-50 p-3">
+          <p className="text-slate-700">
+            Attribution required — include this credit with the clip:
+          </p>
+          <p className="mt-1 font-medium text-slate-900">{attribution}</p>
+          <button
+            type="button"
+            className="mt-2 rounded border px-3 py-1.5"
+            onClick={copyAttribution}
+          >
+            {copied ? "Copied" : "Copy attribution"}
+          </button>
+          <p className="mt-1 text-slate-500">
+            The same text is written into the ZIP export as
+            ATTRIBUTION.txt.
+          </p>
+        </div>
       )}
     </div>
   );

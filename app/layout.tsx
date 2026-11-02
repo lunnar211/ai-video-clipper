@@ -55,6 +55,9 @@ export default function RootLayout({
               <a className="underline" href="/terms">Terms of Use</a>
               <a className="underline" href="/contact">Contact</a>
               <a className="underline" href="/copyright">Copyright / DMCA</a>
+              <a className="underline" href="/cookies">Cookie Policy</a>
+              <a className="underline" href="/acceptable-use">Acceptable Use</a>
+              <a className="underline" href="/report">Report infringement</a>
             </p>
             <p className="mt-2">
               Face detection uses MediaPipe (Apache 2.0); content-aware
