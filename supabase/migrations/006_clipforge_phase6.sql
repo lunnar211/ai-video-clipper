@@ -17,7 +17,8 @@
 -- SUM(delta_minutes) — never a mutable balance column; this is a
 -- DIFFERENT unit from Phase 4 clipper_credit_adjustments, which
 -- counts CLIPS and is left untouched), clipper_coupons +
--- clipper_coupon_redemptions, clipper_referrals +
+-- clipper_coupon_redemptions, clipper_referral_codes (code → owner
+-- registry) + clipper_referrals +
 -- clipper_commissions (payouts are manual — no payout rail wired),
 -- clipper_webhook_events (MoR event ids, UNIQUE per provider —
 -- the duplicate-payment protection), clipper_notifications
@@ -129,6 +130,13 @@ create table if not exists public.clipper_referrals (
   unique (referred_user_id)
 );
 
+create table if not exists public.clipper_referral_codes (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  user_id uuid not null references public.clipper_users (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.clipper_commissions (
   id uuid primary key default gen_random_uuid(),
   referral_id uuid not null references public.clipper_referrals (id) on delete cascade,
@@ -166,6 +174,7 @@ alter table public.clipper_credit_ledger enable row level security;
 alter table public.clipper_coupons enable row level security;
 alter table public.clipper_coupon_redemptions enable row level security;
 alter table public.clipper_referrals enable row level security;
+alter table public.clipper_referral_codes enable row level security;
 alter table public.clipper_commissions enable row level security;
 alter table public.clipper_webhook_events enable row level security;
 alter table public.clipper_notifications enable row level security;

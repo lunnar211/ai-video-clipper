@@ -392,8 +392,103 @@ export async function listRedemptionsByUser(
 }
 
 /* ------------------------------------------------------------------ */
+/* User plan lookup (clipper_users.plan, widened by migration 006)    */
+/* ------------------------------------------------------------------ */
+
+export async function getUserPlan(
+  db: BillingDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<string | null> {
+  const rows = await getRows<{ plan: string }>(
+    db,
+    "clipper_users",
+    `id=eq.${encodeURIComponent(userId)}&select=plan&limit=1`,
+    fetchImpl,
+  );
+  return rows[0]?.plan ?? null;
+}
+
+export async function getUserByEmail(
+  db: BillingDb,
+  email: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<{ id: string; plan: string } | null> {
+  const rows = await getRows<{ id: string; plan: string }>(
+    db,
+    "clipper_users",
+    `email=eq.${encodeURIComponent(email)}&select=id,plan&limit=1`,
+    fetchImpl,
+  );
+  return rows[0] ?? null;
+}
+
+export async function updateUserPlan(
+  db: BillingDb,
+  userId: string,
+  plan: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<void> {
+  await patchRows(
+    db,
+    "clipper_users",
+    `id=eq.${encodeURIComponent(userId)}`,
+    { plan },
+    fetchImpl,
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Affiliates                                                         */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Referral-code registry: a code maps to exactly one owner. This is
+ * separate from clipper_referrals (which records each attribution):
+ * without a registry, a code that was never used would have no
+ * owner to attribute to.
+ */
+export type ReferralCodeRow = {
+  id: string;
+  code: string;
+  user_id: string;
+  created_at: string;
+};
+
+export async function createReferralCode(
+  db: BillingDb,
+  row: Omit<ReferralCodeRow, "id" | "created_at">,
+  fetchImpl: FetchImpl = fetch,
+): Promise<ReferralCodeRow> {
+  return postRow(db, "clipper_referral_codes", row, fetchImpl);
+}
+
+export async function getReferralCodeOwner(
+  db: BillingDb,
+  code: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<ReferralCodeRow | null> {
+  const rows = await getRows<ReferralCodeRow>(
+    db,
+    "clipper_referral_codes",
+    `code=eq.${encodeURIComponent(code.toUpperCase())}&limit=1`,
+    fetchImpl,
+  );
+  return rows[0] ?? null;
+}
+
+export async function listReferralCodesByUser(
+  db: BillingDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<ReferralCodeRow[]> {
+  return getRows(
+    db,
+    "clipper_referral_codes",
+    `user_id=eq.${encodeURIComponent(userId)}&order=created_at.desc`,
+    fetchImpl,
+  );
+}
 
 export type ReferralRow = {
   id: string;

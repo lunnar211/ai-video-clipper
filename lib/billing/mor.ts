@@ -45,6 +45,11 @@ export type NormalizedMorEvent = {
   /** MoR transaction id, when the event carries one. */
   transactionId: string | null;
   customerEmail: string | null;
+  /** MoR subscription status, when the event carries one. */
+  status: string | null;
+  /** Current billing period bounds, when the event carries them. */
+  periodStart: string | null;
+  periodEnd: string | null;
   /** Price id of the purchased item, when the event carries one. */
   priceId: string | null;
   /** Amount in integer minor units, when the event carries one. */
@@ -68,6 +73,14 @@ export interface MorProvider {
   verifyWebhook(rawBody: string, headers: Headers): boolean;
   /** Parse a verified body into a normalized event (null = unknown). */
   parseWebhookEvent(body: unknown): NormalizedMorEvent | null;
+  /**
+   * Cancel at the MoR. Optional: providers without a cancel API
+   * omit it, and the route records a local-only cancel instead.
+   */
+  cancelSubscription?(input: {
+    subscriptionId: string;
+    mode: "immediate" | "end_of_period";
+  }): Promise<{ ok: boolean; reason?: string }>;
   webhookSecretEnvName(): string;
 }
 
@@ -266,6 +279,23 @@ export class PaddleMorProvider implements MorProvider {
         typeof data.customer_email === "string"
           ? data.customer_email
           : null,
+      status: typeof data.status === "string" ? data.status : null,
+      periodStart:
+        typeof data.current_billing_period === "object" &&
+        data.current_billing_period !== null &&
+        typeof (data.current_billing_period as Record<string, unknown>)
+          .starts_at === "string"
+          ? ((data.current_billing_period as Record<string, unknown>)
+              .starts_at as string)
+          : null,
+      periodEnd:
+        typeof data.current_billing_period === "object" &&
+        data.current_billing_period !== null &&
+        typeof (data.current_billing_period as Record<string, unknown>)
+          .ends_at === "string"
+          ? ((data.current_billing_period as Record<string, unknown>)
+              .ends_at as string)
+          : null,
       priceId: typeof price.id === "string" ? price.id : null,
       amountMinor,
       currency:
@@ -276,6 +306,37 @@ export class PaddleMorProvider implements MorProvider {
 
   webhookSecretEnvName(): string {
     return "PADDLE_WEBHOOK_SECRET";
+  }
+
+  async cancelSubscription(input: {
+    subscriptionId: string;
+    mode: "immediate" | "end_of_period";
+  }): Promise<{ ok: boolean; reason?: string }> {
+    const key = getKey("PADDLE_API_KEY");
+    if (!key) {
+      return { ok: false, reason: "Paddle is not configured." };
+    }
+    const res = await this.fetchImpl(
+      `${paddleBaseUrl()}/subscriptions/${encodeURIComponent(input.subscriptionId)}/cancel`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          "Paddle-Version": "1",
+        },
+        body: JSON.stringify({
+          effective_from:
+            input.mode === "immediate"
+              ? "immediately"
+              : "next_billing_period",
+        }),
+      },
+    );
+    if (!res.ok) {
+      return { ok: false, reason: `Paddle cancel failed (HTTP ${res.status}).` };
+    }
+    return { ok: true };
   }
 }
 
@@ -364,6 +425,14 @@ export class LemonSqueezyMorProvider implements MorProvider {
           : null,
       customerEmail:
         typeof attrs.user_email === "string" ? attrs.user_email : null,
+      status: typeof attrs.status === "string" ? attrs.status : null,
+      periodStart: null,
+      periodEnd:
+        typeof attrs.renews_at === "string"
+          ? attrs.renews_at
+          : typeof attrs.ends_at === "string"
+            ? attrs.ends_at
+            : null,
       priceId: null,
       amountMinor: total,
       currency:
@@ -377,10 +446,36 @@ export class LemonSqueezyMorProvider implements MorProvider {
   }
 }
 
+/** Map a provider status string onto an app subscription status. */
+export function mapMorStatus(
+  provider: MorName,
+  status: string | null,
+): "trialing" | "active" | "past_due" | "canceled" | null {
+  if (!status) return null;
+  if (status === "active") return "active";
+  if (status === "trialing") return "trialing";
+  if (status === "past_due") return "past_due";
+  if (status === "canceled") return "canceled";
+  if (provider === "lemonsqueezy" && (status === "cancelled" || status === "expired")) {
+    return "canceled";
+  }
+  // Paddle "paused" and anything unknown: do NOT change local status.
+  return null;
+}
+
 /** Provider selection: BILLING_MOR_PROVIDER=lemonsqueezy, else paddle. */
 export function getMorProvider(fetchImpl?: FetchImpl): MorProvider {
   if (process.env.BILLING_MOR_PROVIDER === "lemonsqueezy") {
     return new LemonSqueezyMorProvider();
   }
+  return new PaddleMorProvider(fetchImpl);
+}
+
+/** Explicit provider selection (webhook ?provider= overrides env). */
+export function morProviderFor(
+  name: MorName,
+  fetchImpl?: FetchImpl,
+): MorProvider {
+  if (name === "lemonsqueezy") return new LemonSqueezyMorProvider();
   return new PaddleMorProvider(fetchImpl);
 }

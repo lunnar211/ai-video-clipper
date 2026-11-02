@@ -35,6 +35,10 @@ import {
 } from "@/lib/publish/tempmedia";
 import { notifyPublishFailure } from "@/lib/publish/notify";
 import { scheduleAudit } from "@/lib/admin/audit";
+import {
+  consumptionMinutes,
+  recordConsumptionSafe,
+} from "@/lib/billing/metering";
 import { dispatchEventSafe } from "@/lib/integrations/dispatch";
 import { makeDomainEvent } from "@/lib/integrations/events";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
@@ -335,6 +339,27 @@ export async function POST(
         },
       ),
     );
+    // Phase 6: metering for a completed publish — whole minutes
+    // for the clip length, recorded best-effort. Guest posts
+    // (no user row) are skipped: the ledger FK requires a user.
+    // Never changes this response.
+    if (nextStatus === "published" && post.user_id) {
+      const minutes = consumptionMinutes(clipFacts.durationSec);
+      void recordConsumptionSafe({
+        userId: post.user_id,
+        minutes,
+        reason: "publish",
+        reference: post.id,
+      });
+      scheduleAudit({
+        actor: post.user_id,
+        action: "billing.credit_consumed",
+        target: post.id,
+        metadata: { minutes },
+        ip: getClientIp(req),
+        user_agent: req.headers.get("user-agent"),
+      });
+    }
   }
   return NextResponse.json({
     postId: post.id,
