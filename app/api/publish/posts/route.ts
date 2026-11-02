@@ -16,6 +16,8 @@ import {
   listTargetRows,
 } from "@/lib/publish/store";
 import { scheduleAudit } from "@/lib/admin/audit";
+import { dispatchEventSafe } from "@/lib/integrations/dispatch";
+import { makeDomainEvent } from "@/lib/integrations/events";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
 
 export const runtime = "nodejs";
@@ -183,6 +185,15 @@ export async function POST(req: Request): Promise<Response> {
       ip: getClientIp(req),
       user_agent: req.headers.get("user-agent"),
     });
+    // Phase 5: same event on the integration bus (webhook fan-out).
+    // Swallowed on failure — never changes this response.
+    void dispatchEventSafe(
+      makeDomainEvent("post.scheduled", {
+        targetId: post.id,
+        actor: data.userId ?? "guest",
+        payload: { platforms: data.targets.map((t) => t.platform) },
+      }),
+    );
   }
   return NextResponse.json({ post, targets }, { status: 201 });
 }

@@ -8,6 +8,8 @@ import { resolveRightsDb } from "@/lib/rights/declarations";
 import { getAdminIdentity, isAdmin } from "@/lib/rights/admin";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { scheduleAudit } from "@/lib/admin/audit";
+import { dispatchEventSafe } from "@/lib/integrations/dispatch";
+import { makeDomainEvent } from "@/lib/integrations/events";
 
 export const runtime = "nodejs";
 
@@ -68,6 +70,15 @@ export async function POST(req: Request): Promise<Response> {
       ip: getClientIp(req),
       user_agent: req.headers.get("user-agent"),
     });
+    // Phase 5: same event on the integration bus (webhook fan-out).
+    // Swallowed on failure — never changes this response.
+    void dispatchEventSafe(
+      makeDomainEvent("strike.created", {
+        targetId: row.id,
+        actor: "guest",
+        payload: { accusedUserId: parsed.data.accusedUserId ?? null },
+      }),
+    );
     return NextResponse.json({ filed: true, id: row.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Intake failed";

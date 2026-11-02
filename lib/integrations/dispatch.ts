@@ -19,11 +19,15 @@
 import type { FetchImpl } from "@/lib/ai/providers";
 import { createEnvTokenCrypto } from "@/lib/publish/tokens";
 import { attemptDelivery, nextBackoffMs } from "./webhooks";
-import type { DomainEvent } from "./events";
+import {
+  publishIntegrationEventSafe,
+  type DomainEvent,
+} from "./events";
 import {
   createWebhookDelivery,
   getWebhookEndpoint,
   listWebhookEndpoints,
+  resolveIntegrationDb,
   updateWebhookDelivery,
   type IntegrationDb,
   type WebhookDeliveryRow,
@@ -173,4 +177,26 @@ export async function replayDelivery(
     fetchImpl,
   );
   return { status: attempt.ok ? "delivered" : "failed" };
+}
+
+/**
+ * The single bridge between domain events and webhook endpoints.
+ * Publishes the event on the bus (for non-dispatching subscribers)
+ * AND dispatches it to subscribed endpoints when a database is
+ * configured. Never throws, never changes the caller's response.
+ * The bus deliberately has NO dispatching subscriber — this function
+ * is the only fan-out, so each event is delivered exactly once.
+ */
+export async function dispatchEventSafe(
+  event: DomainEvent,
+  fetchImpl: FetchImpl = fetch,
+): Promise<void> {
+  try {
+    publishIntegrationEventSafe(event);
+    const db = resolveIntegrationDb();
+    if (!db) return;
+    await dispatchEventToEndpoints(db, event, fetchImpl);
+  } catch {
+    // Dispatch must never break the publisher.
+  }
 }

@@ -219,6 +219,20 @@ export async function getWebhookEndpoint(
   return rows[0] ?? null;
 }
 
+export async function getWebhookDeliveryById(
+  db: IntegrationDb,
+  id: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<WebhookDeliveryRow | null> {
+  const rows = await getRows<WebhookDeliveryRow>(
+    db,
+    "clipper_webhook_deliveries",
+    `id=eq.${encodeURIComponent(id)}`,
+    fetchImpl,
+  );
+  return rows[0] ?? null;
+}
+
 export async function deleteWebhookEndpoint(
   db: IntegrationDb,
   id: string,

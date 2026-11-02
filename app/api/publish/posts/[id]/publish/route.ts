@@ -35,6 +35,8 @@ import {
 } from "@/lib/publish/tempmedia";
 import { notifyPublishFailure } from "@/lib/publish/notify";
 import { scheduleAudit } from "@/lib/admin/audit";
+import { dispatchEventSafe } from "@/lib/integrations/dispatch";
+import { makeDomainEvent } from "@/lib/integrations/events";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
 
 export const runtime = "nodejs";
@@ -318,6 +320,21 @@ export async function POST(
       ip: getClientIp(req),
       user_agent: req.headers.get("user-agent"),
     });
+    // Phase 5: same event on the integration bus (webhook fan-out).
+    // Swallowed on failure — never changes this response.
+    void dispatchEventSafe(
+      makeDomainEvent(
+        nextStatus === "published" ? "post.published" : "post.failed",
+        {
+          targetId: post.id,
+          actor: post.user_id ?? "guest",
+          payload: {
+            platforms: finalTargets.map((t) => t.platform),
+            publishedCount,
+          },
+        },
+      ),
+    );
   }
   return NextResponse.json({
     postId: post.id,
