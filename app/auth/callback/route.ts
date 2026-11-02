@@ -1,16 +1,24 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
+import { validNextPath } from "@/lib/auth/email-login";
 import { scheduleAudit } from "@/lib/admin/audit";
 
 /**
- * Supabase OAuth callback: exchanges the provider code for a session
+ * Supabase Auth callback: exchanges the provider code for a session
  * and redirects home. If Supabase is not configured, the route says
  * so honestly instead of crashing.
+ *
+ * Redirect safety: `next` is validated to an internal path only
+ * (see validNextPath) — an absolute or protocol-relative `next` can
+ * never bounce a user to another site. Sign-in callers pass
+ * redirectTo = their own origin + /auth/callback, so Supabase returns
+ * here; the allowlist entry for this callback URL lives in the
+ * Supabase dashboard (owner-managed), not in code.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
-  const next = url.searchParams.get("next") ?? "/";
+  const next = validNextPath(url.searchParams.get("next")); // internal only
   const client = await createSupabaseServerClient();
   if (!client) {
     return new NextResponse("Sign-in is not configured yet.", {

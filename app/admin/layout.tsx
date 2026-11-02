@@ -1,14 +1,30 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getAdminSession } from "@/lib/admin/session";
+import { adminLayoutGate } from "@/lib/admin/guard";
 import AdminBanner from "./AdminBanner";
 
 /**
- * Admin console layout (ClipForge Phase 4). Wraps every /admin page
- * (including the Phase 2 strikes queue) with the view-as banner and
- * console navigation. The banner is a client component that reads
- * only the session endpoint — no tokens or content ever reach it.
+ * Admin console layout (ClipForge Phase 4 + admin hard gate).
+ * Wraps every /admin page (including the Phase 2 strikes queue) with
+ * the view-as banner and console navigation. The banner is a client
+ * component that reads only the session endpoint — no tokens or
+ * content ever reach it.
+ *
+ * HARD GATE: the session is resolved server-side BEFORE any console
+ * UI renders. No session -> redirect to /signin; signed in without a
+ * console role (or suspended) -> redirect home. MFA is not checked
+ * here (API routes still enforce it, and /admin/mfa must stay
+ * reachable for enrolment).
  */
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const verdict = adminLayoutGate(await getAdminSession());
+  if (!verdict.allowed) redirect(verdict.redirectTo);
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
       <AdminBanner />

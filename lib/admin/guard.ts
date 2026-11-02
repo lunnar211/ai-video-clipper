@@ -14,7 +14,7 @@ import {
   getAdminSession,
   type AdminSession,
 } from "./session";
-import type { AdminRole } from "./roles";
+import { CONSOLE_ROLES, type AdminRole } from "./roles";
 
 export type AdminGate =
   | { session: AdminSession; errorResponse: null }
@@ -83,4 +83,35 @@ export async function adminIdentity(
     };
   }
   return { session, errorResponse: null };
+}
+
+/**
+ * Server layout gate decision (admin hard gate, login-build addition).
+ * Pure and unit-testable; the /admin layout resolves the session with
+ * getAdminSession() and applies this verdict BEFORE rendering any
+ * console UI, so outsiders never see admin nav or content.
+ * - No session -> redirect to /signin (nothing admin renders).
+ * - Signed in but suspended, or without a console role -> redirect
+ *   to "/" (they are already signed in, so the sign-in page would
+ *   loop them back here).
+ * - Console role (owner/admin/support/analyst/viewer) -> allowed.
+ * MFA is deliberately NOT checked here: owner/admin MFA is still
+ * enforced by adminGate() on every API route, and /admin/mfa itself
+ * must stay reachable so enrolment is possible.
+ */
+export type LayoutGateVerdict =
+  | { allowed: true; redirectTo: null }
+  | { allowed: false; redirectTo: "/signin" | "/" };
+
+export function adminLayoutGate(
+  session: AdminSession | null,
+): LayoutGateVerdict {
+  if (!session) return { allowed: false, redirectTo: "/signin" };
+  if (
+    session.status === "suspended" ||
+    !CONSOLE_ROLES.includes(session.role)
+  ) {
+    return { allowed: false, redirectTo: "/" };
+  }
+  return { allowed: true, redirectTo: null };
 }

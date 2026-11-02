@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import AuthButtons from "@/components/AuthButtons";
+import AdminNavLink from "@/components/AdminNavLink";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -46,9 +47,7 @@ export default function RootLayout({
             <Link href="/analytics" className="text-sm text-slate-700">
               Analytics
             </Link>
-            <Link href="/admin" className="text-sm text-slate-700">
-              Admin
-            </Link>
+            <AdminNavLink />
             <span className="ml-auto">
               <AuthButtons />
             </span>
