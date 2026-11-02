@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateMetadata } from "@/lib/ai/metadata";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -51,5 +52,14 @@ export async function POST(req: Request): Promise<Response> {
     parsed.data.transcript,
     parsed.data.clip,
   );
+  // Audit only: cost null (never invented); transcript never logged.
+  scheduleAudit({
+    actor: "guest",
+    action: "ai.job_run",
+    target: null,
+    metadata: { feature: "metadata", provider, cost_usd: null },
+    ip: getClientIp(req),
+    user_agent: req.headers.get("user-agent"),
+  });
   return NextResponse.json({ metadata, source, provider });
 }

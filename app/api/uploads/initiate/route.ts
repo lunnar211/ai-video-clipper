@@ -5,6 +5,7 @@ import {
   STORAGE_NOT_CONFIGURED,
 } from "@/lib/storage/r2";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -79,6 +80,16 @@ export async function POST(req: Request): Promise<Response> {
   const key = `uploads/${crypto.randomUUID()}/${safeName(filename)}`;
   try {
     const init = await storage.initiate(key, partCount);
+    // Audit only: uploads are guest-capable, so the actor is "guest".
+    // The filename is never logged (it may contain personal info).
+    scheduleAudit({
+      actor: "guest",
+      action: "upload.created",
+      target: init.key,
+      metadata: { sizeBytes, mime },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({
       uploadId: init.uploadId,
       key: init.key,

@@ -5,6 +5,7 @@ import {
 } from "@/lib/rights/strikes";
 import { resolveRightsDb } from "@/lib/rights/declarations";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 
@@ -54,6 +55,15 @@ export async function POST(
       appellant_name: parsed.data.appellantName,
       appellant_email: parsed.data.appellantEmail,
       reason: parsed.data.reason,
+    });
+    // Audit only: appellant details and reason are never logged.
+    scheduleAudit({
+      actor: "guest",
+      action: "strike.appeal",
+      target: row.id,
+      metadata: { strikeId: parsed.data.strikeId },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
     });
     return NextResponse.json({ filed: true, id: row.id });
   } catch (err) {

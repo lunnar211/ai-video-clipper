@@ -34,6 +34,8 @@ import {
   TEMP_MEDIA_PREFIX,
 } from "@/lib/publish/tempmedia";
 import { notifyPublishFailure } from "@/lib/publish/notify";
+import { scheduleAudit } from "@/lib/admin/audit";
+import { isViewAsRequest } from "@/lib/admin/impersonation";
 
 export const runtime = "nodejs";
 
@@ -72,6 +74,14 @@ export async function POST(
     return NextResponse.json(
       { error: "Too many requests — try again in a minute." },
       { status: 429 },
+    );
+  }
+  // View-as sessions are read-only: an admin viewing as a user may
+  // never publish as that user.
+  if (isViewAsRequest(req)) {
+    return NextResponse.json(
+      { error: "View-as sessions are read-only and cannot publish." },
+      { status: 403 },
     );
   }
   const { id } = await params;
@@ -293,6 +303,21 @@ export async function POST(
     post.media_key.startsWith(TEMP_MEDIA_PREFIX)
   ) {
     await deleteTempMediaNow(storage, post.media_key);
+  }
+  // Audit only: fully published or fully failed. A partial outcome
+  // is visible in the queue/analytics, not as a single audit action.
+  if (nextStatus === "published" || nextStatus === "failed") {
+    scheduleAudit({
+      actor: post.user_id ?? "guest",
+      action: nextStatus === "published" ? "post.published" : "post.failed",
+      target: post.id,
+      metadata: {
+        platforms: finalTargets.map((t) => t.platform),
+        publishedCount,
+      },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
   }
   return NextResponse.json({
     postId: post.id,

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { groqTranscribe } from "@/lib/ai/groq";
 import { getKey, AI_NOT_CONNECTED } from "@/lib/ai/providers";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -49,6 +50,16 @@ export async function POST(req: Request): Promise<Response> {
       audio.name || "audio.wav",
       { wordTimestamps: wantWords },
     );
+    // Audit only: cost is recorded as null — never invented. The
+    // transcript itself is never logged.
+    scheduleAudit({
+      actor: "guest",
+      action: "ai.job_run",
+      target: null,
+      metadata: { feature: "transcribe", model, cost_usd: null },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({ segments, model, words });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Transcription failed";

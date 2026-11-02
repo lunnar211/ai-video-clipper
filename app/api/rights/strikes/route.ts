@@ -7,6 +7,7 @@ import {
 import { resolveRightsDb } from "@/lib/rights/declarations";
 import { getAdminIdentity, isAdmin } from "@/lib/rights/admin";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 
@@ -57,6 +58,15 @@ export async function POST(req: Request): Promise<Response> {
       work_description: parsed.data.workDescription,
       infringing_ref: parsed.data.infringingRef,
       accused_user_id: parsed.data.accusedUserId ?? null,
+    });
+    // Audit only: reporter details are never logged.
+    scheduleAudit({
+      actor: "guest",
+      action: "strike.created",
+      target: row.id,
+      metadata: { accusedUserId: parsed.data.accusedUserId ?? null },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
     });
     return NextResponse.json({ filed: true, id: row.id });
   } catch (err) {

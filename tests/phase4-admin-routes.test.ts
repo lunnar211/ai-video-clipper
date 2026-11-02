@@ -55,9 +55,12 @@ import {
 
 const ADMIN_SESSION = {
   userId: "admin-1",
+  email: "admin@example.com",
   role: "owner" as const,
   status: "active" as const,
+  publishingPaused: false,
   mfaVerified: true,
+  mfaEnrolled: true,
 };
 
 const TOKEN_KEY = Buffer.alloc(32, 11).toString("base64");

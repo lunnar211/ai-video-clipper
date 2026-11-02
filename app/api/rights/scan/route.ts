@@ -5,6 +5,7 @@ import {
 } from "@/lib/rights/fingerprint";
 import { evaluatePolicy } from "@/lib/rights/policy";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -53,6 +54,15 @@ export async function POST(req: Request): Promise<Response> {
       detected: false,
       licenceProof,
     });
+    // Audit only: audio is never logged, only the verdict.
+    scheduleAudit({
+      actor: "guest",
+      action: "rights.fingerprint",
+      target: null,
+      metadata: { scanned: false, detected: false, policy },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({ ...NOT_SCANNED, policy });
   }
   try {
@@ -61,6 +71,19 @@ export async function POST(req: Request): Promise<Response> {
       scanned: result.scanned,
       detected: result.detected,
       licenceProof,
+    });
+    // Audit only: audio is never logged, only the verdict.
+    scheduleAudit({
+      actor: "guest",
+      action: "rights.fingerprint",
+      target: null,
+      metadata: {
+        scanned: result.scanned,
+        detected: result.detected,
+        policy,
+      },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
     });
     return NextResponse.json({ ...result, policy });
   } catch (err) {

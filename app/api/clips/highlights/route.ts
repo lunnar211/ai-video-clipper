@@ -3,6 +3,7 @@ import { z } from "zod";
 import { pickHighlights } from "@/lib/ai/highlights";
 import { AI_NOT_CONNECTED } from "@/lib/ai/providers";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -52,6 +53,15 @@ export async function POST(req: Request): Promise<Response> {
       fetch,
       { targetSeconds: parsed.data.targetSeconds },
     );
+    // Audit only: cost null (never invented); transcript never logged.
+    scheduleAudit({
+      actor: "guest",
+      action: "ai.job_run",
+      target: null,
+      metadata: { feature: "highlights", provider, cost_usd: null },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({ moments, provider });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Highlight failed";

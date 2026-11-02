@@ -84,8 +84,33 @@ export default function Privacy() {
         publishing-pause flag, or viewed the review queue, with
         timestamps. Admins do not see your video content, transcripts,
         or tokens by default; any content access requires a logged,
-        reasoned break-glass action. The full admin console, with its
-        complete audit log, arrives in a later phase.
+        reasoned break-glass action. The full admin console is live:
+        role-based access (owner, admin, support, analyst, viewer),
+        with TOTP two-factor authentication required for owner and
+        admin sessions. Its audit log records sign-ins, uploads,
+        project creation, AI jobs and their recorded cost, renders,
+        account links, scheduled/published/failed posts, billing
+        events, rights declarations, fingerprint results, strikes, and
+        every admin action — each entry with actor, action, target,
+        metadata, IP, user-agent, and timestamp. The log is
+        append-only: nothing in the app can edit or delete an entry,
+        except a retention purge (default 365 days, configurable) that
+        itself writes an audit entry. Admins can view dashboards
+        (activity, funnel, queue health, cost, revenue, publish
+        success, errors, strikes, anomaly alerts) built only from real
+        database aggregates — without a configured database the
+        dashboards show setup instructions, never invented numbers.
+        An admin may view the console as another user only with a
+        written reason: that view-as session is read-only (it can
+        never publish, bill, or change anything as the user), shows a
+        visible banner for its whole duration, and its start and end
+        are audited. Content access beyond safe metadata requires a
+        separate break-glass grant: one item, one reason, 15 minutes,
+        single use, fully audited, and the item&apos;s content is
+        never copied into any log. A live event feed streams recent
+        audit entries to the console, and anomaly alerts can be sent
+        to configured Slack, Discord, or email webhooks (inert until a
+        webhook URL is configured; in-console alerts always work).
       </p>
       <h2 className="text-lg font-semibold text-slate-900">
         Publishing (only if you use it)

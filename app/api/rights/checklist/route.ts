@@ -6,6 +6,7 @@ import {
 } from "@/lib/rights/checklist";
 import { resolveRightsDb } from "@/lib/rights/declarations";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 
@@ -56,6 +57,15 @@ export async function POST(req: Request): Promise<Response> {
   }
   try {
     const row = await createChecklistRow(db, parsed.data);
+    // Audit only: the checklist ticks are recorded, never content.
+    scheduleAudit({
+      actor: "guest",
+      action: "rights.checklist",
+      target: parsed.data.postRef,
+      metadata: { policyOutcome: parsed.data.policyOutcome ?? null },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({ stored: true, id: row.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Storage failed";

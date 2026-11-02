@@ -15,6 +15,8 @@ import {
   listPostRows,
   listTargetRows,
 } from "@/lib/publish/store";
+import { scheduleAudit } from "@/lib/admin/audit";
+import { isViewAsRequest } from "@/lib/admin/impersonation";
 
 export const runtime = "nodejs";
 
@@ -60,6 +62,14 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json(
       { error: "Too many requests — try again in a minute." },
       { status: 429 },
+    );
+  }
+  // View-as sessions are read-only: an admin viewing as a user may
+  // never create a post as that user.
+  if (isViewAsRequest(req)) {
+    return NextResponse.json(
+      { error: "View-as sessions are read-only and cannot create posts." },
+      { status: 403 },
     );
   }
   let body: unknown;
@@ -161,6 +171,19 @@ export async function POST(req: Request): Promise<Response> {
       attempts: 0,
     })),
   );
+  // Audit only: a scheduled post (drafts are not audited actions).
+  if (data.scheduleAt) {
+    scheduleAudit({
+      actor: data.userId ?? "guest",
+      action: "post.scheduled",
+      target: post.id,
+      metadata: {
+        platforms: data.targets.map((t) => t.platform),
+      },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
+  }
   return NextResponse.json({ post, targets }, { status: 201 });
 }
 

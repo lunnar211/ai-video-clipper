@@ -32,6 +32,7 @@ export const AUDIT_ACTIONS = [
   "upload.created",
   "project.created",
   "ai.job_run",
+  "render.job_created",
   "clip.rendered",
   "account.linked",
   "account.unlinked",

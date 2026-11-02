@@ -8,6 +8,7 @@ import {
 } from "@/lib/rights/declarations";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 
@@ -70,6 +71,15 @@ export async function POST(req: Request): Promise<Response> {
       user_agent: req.headers.get("user-agent"),
       declaration_text: DECLARATION_TEXT,
       declaration_text_version: parsed.data.declarationTextVersion,
+    });
+    // Audit only: the declaration text itself is never logged.
+    scheduleAudit({
+      actor: row.user_id ?? "guest",
+      action: "rights.declaration",
+      target: parsed.data.projectId,
+      metadata: { declarationTextVersion: parsed.data.declarationTextVersion },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
     });
     return NextResponse.json({
       stored: true,

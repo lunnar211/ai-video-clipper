@@ -9,6 +9,7 @@ import {
 import { resolveRightsDb } from "@/lib/rights/declarations";
 import { getAdminIdentity, isAdmin } from "@/lib/rights/admin";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 
@@ -129,6 +130,15 @@ export async function POST(
         await setPublishingPaused(db, current.accused_user_id, paused);
       }
     }
+    // Audit only: the admin note itself is never logged.
+    scheduleAudit({
+      actor: identity?.userId ?? "admin",
+      action: "strike.reviewed",
+      target: id,
+      metadata: { to: parsed.data.to, publishingPaused: paused },
+      ip: getClientIp(req),
+      user_agent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({
       updated: true,
       to: parsed.data.to,

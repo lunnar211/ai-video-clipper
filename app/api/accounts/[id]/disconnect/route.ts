@@ -5,6 +5,7 @@ import {
   revokeToken,
 } from "@/lib/publish/oauth";
 import { createEnvTokenCrypto } from "@/lib/publish/tokens";
+import { scheduleAudit } from "@/lib/admin/audit";
 import {
   resolvePublishDb,
   getAccountRow,
@@ -57,5 +58,14 @@ export async function POST(
     }
   }
   await deleteAccountRow(db, id);
+  // Audit only: the deleted row's tokens are never logged.
+  scheduleAudit({
+    actor: "guest",
+    action: "account.unlinked",
+    target: id,
+    metadata: { platform: row.platform, revoked },
+    ip: getClientIp(req),
+    user_agent: req.headers.get("user-agent"),
+  });
   return NextResponse.json({ disconnected: true, revoked });
 }

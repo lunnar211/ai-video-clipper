@@ -7,6 +7,7 @@ import {
   WORKER_NOT_CONFIGURED,
 } from "@/lib/server-render/contract";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { scheduleAudit } from "@/lib/admin/audit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -55,6 +56,20 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
   const data = (await res.json().catch(() => ({}))) as unknown;
+  // Audit only: a job was accepted by the worker. "clip.rendered"
+  // fires later, when the worker reports completion.
+  const jobId =
+    typeof data === "object" && data !== null && "id" in data
+      ? String((data as { id: unknown }).id)
+      : null;
+  scheduleAudit({
+    actor: "guest",
+    action: "render.job_created",
+    target: jobId,
+    metadata: null,
+    ip: getClientIp(req),
+    user_agent: req.headers.get("user-agent"),
+  });
   return NextResponse.json(data);
 }
 

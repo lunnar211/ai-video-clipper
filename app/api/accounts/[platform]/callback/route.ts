@@ -10,6 +10,7 @@ import {
   resolveOAuthConfig,
 } from "@/lib/publish/oauth";
 import { createEnvTokenCrypto } from "@/lib/publish/tokens";
+import { scheduleAudit } from "@/lib/admin/audit";
 import {
   resolvePublishDb,
   createAccountRow,
@@ -113,6 +114,15 @@ export async function GET(
     status: "connected",
   });
   void toPublicAccount(row);
+  // Audit only: tokens are never logged, only the link event.
+  scheduleAudit({
+    actor: "guest",
+    action: "account.linked",
+    target: row.id,
+    metadata: { platform },
+    ip: getClientIp(req),
+    user_agent: req.headers.get("user-agent"),
+  });
   const res = redirectTo(req, `/accounts?connected=${platform}`);
   res.headers.append(
     "Set-Cookie",
