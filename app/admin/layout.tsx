@@ -55,6 +55,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <Link href="/admin/gdpr" className="text-violet-700 underline">
           GDPR
         </Link>
+        <Link href="/admin/billing" className="text-violet-700 underline">
+          Billing
+        </Link>
       </nav>
       {children}
     </div>
