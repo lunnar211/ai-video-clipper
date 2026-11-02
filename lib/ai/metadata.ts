@@ -44,6 +44,10 @@ export const clipMetadataSchema = z.object({
     tiktok: platformDescriptionSchema,
     youtubeShorts: platformDescriptionSchema,
     instagramReels: platformDescriptionSchema,
+    // ClipForge Phase 1 additions. Optional so metadata produced before
+    // this change still validates; new generations always include them.
+    x: platformDescriptionSchema.optional(),
+    linkedin: platformDescriptionSchema.optional(),
   }),
   tags: z.object({
     broad: z.array(z.string().min(1).max(40)).min(3).max(8),
@@ -120,6 +124,16 @@ function buildPrompt(
           tone: "storytelling",
           hashtags: ["#a", "#b", "#c", "#d", "#e", "#f", "#g", "#h"],
         },
+        x: {
+          text: "Concise post, under 280 characters",
+          tone: "concise",
+          hashtags: ["#a", "#b"],
+        },
+        linkedin: {
+          text: "Professional caption, under 700 characters",
+          tone: "professional",
+          hashtags: ["#a", "#b", "#c"],
+        },
       },
       tags: { broad: ["#shorts"], niche: ["#topic"] },
       pinnedComment: "A question that invites comments",
@@ -133,7 +147,8 @@ function buildPrompt(
     "- titles: EXACTLY 5 options, each with hookScore 0-100 and a one-line reason.",
     "- descriptions must differ per platform: TikTok short + punchy with 3-5 hashtags,",
     "  YouTube Shorts searchable with up to 3 hashtags, Instagram Reels longer +",
-    "  storytelling with 8-12 hashtags.",
+    "  storytelling with 8-12 hashtags, X concise under 280 characters with 1-2",
+    "  hashtags, LinkedIn professional under 700 characters with 3-5 hashtags.",
     "- tags: 3-8 broad tags and 3-8 niche tags, 10-15 total.",
     "- virality score and sub-scores (hook, emotion, pacing, ending) are 0-100.",
     "- Scores are estimates, never a promise of views.",
@@ -240,6 +255,16 @@ export function buildTemplateMetadata(
           "#explore",
           "#content",
         ],
+      },
+      x: {
+        text: `${title} 👀`.slice(0, 280),
+        tone: "concise",
+        hashtags: ["#shorts", "#video"],
+      },
+      linkedin: {
+        text: `${title}. ${hookLine}`.slice(0, 700),
+        tone: "professional",
+        hashtags: ["#video", "#content", "#learning"],
       },
     },
     tags: {

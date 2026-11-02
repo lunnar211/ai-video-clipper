@@ -29,11 +29,21 @@ const momentsSchema = z.object({
  * output is never trusted: fenced code blocks are stripped, unknown
  * fields dropped, and moments are clamped to the video.
  *
- * Rules (the 30–60 s promise): moments longer than 60 s are cut to
- * 60 s; moments shorter than 15 s are dropped; overlaps are resolved
- * by keeping the earliest; everything is sorted by start.
+ * Rules (the default 30–60 s promise): moments longer than `maxLen`
+ * are cut to it; moments shorter than `minLen` are dropped; overlaps
+ * are resolved by keeping the earliest; everything is sorted by start.
+ * Length targets (ClipForge Phase 1) pass their own window — e.g. a
+ * 30 s target keeps [15, 30] — while the default stays 15–60 s exactly
+ * as before, so existing callers are unaffected.
  */
-export function parseMoments(raw: string, duration: number): Moment[] {
+export function parseMoments(
+  raw: string,
+  duration: number,
+  opts: { minLen?: number; maxLen?: number; maxClips?: number } = {},
+): Moment[] {
+  const minLen = opts.minLen ?? 15;
+  const maxLen = opts.maxLen ?? 60;
+  const maxClips = opts.maxClips ?? 5;
   const fenced = raw.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "");
   const start = fenced.indexOf("{");
   const end = fenced.lastIndexOf("}");
@@ -51,8 +61,8 @@ export function parseMoments(raw: string, duration: number): Moment[] {
   for (const m of sorted) {
     if (m.start >= duration) continue;
     let endTime = Math.min(m.end, duration);
-    if (endTime - m.start > 60) endTime = m.start + 60;
-    if (endTime - m.start < 15) continue;
+    if (endTime - m.start > maxLen) endTime = m.start + maxLen;
+    if (endTime - m.start < minLen) continue;
     if (kept.length > 0 && m.start < kept[kept.length - 1].end) continue;
     kept.push({
       start: m.start,
@@ -62,7 +72,7 @@ export function parseMoments(raw: string, duration: number): Moment[] {
         h.startsWith("#") ? h : `#${h}`,
       ),
     });
-    if (kept.length >= 5) break;
+    if (kept.length >= maxClips) break;
   }
   return kept;
 }
@@ -102,6 +112,7 @@ export async function pickHighlights(
   duration: number,
   maxClips = 5,
   fetchImpl: FetchImpl = fetch,
+  opts: { targetSeconds?: number } = {},
 ): Promise<{ moments: Moment[]; provider: string }> {
   const prompt = buildPrompt(transcript, duration, maxClips);
   const attempts: Array<{ name: string; run: () => Promise<string> }> = [];
@@ -148,7 +159,17 @@ export async function pickHighlights(
   for (const attempt of attempts) {
     try {
       const raw = await attempt.run();
-      const moments = parseMoments(raw, duration);
+      const moments = parseMoments(
+        raw,
+        duration,
+        opts.targetSeconds
+          ? {
+              minLen: Math.max(10, opts.targetSeconds - 15),
+              maxLen: opts.targetSeconds,
+              maxClips,
+            }
+          : { maxClips },
+      );
       if (moments.length > 0) {
         const safe = await Promise.all(
           moments.map(async (m) => {

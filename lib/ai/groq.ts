@@ -1,4 +1,4 @@
-import type { TranscriptSegment } from "@/lib/captions";
+import type { TranscriptSegment, WordTimestamp } from "@/lib/captions";
 import {
   getKey,
   providerErrorMessage,
@@ -15,6 +15,7 @@ export const GROQ_TEXT_MODEL =
 
 type WhisperVerboseJson = {
   segments?: Array<{ start: number; end: number; text: string }>;
+  words?: Array<{ word: string; start: number; end: number }>;
   text?: string;
 };
 
@@ -22,12 +23,24 @@ type WhisperVerboseJson = {
  * Transcribe an audio blob with Groq Whisper. Returns timestamped
  * segments. Falls back to whisper-large-v3 if the primary model is
  * rejected (404/400) — the transcript, never a fake, is what matters.
+ * With `wordTimestamps: true`, also returns word-level timings
+ * (verbose_json `words` granularity) for animated captions.
  */
 export async function groqTranscribe(
   audio: Blob,
   filename: string,
-  fetchImpl: FetchImpl = fetch,
-): Promise<{ segments: TranscriptSegment[]; model: string }> {
+  optsOrFetch: { wordTimestamps?: boolean } | FetchImpl = {},
+  fetchImplArg?: FetchImpl,
+): Promise<{
+  segments: TranscriptSegment[];
+  model: string;
+  words?: WordTimestamp[];
+}> {
+  // Back-compat: older callers pass fetchImpl positionally as arg 3.
+  const opts =
+    typeof optsOrFetch === "function" ? {} : optsOrFetch;
+  const fetchImpl: FetchImpl =
+    typeof optsOrFetch === "function" ? optsOrFetch : (fetchImplArg ?? fetch);
   const key = getKey("GROQ_API_KEY");
   if (!key) throw new Error("GROQ_API_KEY is not configured");
 
@@ -39,6 +52,9 @@ export async function groqTranscribe(
     form.append("model", model);
     form.append("response_format", "verbose_json");
     form.append("timestamp_granularities[]", "segment");
+    if (opts.wordTimestamps) {
+      form.append("timestamp_granularities[]", "word");
+    }
     const res = await fetchImpl(`${GROQ_BASE}/audio/transcriptions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}` },
@@ -56,7 +72,23 @@ export async function groqTranscribe(
         )
         .map((s) => ({ start: s.start, end: s.end, text: s.text.trim() }))
         .filter((s) => s.text.length > 0);
-      return { segments, model };
+      const words: WordTimestamp[] | undefined = opts.wordTimestamps
+        ? (data.words ?? [])
+            .filter(
+              (w) =>
+                Number.isFinite(w.start) &&
+                Number.isFinite(w.end) &&
+                w.end > w.start &&
+                typeof w.word === "string",
+            )
+            .map((w) => ({
+              word: w.word.trim(),
+              start: w.start,
+              end: w.end,
+            }))
+            .filter((w) => w.word.length > 0)
+        : undefined;
+      return { segments, model, words };
     }
     lastError = new Error(providerErrorMessage(res, "Groq Whisper"));
     // Only retry with the fallback model on model-level rejections.

@@ -108,3 +108,76 @@ export async function sampleFaceCenterX(
     return null;
   }
 }
+
+export type FaceTrackPoint = { t: number; x: number };
+
+/**
+ * Per-second face track: one centre-x per second of [start, end],
+ * smoothed with a 3-point median so the crop window glides instead of
+ * jumping. Returns [] when detection is unavailable. The renderer
+ * uses this for cropMode "track"; the existing "face" mode keeps its
+ * single-median behaviour untouched.
+ */
+export async function sampleFaceTrack(
+  video: HTMLVideoElement,
+  start: number,
+  end: number,
+): Promise<FaceTrackPoint[]> {
+  try {
+    const detector = await loadDetector();
+    if (!detector) return [];
+    const wasPaused = video.paused;
+    video.pause();
+    const probe = document.createElement("canvas");
+    probe.width = 320;
+    probe.height = Math.max(
+      1,
+      Math.round(320 * (video.videoHeight / Math.max(1, video.videoWidth))),
+    );
+    const pctx = probe.getContext("2d", { willReadFrequently: true });
+    if (!pctx) return [];
+    const raw: FaceTrackPoint[] = [];
+    const steps = Math.max(1, Math.floor(end - start));
+    for (let i = 0; i < steps; i++) {
+      const t = start + (i + 0.5) * ((end - start) / steps);
+      await seekTo(video, t);
+      pctx.drawImage(video, 0, 0, probe.width, probe.height);
+      const result = await detector.detect(probe);
+      const box = result.detections[0]?.boundingBox;
+      if (box && box.width > 0) {
+        raw.push({ t, x: (box.originX + box.width / 2) / probe.width });
+      }
+    }
+    if (wasPaused === false) {
+      await video.play().catch(() => undefined);
+    }
+    if (raw.length < Math.ceil(steps / 2)) return [];
+    // Fill gaps from neighbours, then smooth with a 3-point median.
+    const filled: FaceTrackPoint[] = [];
+    for (let i = 0; i < steps; i++) {
+      const t = start + (i + 0.5) * ((end - start) / steps);
+      const exact = raw.find((p) => Math.abs(p.t - t) < 0.01);
+      if (exact) {
+        filled.push(exact);
+      } else {
+        const before = [...raw].reverse().find((p) => p.t < t);
+        const after = raw.find((p) => p.t > t);
+        const x =
+          before && after
+            ? (before.x + after.x) / 2
+            : (before ?? after)?.x ?? 0.5;
+        filled.push({ t, x });
+      }
+    }
+    return filled.map((p, i) => {
+      const xs = [
+        filled[Math.max(0, i - 1)].x,
+        p.x,
+        filled[Math.min(filled.length - 1, i + 1)].x,
+      ];
+      return { t: p.t, x: median(xs) };
+    });
+  } catch {
+    return [];
+  }
+}
