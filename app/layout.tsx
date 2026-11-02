@@ -37,6 +37,15 @@ export default function RootLayout({
             <Link href="/pricing" className="text-sm text-slate-700">
               Pricing
             </Link>
+            <Link href="/publish" className="text-sm text-slate-700">
+              Publish
+            </Link>
+            <Link href="/accounts" className="text-sm text-slate-700">
+              Accounts
+            </Link>
+            <Link href="/analytics" className="text-sm text-slate-700">
+              Analytics
+            </Link>
             <span className="ml-auto">
               <AuthButtons />
             </span>

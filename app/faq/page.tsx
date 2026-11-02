@@ -25,11 +25,27 @@ const faqs = [
   },
   {
     q: "Do I need an account or payment?",
-    a: "No. There is no sign-in, no database and no payment in this version. See the Pricing page.",
+    a: "The clipper works without an account. Sign-in, publishing, and paid tiers exist only when the server is configured for them (see the Publish and Accounts pages); without that setup the tool keeps working in its free browser mode. See the Pricing page.",
   },
   {
     q: "Can I use the clips commercially?",
     a: "Only if you own the rights to the source video. This tool does not grant you any rights, and it does not check rights for you — that responsibility is yours.",
+  },
+  {
+    q: "What leaves this site when I publish a clip?",
+    a: "Only what the target platform needs: the rendered clip bytes, the title, description, tags, and visibility you chose for that post, sent to that platform's official API over HTTPS using the account you connected. Your account tokens are encrypted on the server and are never sent to any platform except that platform itself, and never shown to you or to admins. Publishing is refused until the platform's feature flag is on and its app review is approved.",
+  },
+  {
+    q: "Where does my staged media live, and for how long?",
+    a: "Clips staged for publishing live in object storage under a temporary prefix. They are deleted automatically after publishing, and a bucket lifecycle rule removes anything left behind after 24 hours. Nothing staged for publishing is kept longer than that.",
+  },
+  {
+    q: "Are the view counts on the Analytics page real?",
+    a: "Yes — they are exactly what the platform's own API reported for that post, synced after publishing. Platforms whose analytics adapters are not built yet report as unsupported, never as invented numbers. With no connected accounts, the page says so plainly.",
+  },
+  {
+    q: "Can I publish to a platform before its app is approved?",
+    a: "No. Each platform stays off until its app review is approved and its approval flag is set. Connect may still show for testing, but any publish attempt is refused with the reason stated.",
   },
 ];
 

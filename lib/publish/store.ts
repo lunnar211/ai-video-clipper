@@ -193,6 +193,10 @@ export type PublishPostRow = {
   title: string | null;
   schedule_at: string | null;
   timezone: string | null;
+  /** Stored pre-publish draft, re-evaluated at publish time. */
+  pre_publish: Record<string, unknown> | null;
+  /** Post ref of the Phase 2 checklist record for this post. */
+  checklist_post_ref: string | null;
   status: string;
   created_at: string;
   updated_at: string;

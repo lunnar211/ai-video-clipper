@@ -11,6 +11,7 @@
 import { z } from "zod";
 import type { FetchImpl } from "@/lib/ai/providers";
 import type { RightsDb } from "@/lib/rights/declarations";
+import { restHeaders } from "@/lib/rights/declarations";
 
 export const CHECKLIST_ITEMS = [
   {
@@ -94,4 +95,21 @@ export async function createChecklistRow(
   const created = data[0];
   if (!created) throw new Error("Checklist storage returned no row");
   return created;
+}
+
+/** Read the newest checklist record for a post ref, or null. */
+export async function getChecklistRow(
+  db: RightsDb,
+  postRef: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<ChecklistRecord | null> {
+  const res = await fetchImpl(
+    `${db.url}/rest/v1/clipper_checklists?post_ref=eq.${encodeURIComponent(postRef)}&order=created_at.desc&limit=1`,
+    { headers: restHeaders(db) },
+  );
+  if (!res.ok) {
+    throw new Error(`Checklist read failed (HTTP ${res.status})`);
+  }
+  const data = (await res.json()) as ChecklistRecord[];
+  return data[0] ?? null;
 }
