@@ -23,6 +23,13 @@ import { mfaRequiredFor } from "./roles";
 export const MFA_MARKER_COOKIE = "clipforge_admin_mfa";
 export const MFA_MARKER_TTL_MS = 12 * 60 * 60 * 1000;
 
+/** Issuer shown in authenticator apps (default "ClipForge"). */
+export function mfaIssuer(
+  env: Record<string, string | undefined> = process.env,
+): string {
+  return env.ADMIN_MFA_ISSUER?.trim() || "ClipForge";
+}
+
 export type AdminSession = {
   userId: string;
   email: string | null;

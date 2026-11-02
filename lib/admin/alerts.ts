@@ -34,12 +34,15 @@ export function alertConfig(
   };
 }
 
-export type AlertDispatch =
-  | { sent: true; channel: string }
-  | { sent: false; reason: string };
+export type AlertDispatch = {
+  sent: boolean;
+  channel: string;
+  reason?: string;
+};
 
 /** POST one alert payload to one webhook URL (timeout-guarded). */
 export async function dispatchWebhook(
+  channel: string,
   url: string,
   payload: Record<string, unknown>,
   fetchImpl: FetchImpl = fetch,
@@ -54,13 +57,15 @@ export async function dispatchWebhook(
         body: JSON.stringify(payload),
         signal: controller.signal,
       });
-      if (!res.ok) return { sent: false, reason: `Webhook HTTP ${res.status}` };
-      return { sent: true, channel: url };
+      if (!res.ok) {
+        return { sent: false, channel, reason: `Webhook HTTP ${res.status}` };
+      }
+      return { sent: true, channel };
     } finally {
       clearTimeout(timer);
     }
   } catch {
-    return { sent: false, reason: "Webhook dispatch failed" };
+    return { sent: false, channel, reason: "Webhook dispatch failed" };
   }
 }
 
@@ -76,17 +81,17 @@ export async function dispatchAnomaly(
     severity: anomaly.severity,
     detail: anomaly.detail,
   };
-  const results: AlertDispatch[] = [];
-  const channels = [
-    config.slackWebhookUrl,
-    config.discordWebhookUrl,
-    config.emailWebhookUrl,
-  ].filter((u): u is string => Boolean(u));
+  const channels: { name: string; url: string }[] = [
+    { name: "slack", url: config.slackWebhookUrl },
+    { name: "discord", url: config.discordWebhookUrl },
+    { name: "email", url: config.emailWebhookUrl },
+  ].filter((c): c is { name: string; url: string } => Boolean(c.url));
   if (channels.length === 0) {
-    return [{ sent: false, reason: "No alert webhook URL configured" }];
+    return [{ sent: false, channel: "none", reason: "No alert webhook URL configured" }];
   }
-  for (const url of channels) {
-    results.push(await dispatchWebhook(url, payload, fetchImpl));
+  const results: AlertDispatch[] = [];
+  for (const c of channels) {
+    results.push(await dispatchWebhook(c.name, c.url, payload, fetchImpl));
   }
   return results;
 }

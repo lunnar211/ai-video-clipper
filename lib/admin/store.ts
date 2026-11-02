@@ -10,6 +10,7 @@
  */
 
 import type { FetchImpl } from "@/lib/ai/providers";
+import type { EncryptedToken } from "@/lib/publish/tokens";
 import {
   resolveRightsDb,
   restHeaders,
@@ -335,9 +336,188 @@ export async function listAdminAlerts(
 }
 
 /* ------------------------------------------------------------------ */
-/* Drill-down source rows (status-only accounts; never token rows).    */
+/* MFA rows (secret stored ENCRYPTED via the token envelope).          */
 /* ------------------------------------------------------------------ */
 
+export type MfaRow = {
+  user_id: string;
+  secret_enc: EncryptedToken;
+  key_id: string;
+  verified_at: string | null;
+  created_at: string;
+};
+
+export async function getMfaRow(
+  db: AdminDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<MfaRow | null> {
+  const rows = await getRows<MfaRow>(
+    db,
+    "clipper_admin_mfa",
+    `user_id=eq.${encodeURIComponent(userId)}`,
+    fetchImpl,
+  );
+  return rows[0] ?? null;
+}
+
+export async function upsertMfaRow(
+  db: AdminDb,
+  row: Omit<MfaRow, "created_at">,
+  fetchImpl: FetchImpl = fetch,
+): Promise<MfaRow> {
+  const res = await fetchImpl(
+    `${db.url}/rest/v1/clipper_admin_mfa?on_conflict=user_id`,
+    {
+      method: "POST",
+      headers: {
+        ...restHeaders(db),
+        Prefer: "resolution=merge-duplicates,return=representation",
+      },
+      body: JSON.stringify(row),
+    },
+  );
+  if (!res.ok) throw new Error(`MFA upsert failed (HTTP ${res.status})`);
+  const data = (await res.json()) as MfaRow[];
+  const created = data[0];
+  if (!created) throw new Error("MFA upsert returned no row");
+  return created;
+}
+
+export async function setMfaVerified(
+  db: AdminDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<void> {
+  const res = await fetchImpl(
+    `${db.url}/rest/v1/clipper_admin_mfa?user_id=eq.${encodeURIComponent(userId)}`,
+    {
+      method: "PATCH",
+      headers: restHeaders(db),
+      body: JSON.stringify({ verified_at: new Date().toISOString() }),
+    },
+  );
+  if (!res.ok) throw new Error(`MFA verify update failed (HTTP ${res.status})`);
+}
+
+/* ------------------------------------------------------------------ */
+/* Open impersonation sessions for one admin.                          */
+/* ------------------------------------------------------------------ */
+
+export async function listOpenImpersonations(
+  db: AdminDb,
+  adminId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<ImpersonationRow[]> {
+  return getRows(
+    db,
+    "clipper_impersonation_sessions",
+    `admin_id=eq.${encodeURIComponent(adminId)}&ended_at=is.null&order=started_at.desc`,
+    fetchImpl,
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Metric source rows (whole-table reads, capped for dashboards).       */
+/* ------------------------------------------------------------------ */
+
+export async function listRenderJobs(
+  db: AdminDb,
+  fetchImpl: FetchImpl = fetch,
+): Promise<{ status: string; created_at: string }[]> {
+  return getRows(
+    db,
+    "clipper_render_jobs",
+    "select=status,created_at&order=created_at.desc&limit=1000",
+    fetchImpl,
+  );
+}
+
+export async function listAllTargets(
+  db: AdminDb,
+  fetchImpl: FetchImpl = fetch,
+): Promise<{ platform: string; status: string; error: string | null }[]> {
+  return getRows(
+    db,
+    "publish_targets",
+    "select=platform,status,error&order=created_at.desc&limit=1000",
+    fetchImpl,
+  );
+}
+
+export async function listAllStrikes(
+  db: AdminDb,
+  fetchImpl: FetchImpl = fetch,
+): Promise<{ status: string; created_at: string }[]> {
+  return getRows(
+    db,
+    "clipper_strikes",
+    "select=status,created_at&order=created_at.desc&limit=1000",
+    fetchImpl,
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Compliance record rows (counts + status only; no content).          */
+/* ------------------------------------------------------------------ */
+
+export async function countUserDeclarations(
+  db: AdminDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<number> {
+  const rows = await getRows(
+    db,
+    "clipper_declarations",
+    `select=id&user_id=eq.${encodeURIComponent(userId)}`,
+    fetchImpl,
+  );
+  return rows.length;
+}
+
+export type FingerprintScanRow = {
+  id: string;
+  provider: string;
+  detected: boolean;
+  policy_outcome: string | null;
+  created_at: string;
+};
+
+export async function listUserFingerprintScans(
+  db: AdminDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<FingerprintScanRow[]> {
+  return getRows(
+    db,
+    "clipper_fingerprint_scans",
+    `select=id,provider,detected,policy_outcome,created_at&user_id=eq.${encodeURIComponent(userId)}&order=created_at.desc&limit=200`,
+    fetchImpl,
+  );
+}
+
+export type UserStrikeRow = {
+  id: string;
+  status: string;
+  created_at: string;
+};
+
+export async function listUserStrikes(
+  db: AdminDb,
+  userId: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<UserStrikeRow[]> {
+  return getRows(
+    db,
+    "clipper_strikes",
+    `select=id,status,created_at&accused_user_id=eq.${encodeURIComponent(userId)}&order=created_at.desc&limit=200`,
+    fetchImpl,
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Drill-down source rows (status-only accounts; never token rows).    */
+/* ------------------------------------------------------------------ */
 export type DrillProjectRow = {
   id: string;
   title: string;

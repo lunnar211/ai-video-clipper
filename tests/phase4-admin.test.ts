@@ -295,12 +295,13 @@ describe("alerts", () => {
       { rule: "unusual_volume", severity: "warning", detail: "x" },
       alertConfig({}),
     );
-    expect(noUrl[0]).toEqual({ sent: false, reason: "No alert webhook URL configured" });
+    expect(noUrl[0]).toEqual({ sent: false, channel: "none", reason: "No alert webhook URL configured" });
     const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
-    const sent = await dispatchWebhook("https://hooks.example.com/x", { text: "hi" }, fetchMock as never);
+    const sent = await dispatchWebhook("slack", "https://hooks.example.com/x", { text: "hi" }, fetchMock as never);
     expect(sent.sent).toBe(true);
-    const failed = await dispatchWebhook("https://hooks.example.com/x", { text: "hi" }, (async () => ({ ok: false, status: 500 }) as Response) as never);
-    expect(failed).toEqual({ sent: false, reason: "Webhook HTTP 500" });
+    expect(sent.channel).toBe("slack");
+    const failed = await dispatchWebhook("slack", "https://hooks.example.com/x", { text: "hi" }, (async () => ({ ok: false, status: 500 }) as Response) as never);
+    expect(failed).toEqual({ sent: false, channel: "slack", reason: "Webhook HTTP 500" });
   });
 });
 

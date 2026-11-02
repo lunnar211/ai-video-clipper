@@ -54,6 +54,9 @@ export const AUDIT_ACTIONS = [
   "admin.impersonate_end",
   "admin.breakglass",
   "admin.audit_purge",
+  "admin.mfa_setup",
+  "admin.mfa_verify",
+  "admin.alert_dispatch",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
