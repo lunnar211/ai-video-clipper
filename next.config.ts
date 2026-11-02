@@ -16,7 +16,22 @@ const csp = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-].join("; ");
+];
+
+// When R2 is configured, its public origin joins the media/img/connect
+// lists so hosted clips and thumbnails load. Unset = previous CSP.
+const r2Origin = process.env.R2_CSP_ORIGIN;
+const cspValue = r2Origin
+  ? csp
+      .map((d) =>
+        d.startsWith("img-src") ||
+        d.startsWith("media-src") ||
+        d.startsWith("connect-src")
+          ? `${d} ${r2Origin}`
+          : d,
+      )
+      .join("; ")
+  : csp.join("; ");
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -31,7 +46,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/(.*)",
-        headers: [{ key: "Content-Security-Policy", value: csp }],
+        headers: [{ key: "Content-Security-Policy", value: cspValue }],
       },
     ];
   },

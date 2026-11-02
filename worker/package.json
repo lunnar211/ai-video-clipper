@@ -1,0 +1,1 @@
+{"description":"ClipForge ffmpeg worker skeleton (Phase 1) — signature verification + job status; ffmpeg execution is the next slice.","name":"clipforge-worker","private":true,"scripts":{"start":"node server.mjs"},"type":"module","version":"0.1.0"}

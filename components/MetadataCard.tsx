@@ -210,6 +210,20 @@ export default function MetadataCard({
               text={`${metadata.descriptions.instagramReels.text}\n${metadata.descriptions.instagramReels.hashtags.join(" ")}`}
               multiline
             />
+            {metadata.descriptions.x && (
+              <Field
+                label={`X — ${metadata.descriptions.x.tone}`}
+                text={`${metadata.descriptions.x.text}\n${metadata.descriptions.x.hashtags.join(" ")}`}
+                multiline
+              />
+            )}
+            {metadata.descriptions.linkedin && (
+              <Field
+                label={`LinkedIn — ${metadata.descriptions.linkedin.tone}`}
+                text={`${metadata.descriptions.linkedin.text}\n${metadata.descriptions.linkedin.hashtags.join(" ")}`}
+                multiline
+              />
+            )}
           </>
         )}
         {tab === "tags" && (

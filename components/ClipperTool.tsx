@@ -1,14 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { TranscriptSegment } from "@/lib/captions";
-import { segmentsToSrt } from "@/lib/captions";
+import type { TranscriptSegment, WordTimestamp } from "@/lib/captions";
+import { segmentsToSrt, segmentsToVtt, captionPresetById } from "@/lib/captions";
 import type { CropMode } from "@/lib/crop";
 import { extractAudioWav, extractAudioSampleWav } from "@/lib/browser/audio";
 import { renderClip } from "@/lib/browser/render";
+import { sniffVideoFile } from "@/lib/browser/filetype";
+import { pickThumbnail } from "@/lib/browser/thumbnails";
+import { buildZip } from "@/lib/browser/zip";
 import MetadataCard from "@/components/MetadataCard";
 import RightsConsent from "@/components/RightsConsent";
 import MusicPicker from "@/components/MusicPicker";
+import ClipEditor from "@/components/ClipEditor";
+import BrandKitPanel from "@/components/BrandKitPanel";
+import type { BrandKit } from "@/lib/brandkit";
+import { loadBrandKit, saveBrandKit } from "@/lib/brandkit";
+import { TRANSLATION_LANGUAGES } from "@/lib/ai/languages";
+import type { MomentLike } from "@/lib/pipeline/search";
 import type { UserTrack } from "@/lib/music/tracks";
 import type { MusicMatch } from "@/lib/music/audd";
 import {
@@ -93,6 +102,22 @@ export default function ClipperTool() {
   >({});
   const [musicAck, setMusicAck] = useState<Record<string, boolean>>({});
   const [usedToday, setUsedToday] = useState<number>(() => clipsUsedToday());
+  // ClipForge Phase 1 state (all additive; existing flow unchanged).
+  const [words, setWords] = useState<WordTimestamp[] | null>(null);
+  const [targetSeconds, setTargetSeconds] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<MomentLike[]>([]);
+  const [translateLang, setTranslateLang] = useState("es");
+  const [translating, setTranslating] = useState(false);
+  const [translatedTranscript, setTranslatedTranscript] = useState<TranscriptSegment[] | null>(null);
+  const [editingClipId, setEditingClipId] = useState<string | null>(null);
+  const [presetByClip, setPresetByClip] = useState<Record<string, string>>({});
+  const [splitBgByClip, setSplitBgByClip] = useState<Record<string, string>>({});
+  const [brandKit, setBrandKit] = useState<BrandKit>(() => loadBrandKit());
+  const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
+  const [shareLinks, setShareLinks] = useState<Record<string, string>>({});
+  const [zipBusy, setZipBusy] = useState(false);
   const previewRef = useRef<HTMLVideoElement | null>(null);
 
   const toggleRights = useCallback((checked: boolean) => {
@@ -118,6 +143,12 @@ export default function ClipperTool() {
     setClips([]);
     setRendered({});
     setDuration(0);
+    setWords(null);
+    setTranslatedTranscript(null);
+    setSearchResults([]);
+    setEditingClipId(null);
+    setThumbnails({});
+    setShareLinks({});
     if (f.size > MAX_FILE_BYTES) {
       setError(
         "That file is over 500 MB. The browser cannot hold larger videos — use a shorter or more compressed recording.",
@@ -128,6 +159,16 @@ export default function ClipperTool() {
       setError("Please choose a video file.");
       return;
     }
+    // Magic-byte sniff: a file whose header is readable and not a video
+    // container is rejected even if its extension/MIME claims video.
+    // "unknown" (unreadable header) is allowed — the decoder is the gate.
+    void sniffVideoFile(f).then((sniffed) => {
+      if (sniffed === "not-video") {
+        setError("That file does not look like a video (header check failed).");
+        setFile(null);
+        setVideoUrl(null);
+      }
+    });
     setFile(f);
     setVideoUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
@@ -166,12 +207,14 @@ export default function ClipperTool() {
       const wav = await extractAudioWav(file);
       const form = new FormData();
       form.append("audio", wav, "audio.wav");
+      form.append("words", "1");
       const res = await fetch("/api/clips/transcribe", {
         method: "POST",
         body: form,
       });
       const data = (await res.json().catch(() => ({}))) as {
         segments?: TranscriptSegment[];
+        words?: WordTimestamp[];
         error?: string;
       };
       if (!res.ok) {
@@ -185,6 +228,7 @@ export default function ClipperTool() {
         return;
       }
       setTranscript(data.segments ?? []);
+      setWords(data.words ?? null);
       setNotice(
         `Transcript ready: ${(data.segments ?? []).length} segments. Now find highlights, or cut clips by hand.`,
       );
@@ -208,7 +252,12 @@ export default function ClipperTool() {
       const res = await fetch("/api/clips/highlights", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript, duration, maxClips: 5 }),
+        body: JSON.stringify({
+          transcript,
+          duration,
+          maxClips: 5,
+          targetSeconds: targetSeconds ?? undefined,
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         moments?: Moment[];
@@ -247,7 +296,7 @@ export default function ClipperTool() {
     } finally {
       setFinding(false);
     }
-  }, [transcript, duration]);
+  }, [transcript, duration, targetSeconds]);
 
   const addManualClip = useCallback(() => {
     setError(null);
@@ -326,11 +375,29 @@ export default function ClipperTool() {
           start: clip.start,
           end: clip.end,
           cropMode,
-          captions: transcript ?? [],
+          captions: translatedTranscript ?? transcript ?? [],
           manualCaption: clip.manualCaption,
           voiceoverUrl,
           musicUrl: musicTrack?.url,
           watermark: shouldWatermark("free"),
+          captionPreset: {
+            ...captionPresetById(presetByClip[clip.id] ?? "pop"),
+            fontFamily: brandKit.fontFamily,
+          },
+          words: words
+            ? words
+                .filter((w) => w.end > clip.start && w.start < clip.end)
+                .map((w) => ({
+                  word: w.word,
+                  start: Math.max(0, w.start - clip.start),
+                  end: Math.min(clip.end - clip.start, w.end - clip.start),
+                }))
+            : undefined,
+          brandLogoUrl: brandKit.logoUrl,
+          brandWatermarkText: brandKit.watermarkEnabled
+            ? brandKit.watermarkText
+            : undefined,
+          splitBackgroundUrl: splitBgByClip[clip.id],
           onProgress: setProgress,
         });
         recordRenderToday();
@@ -353,7 +420,7 @@ export default function ClipperTool() {
         setRenderingId(null);
       }
     },
-    [videoUrl, cropMode, transcript, voiceoverOn, rightsOk, musicTrack],
+    [videoUrl, cropMode, transcript, translatedTranscript, voiceoverOn, rightsOk, musicTrack, presetByClip, brandKit, splitBgByClip, words],
   );
 
   const checkMusic = useCallback(
@@ -420,6 +487,188 @@ export default function ClipperTool() {
     },
     [transcript],
   );
+
+  // ClipForge Phase 1 callbacks (additive).
+  const runSearch = useCallback(async () => {
+    if (!transcript || !searchQuery.trim()) return;
+    setSearching(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/clips/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript, query: searchQuery, duration }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        windows?: MomentLike[];
+        source?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        setError(data.error ?? "Search failed.");
+        return;
+      }
+      setSearchResults(data.windows ?? []);
+      setNotice(
+        `Found ${data.windows?.length ?? 0} clip windows (${data.source === "llm" ? "AI reranked" : "keyword match"}).`,
+      );
+    } catch {
+      setError("Search failed (network error).");
+    } finally {
+      setSearching(false);
+    }
+  }, [transcript, searchQuery, duration]);
+
+  const runTranslate = useCallback(async () => {
+    if (!transcript) return;
+    setTranslating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/clips/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ segments: transcript, targetLanguage: translateLang }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        segments?: TranscriptSegment[];
+        error?: string;
+      };
+      if (!res.ok) {
+        if (res.status === 503) {
+          setNotice("Translation needs an AI key on the server — captions stay in the original language.");
+        } else {
+          setError(data.error ?? "Translation failed.");
+        }
+        return;
+      }
+      setTranslatedTranscript(data.segments ?? []);
+      setNotice("Captions translated. Rendered clips now use the translated captions.");
+    } catch {
+      setError("Translation failed (network error).");
+    } finally {
+      setTranslating(false);
+    }
+  }, [transcript, translateLang]);
+
+  const downloadVtt = useCallback(
+    (clip: Clip) => {
+      const src = translatedTranscript ?? transcript;
+      if (!src) return;
+      const vtt = segmentsToVtt(src, clip.start, clip.end);
+      downloadBlob(new Blob([vtt], { type: "text/vtt" }), `${clip.id}.vtt`);
+    },
+    [transcript, translatedTranscript],
+  );
+
+  const downloadAllZip = useCallback(async () => {
+    const outs = clips.filter((c) => rendered[c.id]);
+    if (outs.length === 0) return;
+    setZipBusy(true);
+    try {
+      const entries: Array<{ name: string; data: Uint8Array }> = [];
+      const src = translatedTranscript ?? transcript;
+      for (const clip of outs) {
+        const out = rendered[clip.id];
+        const buf = await (await fetch(out.url)).arrayBuffer();
+        const ext = out.mimeType.includes("mp4") ? "mp4" : "webm";
+        entries.push({ name: `${clip.id}.${ext}`, data: new Uint8Array(buf) });
+        if (src) {
+          entries.push({
+            name: `${clip.id}.srt`,
+            data: new TextEncoder().encode(segmentsToSrt(src, clip.start, clip.end)),
+          });
+        }
+      }
+      const zip = buildZip(entries);
+      downloadBlob(
+        new Blob([zip.buffer as ArrayBuffer], { type: "application/zip" }),
+        "clips.zip",
+      );
+    } catch {
+      setError("ZIP download failed.");
+    } finally {
+      setZipBusy(false);
+    }
+  }, [clips, rendered, transcript, translatedTranscript]);
+
+  const makeThumbnail = useCallback(
+    async (clip: Clip) => {
+      const v = previewRef.current;
+      if (!v) return;
+      const thumb = await pickThumbnail(v, clip.start, clip.end, clip.title);
+      if (thumb) {
+        setThumbnails((prev) => ({ ...prev, [clip.id]: thumb.dataUrl }));
+      } else {
+        setNotice("Thumbnail could not be picked from this video.");
+      }
+    },
+    [],
+  );
+
+  const makeShare = useCallback(
+    async (clip: Clip) => {
+      setError(null);
+      try {
+        const res = await fetch("/api/share", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: clip.title,
+            clipStart: clip.start,
+            clipEnd: clip.end,
+          }),
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          url?: string;
+          error?: string;
+        };
+        if (!res.ok) {
+          setError(data.error ?? "Share link failed.");
+          return;
+        }
+        if (data.url) {
+          setShareLinks((prev) => ({ ...prev, [clip.id]: data.url as string }));
+        }
+      } catch {
+        setError("Share link failed (network error).");
+      }
+    },
+    [],
+  );
+
+  const saveClipEdit = useCallback((clipId: string, start: number, end: number) => {
+    setClips((prev) =>
+      prev.map((c) => (c.id === clipId ? { ...c, start, end } : c)),
+    );
+  }, []);
+
+  const splitClip = useCallback(
+    (clipId: string, parts: Array<{ start: number; end: number; title: string }>) => {
+      setClips((prev) => {
+        const rest = prev.filter((c) => c.id !== clipId);
+        const added: Clip[] = parts.map((p) => ({
+          id: crypto.randomUUID(),
+          start: p.start,
+          end: p.end,
+          title: p.title,
+          hashtags: [],
+          source: "manual" as const,
+        }));
+        return [...rest, ...added];
+      });
+      setEditingClipId(null);
+      setNotice(`${parts.length} clips created from the split.`);
+    },
+    [],
+  );
+
+  const handleBrandKitChange = useCallback((kit: BrandKit) => {
+    setBrandKit(kit);
+    // Logo object URLs do not survive a reload — persist everything else.
+    const { logoUrl: _logo, ...persisted } = kit;
+    void _logo;
+    saveBrandKit({ ...persisted, logoUrl: undefined });
+  }, []);
 
   const copyText = useCallback(async (clip: Clip) => {
     const text = [clip.title, clip.hashtags.join(" ")]
@@ -533,7 +782,102 @@ export default function ClipperTool() {
             >
               {finding ? "Finding highlights…" : "Find highlight clips"}
             </button>
+            <label className="flex items-center gap-2 text-sm">
+              Clip length target
+              <select
+                className="rounded border px-2 py-1"
+                value={targetSeconds ?? ""}
+                onChange={(e) =>
+                  setTargetSeconds(e.target.value ? Number(e.target.value) : null)
+                }
+              >
+                <option value="">Default (15–60s)</option>
+                <option value="15">15s</option>
+                <option value="30">30s</option>
+                <option value="60">60s</option>
+              </select>
+            </label>
           </div>
+          {transcript && (
+            <div className="space-y-3 border-t pt-3">
+              <div className="flex flex-wrap items-end gap-3 text-sm">
+                <label className="flex flex-col">
+                  Find clips about…
+                  <input
+                    className="mt-1 rounded border px-2 py-1"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="e.g. pasta sauce"
+                  />
+                </label>
+                <button
+                  className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white disabled:opacity-50"
+                  onClick={runSearch}
+                  disabled={searching || searchQuery.trim().length < 3}
+                >
+                  {searching ? "Searching…" : "Search transcript"}
+                </button>
+                <label className="flex items-center gap-2">
+                  Translate captions to
+                  <select
+                    className="rounded border px-2 py-1"
+                    value={translateLang}
+                    onChange={(e) => setTranslateLang(e.target.value)}
+                  >
+                    {TRANSLATION_LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white disabled:opacity-50"
+                  onClick={runTranslate}
+                  disabled={translating}
+                >
+                  {translating ? "Translating…" : "Translate"}
+                </button>
+                {translatedTranscript && (
+                  <button
+                    className="rounded border px-3 py-2"
+                    onClick={() => setTranslatedTranscript(null)}
+                  >
+                    Use original captions
+                  </button>
+                )}
+              </div>
+              {searchResults.length > 0 && (
+                <ul className="space-y-2 text-sm">
+                  {searchResults.map((w, i) => (
+                    <li key={i} className="flex items-center justify-between gap-3 rounded border p-2">
+                      <span>
+                        {fmtTime(w.start)} – {fmtTime(w.end)} · {w.title}
+                      </span>
+                      <button
+                        className="rounded border px-2 py-1"
+                        onClick={() =>
+                          setClips((prev) => [
+                            ...prev,
+                            {
+                              id: crypto.randomUUID(),
+                              start: w.start,
+                              end: w.end,
+                              title: w.title,
+                              hashtags: [],
+                              source: "manual",
+                            },
+                          ])
+                        }
+                      >
+                        Add as clip
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
           {transcript && (
             <details className="text-sm">
               <summary className="cursor-pointer font-medium">
@@ -610,6 +954,10 @@ export default function ClipperTool() {
         </section>
       )}
 
+      {file && duration > 0 && (
+        <BrandKitPanel kit={brandKit} onChange={handleBrandKitChange} />
+      )}
+
       {clips.length > 0 && (
         <section className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
           <h2 className="text-lg font-semibold">3. Render vertical clips</h2>
@@ -622,6 +970,7 @@ export default function ClipperTool() {
                 onChange={(e) => setCropMode(e.target.value as CropMode)}
               >
                 <option value="face">Face-centered (auto)</option>
+                <option value="track">Face-tracked (per-second)</option>
                 <option value="smart">Smart crop (auto)</option>
                 <option value="center">Center</option>
                 <option value="left">Left</option>
@@ -649,6 +998,15 @@ export default function ClipperTool() {
             small “AI Video Clipper” watermark; paid tiers are not
             configured yet.
           </p>
+          {Object.keys(rendered).length > 0 && (
+            <button
+              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              onClick={downloadAllZip}
+              disabled={zipBusy}
+            >
+              {zipBusy ? "Zipping…" : "Download all clips + captions (ZIP)"}
+            </button>
+          )}
           <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
           <ul className="space-y-4">
             {clips.map((clip) => {
@@ -688,6 +1046,36 @@ export default function ClipperTool() {
                         Download SRT captions
                       </button>
                     )}
+                    {transcript && (
+                      <button
+                        className="rounded-lg border px-3 py-1.5"
+                        onClick={() => downloadVtt(clip)}
+                      >
+                        Download VTT captions
+                      </button>
+                    )}
+                    <button
+                      className="rounded-lg border px-3 py-1.5"
+                      onClick={() =>
+                        setEditingClipId(editingClipId === clip.id ? null : clip.id)
+                      }
+                    >
+                      {editingClipId === clip.id ? "Close editor" : "Edit clip"}
+                    </button>
+                    <button
+                      className="rounded-lg border px-3 py-1.5"
+                      onClick={() => makeThumbnail(clip)}
+                    >
+                      Make thumbnail
+                    </button>
+                    {out && (
+                      <button
+                        className="rounded-lg border px-3 py-1.5"
+                        onClick={() => makeShare(clip)}
+                      >
+                        Share link
+                      </button>
+                    )}
                     <button
                       className="rounded-lg border px-3 py-1.5"
                       onClick={() => copyText(clip)}
@@ -695,6 +1083,61 @@ export default function ClipperTool() {
                       {copiedId === clip.id ? "Copied!" : "Copy title + hashtags"}
                     </button>
                   </div>
+                  {editingClipId === clip.id && videoUrl && (
+                    <ClipEditor
+                      videoUrl={videoUrl}
+                      clip={clip}
+                      transcript={translatedTranscript ?? transcript ?? []}
+                      words={words ?? undefined}
+                      file={file}
+                      presetId={presetByClip[clip.id] ?? "pop"}
+                      onSave={(s, e) => saveClipEdit(clip.id, s, e)}
+                      onSplit={(parts) => splitClip(clip.id, parts)}
+                      onPresetChange={(pid) =>
+                        setPresetByClip((prev) => ({ ...prev, [clip.id]: pid }))
+                      }
+                      onSetSplitBackground={(url) =>
+                        setSplitBgByClip((prev) => {
+                          const next = { ...prev };
+                          if (url) next[clip.id] = url;
+                          else delete next[clip.id];
+                          return next;
+                        })
+                      }
+                      onClose={() => setEditingClipId(null)}
+                    />
+                  )}
+                  {thumbnails[clip.id] && (
+                    <div className="mt-3">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={thumbnails[clip.id]}
+                        alt={`Thumbnail for ${clip.title}`}
+                        className="w-32 rounded-lg"
+                      />
+                      <a
+                        className="mt-1 block text-sm font-medium text-violet-700 underline"
+                        href={thumbnails[clip.id]}
+                        download={`${clip.id}-thumbnail.jpg`}
+                      >
+                        Download thumbnail
+                      </a>
+                    </div>
+                  )}
+                  {shareLinks[clip.id] && (
+                    <p className="mt-3 text-sm">
+                      Share link:{" "}
+                      <a
+                        className="font-medium text-violet-700 underline"
+                        href={shareLinks[clip.id]}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {shareLinks[clip.id]}
+                      </a>{" "}
+                      (public to anyone with the link; views are counted)
+                    </p>
+                  )}
                   {musicCheck[clip.id]?.status === "detected" && (
                     <div className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
                       <strong>Copyrighted music detected in this clip.</strong>{" "}

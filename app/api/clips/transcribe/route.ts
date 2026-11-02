@@ -41,12 +41,15 @@ export async function POST(req: Request): Promise<Response> {
       { status: 413 },
     );
   }
+  // Optional word-level timestamps for animated captions ("words" = "1").
+  const wantWords = form.get("words") === "1";
   try {
-    const { segments, model } = await groqTranscribe(
+    const { segments, model, words } = await groqTranscribe(
       audio,
       audio.name || "audio.wav",
+      { wordTimestamps: wantWords },
     );
-    return NextResponse.json({ segments, model });
+    return NextResponse.json({ segments, model, words });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Transcription failed";
     return NextResponse.json(

@@ -20,6 +20,8 @@ const bodySchema = z.object({
     .max(2000),
   duration: z.number().finite().positive().max(3600),
   maxClips: z.number().int().min(1).max(10).optional(),
+  /** ClipForge length target in seconds (15–180); default keeps 15–60 s. */
+  targetSeconds: z.number().int().min(15).max(180).optional(),
 });
 
 export async function POST(req: Request): Promise<Response> {
@@ -47,6 +49,8 @@ export async function POST(req: Request): Promise<Response> {
       parsed.data.transcript,
       parsed.data.duration,
       parsed.data.maxClips ?? 5,
+      fetch,
+      { targetSeconds: parsed.data.targetSeconds },
     );
     return NextResponse.json({ moments, provider });
   } catch (err) {

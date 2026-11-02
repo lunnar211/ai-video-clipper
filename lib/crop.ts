@@ -1,4 +1,4 @@
-export type CropMode = "center" | "left" | "right" | "smart" | "face";
+export type CropMode = "center" | "left" | "right" | "smart" | "face" | "track";
 
 export type CropWindow = {
   /** Source x in pixels. */
