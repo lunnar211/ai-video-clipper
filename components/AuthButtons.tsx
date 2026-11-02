@@ -47,6 +47,15 @@ export default function AuthButtons() {
           type="button"
           className="rounded border px-2 py-1 text-xs"
           onClick={async () => {
+            // Clear the httpOnly admin MFA marker server-side first
+            // (browser JS cannot clear httpOnly cookies), then sign
+            // out of Supabase. Either step failing alone must not
+            // leave the header showing a signed-in user.
+            try {
+              await fetch("/api/auth/sign-out", { method: "POST" });
+            } catch {
+              /* Supabase sign-out below still runs */
+            }
             const client = createSupabaseBrowserClient();
             await client?.auth.signOut();
             setEmail(null);
@@ -58,20 +67,28 @@ export default function AuthButtons() {
     );
   }
   return (
-    <button
-      type="button"
-      className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-white"
-      onClick={async () => {
-        const client = createSupabaseBrowserClient();
-        await client?.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-      }}
-    >
-      Sign in with Google
-    </button>
+    <span className="flex items-center gap-2">
+      <button
+        type="button"
+        className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-white"
+        onClick={async () => {
+          const client = createSupabaseBrowserClient();
+          await client?.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
+          });
+        }}
+      >
+        Sign in with Google
+      </button>
+      <a
+        href="/signin"
+        className="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-800"
+      >
+        Sign in with email
+      </a>
+    </span>
   );
 }
