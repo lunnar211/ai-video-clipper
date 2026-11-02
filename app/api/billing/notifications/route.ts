@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   listNotificationsByUser,
@@ -9,9 +10,10 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
- * GET /api/billing/notifications?userId=… — in-app billing notices
- * (payment failures, dunning steps, low balance). Email notices
- * stay inert until a working mail provider lands.
+ * GET /api/billing/notifications — in-app billing notices
+ * (payment failures, dunning steps, low balance), session-bound
+ * since Phase 8. Email notices stay inert until a working mail
+ * provider lands.
  */
 export async function GET(req: Request): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
@@ -20,11 +22,11 @@ export async function GET(req: Request): Promise<Response> {
       { status: 429 },
     );
   }
-  const userId = new URL(req.url).searchParams.get("userId");
+  const userId = await getSessionUserId();
   if (!userId) {
     return NextResponse.json(
-      { error: "userId is required." },
-      { status: 400 },
+      { error: "Sign in to see your notifications." },
+      { status: 401 },
     );
   }
   const db = resolveBillingDb();

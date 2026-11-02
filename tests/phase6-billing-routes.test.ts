@@ -20,10 +20,18 @@ vi.mock("@/lib/admin/session", async (importOriginal) => {
   };
 });
 
+// Phase 8: billing routes are session-bound, so the session user
+// is mocked to "user-1" (the caller id the tests already use).
+// Caller-supplied userId bodies are ignored by the routes.
+vi.mock("@/lib/auth/session-user", () => ({
+  getSessionUserId: vi.fn().mockResolvedValue("user-1"),
+}));
+
 import {
   getAdminSession,
   requireAdminSession,
 } from "@/lib/admin/session";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { hmacHex } from "@/lib/billing/mor";
 
 import { POST as webhook } from "@/app/api/billing/webhook/route";
@@ -148,6 +156,10 @@ function stubFetch(input: unknown, init?: RequestInit): Promise<Response> {
 }
 
 beforeEach(() => {
+  // The file's afterEach runs vi.resetAllMocks(), which wipes the
+  // factory default — so the session default is restored here,
+  // every test, not just at mock creation.
+  vi.mocked(getSessionUserId).mockResolvedValue("user-1");
   tables = {
     clipper_users: [
       {
@@ -321,7 +333,7 @@ describe("checkout", () => {
 });
 
 describe("cancel", () => {
-  it("404s for a foreign subscription and records a local-only cancel", async () => {
+  it("401s when signed out, 404s for a foreign subscription, and records a local-only cancel", async () => {
     tables.clipper_subscriptions = [
       {
         id: "sub-row-1",
@@ -335,6 +347,14 @@ describe("cancel", () => {
         canceled_at: null,
       } as Row,
     ];
+    vi.mocked(getSessionUserId).mockResolvedValueOnce(null);
+    const signedOut = await cancelSub(
+      req("http://localhost/api/billing/subscriptions/cancel", {
+        subscriptionId: "sub-row-1",
+        mode: "immediate",
+      }),
+    );
+    expect(signedOut.status).toBe(401);
     const foreign = await cancelSub(
       req("http://localhost/api/billing/subscriptions/cancel", {
         userId: "user-1",

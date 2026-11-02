@@ -19,6 +19,19 @@ import { scheduleAudit } from "@/lib/admin/audit";
 import { dispatchEventSafe } from "@/lib/integrations/dispatch";
 import { makeDomainEvent } from "@/lib/integrations/events";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
+import { getSessionUserId } from "@/lib/auth/session-user";
+import {
+  getUserPlan,
+  listLedgerByUser,
+  resolveBillingDb,
+} from "@/lib/billing/store";
+import { monthlyConsumption } from "@/lib/billing/metering";
+import {
+  checkMinutesGate,
+  checkTargetsGate,
+  gateRefusalMessage,
+  minutesForClip,
+} from "@/lib/billing/gates";
 
 export const runtime = "nodejs";
 
@@ -135,6 +148,49 @@ export async function POST(req: Request): Promise<Response> {
     if (!gates.ok) {
       return NextResponse.json(
         { error: gates.reason, platform: target.platform },
+        { status: 403 },
+      );
+    }
+  }
+  // Plan gate (Phase 8): when the caller is signed in and the
+  // billing database resolves, the clip's minutes and the target
+  // count are checked against the plan before anything is stored.
+  // Guests pass through (no user to meter). Note: the post row
+  // still carries the caller-supplied userId (legacy); binding
+  // post ownership to the session is a follow-up slice.
+  const sessionUserId = await getSessionUserId();
+  const billingDb = resolveBillingDb();
+  if (sessionUserId && billingDb) {
+    const planId =
+      (await getUserPlan(billingDb, sessionUserId).catch(() => null)) ??
+      "free";
+    const entries = await listLedgerByUser(billingDb, sessionUserId).catch(
+      () => [],
+    );
+    const now = new Date();
+    const used = monthlyConsumption(
+      entries,
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+    );
+    const minutesGate = checkMinutesGate({
+      planId,
+      minutesUsedThisMonth: used,
+      requestedMinutes: minutesForClip(data.clipFacts.durationSec),
+    });
+    if (!minutesGate.allowed) {
+      return NextResponse.json(
+        { error: gateRefusalMessage(minutesGate) },
+        { status: 403 },
+      );
+    }
+    const targetsGate = checkTargetsGate({
+      planId,
+      targetCount: data.targets.length,
+    });
+    if (!targetsGate.allowed) {
+      return NextResponse.json(
+        { error: gateRefusalMessage(targetsGate) },
         { status: 403 },
       );
     }

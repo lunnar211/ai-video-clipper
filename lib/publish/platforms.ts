@@ -72,7 +72,15 @@ export const PLATFORMS: Record<PlatformId, PlatformDef> = {
     label: "YouTube Shorts",
     flagEnv: "PUBLISH_YOUTUBE_ENABLED",
     approvalEnv: "YOUTUBE_APP_APPROVED",
-    scopes: ["https://www.googleapis.com/auth/youtube.upload"],
+    scopes: [
+      "https://www.googleapis.com/auth/youtube.upload",
+      // Read-only, added in Phase 8 for own-video import verification
+      // (channels.list(mine=true)): proving a pasted link belongs to
+      // the connected channel. Accounts connected before this scope
+      // must reconnect to grant it; the import route refuses those
+      // honestly instead of silently passing.
+      "https://www.googleapis.com/auth/youtube.readonly",
+    ],
     authUrl: "https://accounts.google.com/o/oauth2/v2/auth",
     tokenUrl: "https://oauth2.googleapis.com/token",
     revokeUrl: "https://oauth2.googleapis.com/revoke",

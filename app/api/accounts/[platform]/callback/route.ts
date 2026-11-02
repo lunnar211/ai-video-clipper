@@ -11,6 +11,7 @@ import {
 } from "@/lib/publish/oauth";
 import { createEnvTokenCrypto } from "@/lib/publish/tokens";
 import { scheduleAudit } from "@/lib/admin/audit";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import {
   resolvePublishDb,
   createAccountRow,
@@ -100,8 +101,13 @@ export async function GET(
   const expiresAt = tokens.expiresInSec
     ? new Date(Date.now() + tokens.expiresInSec * 1000).toISOString()
     : null;
+  // Phase 8: bind the account to the signed-in user when a session
+  // exists, so the own-YouTube import can prove ownership. Guests
+  // still get user_id null (unchanged) and must reconnect while
+  // signed in before importing.
+  const sessionUserId = await getSessionUserId();
   const row = await createAccountRow(db, {
-    user_id: null,
+    user_id: sessionUserId,
     platform,
     account_label: `${PLATFORMS[platform].label} account`,
     scopes: PLATFORMS[platform].scopes,
@@ -116,7 +122,7 @@ export async function GET(
   void toPublicAccount(row);
   // Audit only: tokens are never logged, only the link event.
   scheduleAudit({
-    actor: "guest",
+    actor: sessionUserId ?? "guest",
     action: "account.linked",
     target: row.id,
     metadata: { platform },

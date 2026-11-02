@@ -3,11 +3,15 @@
  *
  * Link import exists ONLY for:
  *  (a) videos from a YouTube channel the user proved they own via
- *      Google OAuth — no OAuth token store exists yet, so this path
- *      honestly reports "not connected" until Phase 3's account linking
- *      lands;
+ *      Google OAuth — live since Phase 8 at
+ *      POST /api/imports/youtube-owned: the account must be
+ *      connected while signed in, the pasted link must be a video
+ *      on that exact channel, and ownership is verified through
+ *      the YouTube Data API before any import receipt is issued
+ *      (no video bytes are downloaded by that route);
  *  (b) Google Drive / Dropbox / Loom files from the user's own
- *      connected account — same "not connected" state today;
+ *      connected account — still "not connected" today (no
+ *      per-provider import route yet);
  *  (c) content with a verified permissive licence (CC-BY, CC-BY-SA,
  *      CC0, public domain) — the URL host must be allow-listed, the
  *      licence must be declared, and attribution text is auto-built;

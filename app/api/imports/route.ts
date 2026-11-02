@@ -13,11 +13,13 @@ export const maxDuration = 60;
 
 /**
  * Allowed imports ONLY (see lib/imports/index.ts for the rules).
- * Connected-account sources honestly 503 today: no OAuth token store
- * exists yet, so there is nothing to fetch with. CC-licensed imports
- * validate the URL host + licence through the SSRF guard and return
- * the auto-built attribution; the file itself arrives via direct
- * upload in Phase 1. There is deliberately NO arbitrary-URL branch.
+ * Drive / Dropbox / Loom connected-account sources honestly 503
+ * (no per-provider import route yet). Own-YouTube import lives at
+ * POST /api/imports/youtube-owned since Phase 8. CC-licensed
+ * imports validate the URL host + licence through the SSRF guard
+ * and return the auto-built attribution; the file itself arrives
+ * via direct upload in Phase 1. There is deliberately NO
+ * arbitrary-URL branch.
  */
 export async function POST(req: Request): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
@@ -41,7 +43,9 @@ export async function POST(req: Request): Promise<Response> {
   }
   const data = parsed.data;
   if (data.source !== "cc-licensed") {
-    // Connected-account sources: no OAuth token store exists yet.
+    // Drive / Dropbox / Loom: no per-provider import route yet.
+    // youtube-owned has its own route (see above); sending it here
+    // is a caller error, not a silent downgrade.
     return NextResponse.json(
       { error: IMPORT_NOT_CONNECTED, source: data.source },
       { status: 503 },

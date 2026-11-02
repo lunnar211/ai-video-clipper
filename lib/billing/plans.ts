@@ -144,10 +144,17 @@ export function planFromPriceId(
   return null;
 }
 
-/** -1 (unlimited) always passes; otherwise usage must stay under limit. */
+/**
+ * -1 (unlimited) always passes; otherwise usage may reach the
+ * limit exactly. Plan numbers are inclusive: a 30-minute plan
+ * allows 30 minutes, a 3-target plan allows 3 targets. (A strict
+ * `<` here silently sold one less than the configured limit —
+ * the 30th minute and the 3rd target were refused. Fixed in
+ * Phase 8 when the gates started using this helper.)
+ */
 export function withinLimit(limit: number, usage: number): boolean {
   if (limit < 0) return true;
-  return usage < limit;
+  return usage <= limit;
 }
 
 /** Remaining allowance; -1 (unlimited) reports null, never a number. */

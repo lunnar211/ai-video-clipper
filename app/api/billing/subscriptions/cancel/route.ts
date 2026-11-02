@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { scheduleAudit } from "@/lib/admin/audit";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
@@ -15,7 +16,6 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const bodySchema = z.object({
-  userId: z.string().min(1).max(200),
   subscriptionId: z.string().min(1).max(200),
   mode: z.enum(["immediate", "end_of_period"]),
 });
@@ -58,7 +58,14 @@ export async function POST(req: Request): Promise<Response> {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid cancel request." }, { status: 400 });
   }
-  const { userId, subscriptionId, mode } = parsed.data;
+  const userId = await getSessionUserId();
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Sign in to cancel a subscription." },
+      { status: 401 },
+    );
+  }
+  const { subscriptionId, mode } = parsed.data;
   const db = resolveBillingDb();
   if (!db) {
     return NextResponse.json(

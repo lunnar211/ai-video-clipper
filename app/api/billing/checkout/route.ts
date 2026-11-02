@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { scheduleAudit } from "@/lib/admin/audit";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
@@ -25,7 +26,6 @@ export const maxDuration = 30;
 const bodySchema = z.object({
   email: z.string().email().max(200),
   tier: z.string().min(1).max(50),
-  userId: z.string().min(1).max(200).optional(),
   /** App-side coupon code (validated here; see note below). */
   couponCode: z.string().min(3).max(50).optional(),
 });
@@ -48,10 +48,12 @@ const bodySchema = z.object({
  * MoR's reason and no redemption is recorded. Coupons never
  * silently charge full price while claiming a discount.
  *
- * USER IDENTITY NOTE (standing gap since Phase 3): userId comes
- * from the request body, not a verified session. Session binding
- * is a later hardening slice; until then, treat user-scoped
- * billing rows as caller-asserted.
+ * USER IDENTITY NOTE (bound since Phase 8): the user id comes
+ * from the Supabase session when signed in, and is the constant
+ * "anonymous" for guest checkout — never from the request body,
+ * so no caller can start a checkout as another user. The webhook
+ * later binds the paid subscription to the real user by email
+ * (see the webhook route's resolveUserId).
  */
 export async function POST(req: Request): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
@@ -79,7 +81,11 @@ export async function POST(req: Request): Promise<Response> {
     return NextResponse.json({ error: "Invalid checkout request." }, { status: 400 });
   }
   const { email, tier, couponCode } = parsed.data;
-  const userId = parsed.data.userId ?? "anonymous";
+  // Session-bound identity: a signed-in buyer checks out as
+  // themselves; a guest checks out as the constant "anonymous"
+  // (the webhook binds the paid subscription by email later).
+  // A caller-supplied userId is never accepted.
+  const userId = (await getSessionUserId()) ?? "anonymous";
   if (!isPlanId(tier)) {
     return NextResponse.json(
       { error: `Unknown plan "${tier}".` },

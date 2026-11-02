@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   getInvoice,
@@ -10,9 +11,11 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
- * GET /api/billing/invoices?userId=… — the caller's invoice records.
- * Records carry line items and integer minor-unit totals only —
- * never payment-instrument data.
+ * GET /api/billing/invoices — the caller's invoice records,
+ * session-bound since Phase 8 (the user id comes from the
+ * Supabase session, never from a query parameter). Records carry
+ * line items and integer minor-unit totals only — never
+ * payment-instrument data.
  */
 export async function GET(req: Request): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
@@ -21,11 +24,11 @@ export async function GET(req: Request): Promise<Response> {
       { status: 429 },
     );
   }
-  const userId = new URL(req.url).searchParams.get("userId");
+  const userId = await getSessionUserId();
   if (!userId) {
     return NextResponse.json(
-      { error: "userId is required." },
-      { status: 400 },
+      { error: "Sign in to list your invoices." },
+      { status: 401 },
     );
   }
   const db = resolveBillingDb();

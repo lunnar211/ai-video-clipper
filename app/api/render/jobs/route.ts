@@ -8,6 +8,18 @@ import {
 } from "@/lib/server-render/contract";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { scheduleAudit } from "@/lib/admin/audit";
+import { getSessionUserId } from "@/lib/auth/session-user";
+import {
+  getUserPlan,
+  listLedgerByUser,
+  resolveBillingDb,
+} from "@/lib/billing/store";
+import { monthlyConsumption } from "@/lib/billing/metering";
+import {
+  checkMinutesGate,
+  gateRefusalMessage,
+  minutesForClip,
+} from "@/lib/billing/gates";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -17,6 +29,11 @@ export const maxDuration = 60;
  * default: without WORKER_URL + WORKER_AUTH_SECRET every call 503s
  * honestly. When configured, jobs are signed (HMAC) and forwarded to
  * the ffmpeg worker — the app never pretends a server render happened.
+ *
+ * Plan gate (Phase 8): when the caller is signed in and the
+ * billing database resolves, the clip's minutes are checked
+ * against the monthly cap before the job is forwarded. Guests
+ * pass through (no user to meter) and keep the browser caps.
  */
 export async function POST(req: Request): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
@@ -34,6 +51,35 @@ export async function POST(req: Request): Promise<Response> {
   const parsed = renderJobRequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid render job." }, { status: 400 });
+  }
+  const sessionUserId = await getSessionUserId();
+  const billingDb = resolveBillingDb();
+  if (sessionUserId && billingDb) {
+    const planId =
+      (await getUserPlan(billingDb, sessionUserId).catch(() => null)) ??
+      "free";
+    const entries = await listLedgerByUser(billingDb, sessionUserId).catch(
+      () => [],
+    );
+    const now = new Date();
+    const used = monthlyConsumption(
+      entries,
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+    );
+    const gate = checkMinutesGate({
+      planId,
+      minutesUsedThisMonth: used,
+      requestedMinutes: minutesForClip(
+        parsed.data.clip.end - parsed.data.clip.start,
+      ),
+    });
+    if (!gate.allowed) {
+      return NextResponse.json(
+        { error: gateRefusalMessage(gate) },
+        { status: 403 },
+      );
+    }
   }
   const worker = resolveWorker();
   if (!worker) {

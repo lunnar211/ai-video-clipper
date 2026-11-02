@@ -38,10 +38,10 @@ describe("OAuth helpers (mocked HTTP only)", () => {
       resolveOAuthConfig("youtube", {} as NodeJS.ProcessEnv),
     ).toBeNull();
   });
-  it("builds auth URLs with minimal scopes + offline access for YouTube", () => {
+  it("builds auth URLs with upload + read-only scopes + offline access for YouTube", () => {
     const url = new URL(buildAuthUrl("youtube", cfg, "state-1"));
     expect(url.searchParams.get("scope")).toBe(
-      "https://www.googleapis.com/auth/youtube.upload",
+      "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly",
     );
     expect(url.searchParams.get("access_type")).toBe("offline");
     expect(url.searchParams.get("state")).toBe("state-1");

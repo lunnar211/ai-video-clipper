@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
 import {
@@ -12,9 +13,7 @@ import { generateReferralCode } from "@/lib/billing/affiliates";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-const bodySchema = z.object({
-  userId: z.string().min(1).max(200),
-});
+const bodySchema = z.object({});
 
 /**
  * POST /api/billing/referrals/code — get or create the caller's
@@ -45,7 +44,13 @@ export async function POST(req: Request): Promise<Response> {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
-  const { userId } = parsed.data;
+  const userId = await getSessionUserId();
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Sign in to get a referral code." },
+      { status: 401 },
+    );
+  }
   const db = resolveBillingDb();
   if (!db) {
     return NextResponse.json(

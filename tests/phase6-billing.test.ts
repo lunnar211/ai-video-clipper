@@ -118,10 +118,11 @@ describe("plans", () => {
     expect(getPlan("enterprise", {})).toBeNull();
   });
 
-  it("limits: -1 is unlimited, usage must stay under the cap", () => {
+  it("limits: -1 is unlimited, usage may reach the cap exactly (matches the metering route's `used + minutes > cap` refusal)", () => {
     expect(withinLimit(-1, 999999)).toBe(true);
     expect(withinLimit(10, 9)).toBe(true);
-    expect(withinLimit(10, 10)).toBe(false);
+    expect(withinLimit(10, 10)).toBe(true);
+    expect(withinLimit(10, 11)).toBe(false);
     expect(remainingAllowance(-1, 5)).toBeNull();
     expect(remainingAllowance(10, 3)).toBe(7);
   });

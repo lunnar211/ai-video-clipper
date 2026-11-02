@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { scheduleAudit } from "@/lib/admin/audit";
 import { isViewAsRequest } from "@/lib/admin/impersonation";
@@ -16,7 +17,6 @@ export const maxDuration = 30;
 
 const bodySchema = z.object({
   code: z.string().min(3).max(50),
-  userId: z.string().min(1).max(200),
 });
 
 /**
@@ -48,7 +48,14 @@ export async function POST(req: Request): Promise<Response> {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid attribution request." }, { status: 400 });
   }
-  const { code, userId } = parsed.data;
+  const userId = await getSessionUserId();
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Sign in to attribute a referral." },
+      { status: 401 },
+    );
+  }
+  const { code } = parsed.data;
   const db = resolveBillingDb();
   if (!db) {
     return NextResponse.json(

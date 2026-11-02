@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getSessionUserId } from "@/lib/auth/session-user";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import {
   listSubscriptionsByUser,
@@ -9,11 +10,11 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 /**
- * GET /api/billing/subscriptions?userId=… — the caller's own
- * subscriptions, newest first. userId is caller-asserted (see the
- * identity note on the checkout route); session binding is a later
- * hardening slice. Statuses and plan names only — never payment
- * data (the MoR holds that).
+ * GET /api/billing/subscriptions — the caller's own subscriptions,
+ * newest first. Session-bound since Phase 8: the user id comes
+ * from the Supabase session, never from a query parameter.
+ * Statuses and plan names only — never payment data (the MoR
+ * holds that).
  */
 export async function GET(req: Request): Promise<Response> {
   if (!checkRateLimit(getClientIp(req))) {
@@ -22,11 +23,11 @@ export async function GET(req: Request): Promise<Response> {
       { status: 429 },
     );
   }
-  const userId = new URL(req.url).searchParams.get("userId");
+  const userId = await getSessionUserId();
   if (!userId) {
     return NextResponse.json(
-      { error: "userId is required." },
-      { status: 400 },
+      { error: "Sign in to list your subscriptions." },
+      { status: 401 },
     );
   }
   const db = resolveBillingDb();

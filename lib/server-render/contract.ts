@@ -89,3 +89,37 @@ export async function signWorkerRequest(
 
 export const WORKER_NOT_CONFIGURED =
   "Server render is not configured yet — set WORKER_URL and WORKER_AUTH_SECRET and run the ffmpeg worker (see worker/), or render in the browser.";
+
+/**
+ * Verify a worker callback signature (HMAC-SHA256 hex over the raw
+ * request body, same secret as signWorkerRequest). Returns false
+ * for malformed signatures, wrong lengths, and verify failures —
+ * never throws, so a bad callback is a 401, not a crash.
+ */
+export async function verifyWorkerRequest(
+  body: string,
+  signature: string,
+  secret: string,
+): Promise<boolean> {
+  try {
+    if (!/^[0-9a-fA-F]{64}$/.test(signature)) return false;
+    const key = await crypto.subtle.importKey(
+      "raw",
+      new TextEncoder().encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"],
+    );
+    const sigBytes = new Uint8Array(
+      (signature.match(/../g) ?? []).map((b) => parseInt(b, 16)),
+    );
+    return await crypto.subtle.verify(
+      "HMAC",
+      key,
+      sigBytes,
+      new TextEncoder().encode(body),
+    );
+  } catch {
+    return false;
+  }
+}

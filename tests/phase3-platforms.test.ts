@@ -39,9 +39,10 @@ describe("platform registry", () => {
     expect(publishAllowed("youtube", live)).toBe(true);
     expect(publishRefusalReason("youtube", live)).toBeNull();
   });
-  it("YouTube requests only the upload scope", () => {
+  it("YouTube requests upload + read-only scopes (read-only proves channel ownership for the own-video import)", () => {
     expect(PLATFORMS.youtube.scopes).toEqual([
       "https://www.googleapis.com/auth/youtube.upload",
+      "https://www.googleapis.com/auth/youtube.readonly",
     ]);
   });
 });

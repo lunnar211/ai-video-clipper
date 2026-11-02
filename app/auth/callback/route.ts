@@ -46,6 +46,34 @@ export async function GET(req: Request) {
         ip: req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? null,
         user_agent: req.headers.get("user-agent"),
       });
+      // First sighting = signup (Phase 8): a user with no
+      // clipper_users row yet gets an auth.signup event. Only a
+      // positive "no rows" result counts — any other read failure
+      // skips quietly, so a denied read never fakes a signup.
+      try {
+        const row = await client
+          .from("clipper_users")
+          .select("id")
+          .eq("id", data.user.id)
+          .single();
+        if (
+          !row.data &&
+          (row.error as { code?: string } | null)?.code === "PGRST116"
+        ) {
+          scheduleAudit({
+            actor: data.user.id,
+            action: "auth.signup",
+            target: null,
+            metadata: null,
+            ip:
+              req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+              null,
+            user_agent: req.headers.get("user-agent"),
+          });
+        }
+      } catch {
+        /* signup check must never break sign-in */
+      }
     }
   } catch {
     /* audit must never break sign-in */

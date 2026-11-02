@@ -553,6 +553,15 @@ export async function listUserProjects(
   );
 }
 
+/** Create a project row (server project API, Phase 8). */
+export async function createProjectRow(
+  db: AdminDb,
+  input: { user_id: string; title: string },
+  fetchImpl: FetchImpl = fetch,
+): Promise<DrillProjectRow> {
+  return postRow(db, "clipper_projects", input, fetchImpl);
+}
+
 export async function listUserClips(
   db: AdminDb,
   userId: string,
