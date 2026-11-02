@@ -83,13 +83,13 @@ function amzDates(now: Date): { amzDate: string; dateStamp: string } {
 }
 
 /**
- * Presigned URL for one S3 operation (PUT part or GET object).
- * `expiresSec` is capped at 7 days by SigV4. Testable: the URL always
- * carries X-Amz-Algorithm, X-Amz-Credential, X-Amz-Signature.
+ * Presigned URL for one S3 operation (PUT part, GET object, or DELETE
+ * object). `expiresSec` is capped at 7 days by SigV4. Testable: the
+ * URL always carries X-Amz-Algorithm, X-Amz-Credential, X-Amz-Signature.
  */
 export async function presignR2(
   cfg: R2Config,
-  method: "PUT" | "GET",
+  method: "PUT" | "GET" | "DELETE",
   key: string,
   opts: { expiresSec?: number; now?: Date; uploadId?: string; partNumber?: number } = {},
 ): Promise<string> {
@@ -291,6 +291,8 @@ export type StorageProvider = {
     fetchImpl?: FetchImpl,
   ) => Promise<{ key: string }>;
   presignedGet: (key: string) => Promise<string>;
+  /** Best-effort delete (presigned DELETE). Added for Phase 3 temp media. */
+  delete?: (key: string, fetchImpl?: FetchImpl) => Promise<void>;
 };
 
 /** Resolve the configured storage provider, or null when unset. */
@@ -304,6 +306,13 @@ export function resolveStorage(): StorageProvider | null {
     complete: (key, uploadId, parts, fetchImpl) =>
       completeMultipartUpload(cfg, key, uploadId, parts, fetchImpl),
     presignedGet: (key) => presignR2(cfg, "GET", key),
+    delete: async (key, fetchImpl = fetch) => {
+      const url = await presignR2(cfg, "DELETE", key);
+      const res = await fetchImpl(url, { method: "DELETE" });
+      if (!res.ok) {
+        throw new Error(`R2 delete failed (HTTP ${res.status})`);
+      }
+    },
   };
 }
 

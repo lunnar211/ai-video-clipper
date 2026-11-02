@@ -52,7 +52,7 @@ export function resolveRightsDb(): RightsDb | null {
   return { url: url.replace(/\/$/, ""), serviceKey };
 }
 
-function restHeaders(db: RightsDb): Record<string, string> {
+export function restHeaders(db: RightsDb): Record<string, string> {
   return {
     apikey: db.serviceKey,
     Authorization: `Bearer ${db.serviceKey}`,
