@@ -58,6 +58,16 @@ export const AUDIT_ACTIONS = [
   "admin.mfa_setup",
   "admin.mfa_verify",
   "admin.alert_dispatch",
+  "integration.enabled",
+  "integration.disabled",
+  "integration.webhook_created",
+  "integration.webhook_deleted",
+  "integration.webhook_replay",
+  "integration.key_created",
+  "integration.key_revoked",
+  "integration.sso_saved",
+  "gdpr.export",
+  "gdpr.delete",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
