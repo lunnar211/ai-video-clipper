@@ -33,3 +33,18 @@ export function licenceRequiresAttribution(licence: string): boolean {
   // Own/paid licences: attribution only when the licence says so.
   return false;
 }
+
+/**
+ * Combine attribution lines for one ATTRIBUTION.txt (ClipForge
+ * Phase 11: a CC-import credit joins the music credit). Blank
+ * entries drop out; null means there is nothing to write.
+ */
+export function combineAttributionLines(
+  lines: Array<string | null | undefined>,
+): string | null {
+  const kept = lines.filter(
+    (line): line is string => typeof line === "string" && line.trim() !== "",
+  );
+  if (kept.length === 0) return null;
+  return kept.join("\n");
+}

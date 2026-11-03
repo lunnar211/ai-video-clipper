@@ -30,8 +30,11 @@ import {
   recordRenderToday,
   shouldWatermark,
 } from "@/lib/usage/quota";
-import { takePendingUpload } from "@/lib/upload-pending";
+import { takePendingUpload, takePendingCcUrl } from "@/lib/upload-pending";
 import { stageServerCopy } from "@/lib/storage/stage-upload";
+import CcPasteImport from "@/components/CcPasteImport";
+import type { CcImportMeta } from "@/lib/imports/cc-types";
+import { combineAttributionLines } from "@/lib/rights/attribution";
 import type { Moment } from "@/lib/ai/highlights";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
@@ -136,6 +139,14 @@ export default function ClipperTool() {
   const [translating, setTranslating] = useState(false);
   const [translatedTranscript, setTranslatedTranscript] = useState<TranscriptSegment[] | null>(null);
   const [editingClipId, setEditingClipId] = useState<string | null>(null);
+  // ClipForge Phase 11: verified CC-import licence facts for the
+  // loaded video (null for direct uploads). Recorded as the
+  // project's licence metadata; the attribution line travels with
+  // the clips in the ZIP export.
+  const [ccImport, setCcImport] = useState<CcImportMeta | null>(null);
+  // A CC link handed over from the homepage hero paste tab; the
+  // paste panel auto-verifies it once on arrival.
+  const [ccInitialUrl, setCcInitialUrl] = useState<string | null>(null);
   const [presetByClip, setPresetByClip] = useState<Record<string, string>>({});
   const [splitBgByClip, setSplitBgByClip] = useState<Record<string, string>>({});
   const [brandKit, setBrandKit] = useState<BrandKit>(() => loadBrandKit());
@@ -233,13 +244,30 @@ export default function ClipperTool() {
   // is carried in memory to this tool exactly once (take clears it, so
   // StrictMode's double effect invocation cannot consume it twice).
   // Deferred past commit (queueMicrotask) so the mount handoff does
-  // not cascade renders during the commit phase.
+  // not cascade renders during the commit phase. A hero-pasted CC
+  // link (Phase 11) travels the same way and auto-verifies below.
   useEffect(() => {
     queueMicrotask(() => {
       const pending = takePendingUpload();
-      if (pending) resetForFile(pending);
+      if (pending) {
+        setCcImport(null);
+        resetForFile(pending);
+      }
+      const pendingUrl = takePendingCcUrl();
+      if (pendingUrl) setCcInitialUrl(pendingUrl);
     });
   }, [resetForFile]);
+
+  // ClipForge Phase 11: a CC-verified file loads through the same
+  // reset path as a direct upload (same size/type/header/duration
+  // gates), with its licence facts recorded alongside.
+  const loadCcFile = useCallback(
+    (f: File, meta: CcImportMeta) => {
+      setCcImport(meta);
+      resetForFile(f);
+    },
+    [resetForFile],
+  );
 
   const onMetadata = useCallback(() => {
     const v = previewRef.current;
@@ -673,15 +701,17 @@ export default function ClipperTool() {
         }
       }
       // The music credit travels with the clips when attribution is
-      // required (ClipForge Phase 2).
-      if (musicTrack) {
-        const attribution = userTrackAttribution(musicTrack);
-        if (attribution) {
-          entries.push({
-            name: "ATTRIBUTION.txt",
-            data: new TextEncoder().encode(`${attribution}\n`),
-          });
-        }
+      // required (ClipForge Phase 2); a CC-import credit joins it in
+      // the same file (ClipForge Phase 11).
+      const attribution = combineAttributionLines([
+        musicTrack ? userTrackAttribution(musicTrack) : null,
+        ccImport ? ccImport.attribution : null,
+      ]);
+      if (attribution) {
+        entries.push({
+          name: "ATTRIBUTION.txt",
+          data: new TextEncoder().encode(`${attribution}\n`),
+        });
       }
       const zip = buildZip(entries);
       downloadBlob(
@@ -693,7 +723,7 @@ export default function ClipperTool() {
     } finally {
       setZipBusy(false);
     }
-  }, [clips, rendered, transcript, translatedTranscript, musicTrack]);
+  }, [clips, rendered, transcript, translatedTranscript, musicTrack, ccImport]);
 
   const makeThumbnail = useCallback(
     async (clip: Clip) => {
@@ -829,7 +859,10 @@ export default function ClipperTool() {
         onDrop={(e) => {
           e.preventDefault();
           const f = e.dataTransfer.files?.[0];
-          if (f) resetForFile(f);
+          if (f) {
+            setCcImport(null);
+            resetForFile(f);
+          }
         }}
       >
         <p className="font-medium">Drop your video here, or choose a file</p>
@@ -843,13 +876,37 @@ export default function ClipperTool() {
           accept="video/*"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) resetForFile(f);
+            if (f) {
+              setCcImport(null);
+              resetForFile(f);
+            }
           }}
         />
         {file && (
           <p className="mt-3 text-sm text-muted-foreground">
             {file.name} — {(file.size / 1024 / 1024).toFixed(1)} MB
             {duration > 0 && ` — ${fmtTime(duration)}`}
+          </p>
+        )}
+      </div>
+
+      {/* Paste a video link (Phase 11): CC-verified import only —
+          Wikimedia Commons or Internet Archive, licence checked
+          before anything loads. Any other host is refused. */}
+      <div className="rounded-xl bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold">Paste a video link</h2>
+        <div className="mt-3">
+          <CcPasteImport
+            onLoad={loadCcFile}
+            initialUrl={ccInitialUrl}
+            autoVerify={ccInitialUrl !== null}
+          />
+        </div>
+        {ccImport && (
+          <p className="mt-3 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+            Loaded from a verified free licence: “{ccImport.title}” by{" "}
+            {ccImport.author}, {ccImport.license}. This attribution
+            travels with your clips in the ZIP export.
           </p>
         )}
       </div>

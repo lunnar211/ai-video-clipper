@@ -13,10 +13,16 @@
  *      connected account — still "not connected" today (no
  *      per-provider import route yet);
  *  (c) content with a verified permissive licence (CC-BY, CC-BY-SA,
- *      CC0, public domain) — the URL host must be allow-listed, the
- *      licence must be declared, and attribution text is auto-built;
- *      the file itself still arrives via direct upload in Phase 1
- *      (server-side CC fetch arrives with the ffmpeg worker);
+ *      CC0, public domain) — since Phase 11 the licence is verified
+ *      server-side via POST /api/imports/cc-verify for Wikimedia
+ *      Commons and Internet Archive links only (public APIs, no
+ *      key), and the browser loads the file straight from the
+ *      source host into the browser pipeline; attribution text is
+ *      auto-built and travels into ZIP exports. The legacy
+ *      POST /api/imports "cc-licensed" branch below still accepts a
+ *      caller-declared licence for API compatibility — no UI uses
+ *      it, and it must not be presented as verified (follow-up:
+ *      route it through the same verification or remove it);
  *  (d) direct file upload — the normal browser flow.
  *
  * There is NO arbitrary-URL import endpoint anywhere in this codebase.

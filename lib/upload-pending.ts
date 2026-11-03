@@ -27,3 +27,17 @@ export function takePendingUpload(): File | null {
 export function hasPendingUpload(): boolean {
   return pending !== null;
 }
+
+let pendingCcUrl: string | null = null;
+
+/** Stage a hero-pasted CC link for the tool to verify on arrival. */
+export function setPendingCcUrl(url: string): void {
+  pendingCcUrl = url;
+}
+
+/** Take the staged CC link, clearing it so it is consumed exactly once. */
+export function takePendingCcUrl(): string | null {
+  const url = pendingCcUrl;
+  pendingCcUrl = null;
+  return url;
+}
