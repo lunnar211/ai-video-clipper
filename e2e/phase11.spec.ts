@@ -47,7 +47,7 @@ test("hero paste tab hands the link to the clipper for verification", async ({
   );
 });
 
-test("create page refuses a YouTube link with the allow-list reason", async ({
+test("create page routes a YouTube link to the own-YouTube flow (Phase 14)", async ({
   page,
 }) => {
   await page.goto("/create");
@@ -59,9 +59,17 @@ test("create page refuses a YouTube link with the allow-list reason", async ({
     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   );
   await page.getByRole("button", { name: "Check licence" }).click();
+  // No longer the generic allow-list refusal: the CC box routes
+  // YouTube links to the own-YouTube flow below.
+  await expect(
+    page.getByText("YouTube links don't go through this box"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Your YouTube video flow below/ }),
+  ).toBeVisible();
   await expect(
     page.getByText("Only Wikimedia Commons and Internet Archive links"),
-  ).toBeVisible();
+  ).toHaveCount(0);
 });
 
 test("create page shows a mocked non-free licence refusal", async ({

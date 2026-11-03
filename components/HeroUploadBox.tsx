@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { setPendingUpload, setPendingCcUrl } from "@/lib/upload-pending";
+import { isYoutubeLink } from "@/lib/imports/youtube-link";
 
 /**
  * Hero upload box (ClipForge Phase 7, Phase 10: reusable id).
@@ -35,6 +36,14 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
   const handOffLink = () => {
     const trimmed = link.trim();
     if (!trimmed) return;
+    // Phase 14: a YouTube link pasted here goes straight to the
+    // own-YouTube flow on /create — the CC box would only route it
+    // there anyway, and this skips the detour. The user re-pastes
+    // in that flow's own box; nothing is verified from the hero.
+    if (isYoutubeLink(trimmed)) {
+      router.push("/create#your-youtube-video");
+      return;
+    }
     setPendingCcUrl(trimmed);
     router.push("/create");
   };
@@ -136,6 +145,16 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
               Continue in the clipper
             </button>
           </div>
+          <p className="text-center text-sm text-muted-foreground">
+            Your own YouTube video?{" "}
+            <a
+              href="/create#your-youtube-video"
+              className="font-semibold text-primary underline"
+            >
+              Verify ownership in the clipper
+            </a>
+            .
+          </p>
         </div>
       )}
       <p className="mt-3 text-center text-sm">

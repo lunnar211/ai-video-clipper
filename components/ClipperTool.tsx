@@ -33,6 +33,8 @@ import {
 import { takePendingUpload, takePendingCcUrl } from "@/lib/upload-pending";
 import { stageServerCopy } from "@/lib/storage/stage-upload";
 import CcPasteImport from "@/components/CcPasteImport";
+import YoutubeOwnedImport from "@/components/YoutubeOwnedImport";
+import type { YoutubeOwnedMeta } from "@/lib/imports/youtube-owned-client";
 import PostClip from "@/components/PostClip";
 import type { CcImportMeta } from "@/lib/imports/cc-types";
 import { combineAttributionLines } from "@/lib/rights/attribution";
@@ -145,6 +147,14 @@ export default function ClipperTool() {
   // project's licence metadata; the attribution line travels with
   // the clips in the ZIP export.
   const [ccImport, setCcImport] = useState<CcImportMeta | null>(null);
+  // ClipForge Phase 14: verified own-YouTube facts for the project
+  // (null until a link verifies). This is the project's source
+  // record for the YouTube flow — it does NOT load a file: the
+  // verified video's file still arrives via direct upload. A CC
+  // load switches source and clears it; a direct upload keeps it,
+  // because that upload is expected to be the Studio download of
+  // the verified video.
+  const [ytImport, setYtImport] = useState<YoutubeOwnedMeta | null>(null);
   // A CC link handed over from the homepage hero paste tab; the
   // paste panel auto-verifies it once on arrival.
   const [ccInitialUrl, setCcInitialUrl] = useState<string | null>(null);
@@ -265,6 +275,7 @@ export default function ClipperTool() {
   const loadCcFile = useCallback(
     (f: File, meta: CcImportMeta) => {
       setCcImport(meta);
+      setYtImport(null);
       resetForFile(f);
     },
     [resetForFile],
@@ -855,7 +866,8 @@ export default function ClipperTool() {
       )}
 
       <div
-        className="rounded-xl border-2 border-dashed border-border bg-card p-6 text-center"
+        id="upload-dropzone"
+        className="scroll-mt-24 rounded-xl border-2 border-dashed border-border bg-card p-6 text-center"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
@@ -909,6 +921,57 @@ export default function ClipperTool() {
             {ccImport.author}, {ccImport.license}. This attribution
             travels with your clips in the ZIP export.
           </p>
+        )}
+      </div>
+
+      {/* Your YouTube video (Phase 14): the UI for the Phase 8
+          own-YouTube ownership check. Signed-in users with a
+          connected channel paste their own link; the server proves
+          the video sits on their channel. This verifies ownership
+          ONLY — the video itself is never downloaded from YouTube.
+          The file still arrives via direct upload: the owner
+          downloads their own video from YouTube Studio and uploads
+          it in the box above. */}
+      <div
+        id="your-youtube-video"
+        className="scroll-mt-24 rounded-xl bg-card p-5 shadow-sm"
+      >
+        <h2 className="text-lg font-semibold">Your YouTube video</h2>
+        <div className="mt-3">
+          <YoutubeOwnedImport onVerified={setYtImport} />
+        </div>
+        {ytImport && (
+          <div className="mt-3 rounded-lg border border-green-300 bg-green-50 p-4 text-sm text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+            <p className="font-semibold">Ownership verified.</p>
+            <p className="mt-1">
+              “{ytImport.videoTitle}” is on your connected channel “
+              {ytImport.channelTitle}”.
+            </p>
+            <p className="mt-2">
+              Next step — get the file: in{" "}
+              <a
+                href="https://studio.youtube.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                YouTube Studio
+              </a>
+              , open Content, use the ⋮ menu on this video, and
+              choose Download. Then{" "}
+              <a href="#upload-dropzone" className="underline">
+                upload that file above
+              </a>{" "}
+              — the tool never pulls the video from YouTube itself.
+            </p>
+            <button
+              type="button"
+              className="mt-3 inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors duration-200 hover:opacity-90"
+              onClick={() => setYtImport(null)}
+            >
+              Verify a different video
+            </button>
+          </div>
         )}
       </div>
 

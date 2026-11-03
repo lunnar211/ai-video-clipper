@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CcImportMeta, CcVerifiedFile } from "@/lib/imports/cc-types";
+import { isYoutubeLink } from "@/lib/imports/youtube-link";
 
 /**
  * Paste-a-link import (ClipForge Phase 11).
@@ -66,7 +67,7 @@ export default function CcPasteImport({
     queueMicrotask(() => setUrl(initialUrl));
   }, [initialUrl]);
   const [phase, setPhase] = useState<
-    "idle" | "checking" | "verified" | "error"
+    "idle" | "checking" | "verified" | "error" | "routed"
   >("idle");
   const [loadingFile, setLoadingFile] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -79,6 +80,17 @@ export default function CcPasteImport({
     if (!trimmed) {
       setMessage("Paste a video link first.");
       setPhase("error");
+      return;
+    }
+    // Phase 14 smart routing: a YouTube link pasted here used to
+    // dead-end in the generic allow-list refusal, because the
+    // own-YouTube flow had no UI. Route it to that flow instead —
+    // no server call is made for this box, and other hosts keep
+    // the honest refusal below exactly as before.
+    if (isYoutubeLink(trimmed)) {
+      setVerified(null);
+      setMessage(null);
+      setPhase("routed");
       return;
     }
     setPhase("checking");
@@ -251,6 +263,23 @@ export default function CcPasteImport({
           >
             {loadingFile ? "Loading video…" : "Load this video"}
           </button>
+        </div>
+      )}
+
+      {phase === "routed" && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <p>
+            YouTube links don&apos;t go through this box — use the{" "}
+            <a href="#your-youtube-video" className="font-semibold underline">
+              Your YouTube video flow below
+            </a>
+            . That flow checks the video is on your own connected
+            channel. Other people&apos;s YouTube videos stay refused.
+          </p>
+          <p className="mt-2">
+            Or upload a video file directly above — the file route
+            does not need a link.
+          </p>
         </div>
       )}
 
