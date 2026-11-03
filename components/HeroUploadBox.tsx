@@ -5,14 +5,18 @@ import { useState } from "react";
 import { setPendingUpload } from "@/lib/upload-pending";
 
 /**
- * Hero upload box (ClipForge Phase 7).
+ * Hero upload box (ClipForge Phase 7, Phase 10: reusable id).
  *
  * The marketing homepage hero lets a visitor pick a video; the file is
  * handed to the clipper on /create in module memory (never uploaded,
  * never persisted). Validation (size, type, header sniff) happens once
  * in the tool, not here — this box only carries the file across.
+ *
+ * Phase 10 reuses this same box in the "See it work" section, so the
+ * input id is a prop: two boxes on one page must never share an id,
+ * or the labels would both point at the first input.
  */
-export default function HeroUploadBox() {
+export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
   const router = useRouter();
   const [dragging, setDragging] = useState(false);
 
@@ -25,7 +29,7 @@ export default function HeroUploadBox() {
   return (
     <div className="rounded-xl border-2 border-dashed border-primary/50 bg-card p-5">
       <label
-        htmlFor="hero-upload"
+        htmlFor={id}
         className={`block cursor-pointer rounded-lg px-4 py-6 text-center transition-colors duration-200 ${
           dragging ? "bg-primary/10" : ""
         }`}
@@ -48,7 +52,7 @@ export default function HeroUploadBox() {
           rights to.
         </span>
         <input
-          id="hero-upload"
+          id={id}
           type="file"
           accept="video/*"
           className="sr-only"

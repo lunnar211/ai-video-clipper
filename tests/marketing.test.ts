@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TRANSLATION_LANGUAGES } from "@/lib/ai/languages";
 import {
-  DEMO_NOTE,
-  DEMO_STYLES,
   FEATURES,
   HERO,
   HOME_FAQS,
@@ -14,7 +12,9 @@ import {
 } from "@/lib/marketing";
 
 /**
- * Honesty invariants for the marketing homepage (Phase 7).
+ * Honesty invariants for the marketing homepage (Phase 7, revised
+ * Phase 10: the illustrated demo section was deleted entirely, so no
+ * demo export exists anymore and no test may reference one).
  * If any of these fail, the homepage is claiming something the product
  * is not — fix the copy, never the test.
  */
@@ -32,8 +32,6 @@ function allCopy(): string[] {
     VALUE_STRIP.body,
     ...FEATURES.flatMap((f) => [f.title, f.body]),
     ...STEPS.flatMap((s) => [s.title, s.body, s.proof]),
-    ...DEMO_STYLES.flatMap((d) => [d.name, d.caption]),
-    DEMO_NOTE,
     PLANS_NOTE,
     ...HOME_FAQS.flatMap((f) => [f.q, f.a]),
   ];
@@ -61,10 +59,6 @@ describe("marketing copy honesty", () => {
   it("states the no-downloader rule on the hero", () => {
     expect(HERO.rightsNote).toContain("never downloads videos");
   });
-
-  it("labels demo frames as illustrations, not real clips", () => {
-    expect(DEMO_NOTE.toLowerCase()).toContain("illustrated");
-  });
 });
 
 describe("marketing structure", () => {
@@ -72,7 +66,6 @@ describe("marketing structure", () => {
     expect(FEATURES).toHaveLength(10);
     expect(STEPS).toHaveLength(3);
     expect(HOME_FAQS).toHaveLength(5);
-    expect(DEMO_STYLES).toHaveLength(3);
   });
 
   it("derives the language count from the translation list, firsthand", () => {

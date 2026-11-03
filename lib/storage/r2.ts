@@ -10,6 +10,8 @@
 
 import { type FetchImpl } from "@/lib/ai/providers";
 
+export { STORAGE_NOT_CONFIGURED } from "./not-configured";
+
 export type R2Config = {
   accountId: string;
   accessKeyId: string;
@@ -315,6 +317,3 @@ export function resolveStorage(): StorageProvider | null {
     },
   };
 }
-
-export const STORAGE_NOT_CONFIGURED =
-  "Cloud storage is not connected yet — set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_BUCKET, then retry.";

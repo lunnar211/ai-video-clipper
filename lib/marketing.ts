@@ -1,5 +1,5 @@
 /**
- * Marketing homepage copy (ClipForge Phase 7).
+ * Marketing homepage copy (ClipForge Phase 7, revised Phase 10).
  *
  * 100% ORIGINAL copy for the AI Video Clipper. Nothing here is copied
  * from the reference site: no borrowed headlines, no competitor prices,
@@ -7,11 +7,15 @@
  * limits from the tool itself, the language count from the translation
  * list, plan limits from the billing config (rendered separately).
  *
- * Honesty invariants (pinned by tests/marketing.test.ts):
+ * Honesty invariants (pinned by tests/marketing.test.ts and
+ * tests/phase10-real.test.ts):
  * - no prices anywhere (billing prices are unset — "coming soon")
  * - no "100+" languages, no "10k+" clips, no earnings promises
  * - no "copyright-free" claims, no paste-any-link flow
  * - features described are built, or their gated state is stated
+ * - NO demo content: Phase 10 deleted the illustrated demo section
+ *   entirely. The homepage shows the real tool, not drawings, and
+ *   nothing here pretends a preview is output.
  */
 
 import { TRANSLATION_LANGUAGES } from "@/lib/ai/languages";
@@ -22,7 +26,6 @@ export const TRANSLATION_COUNT = TRANSLATION_LANGUAGES.length;
 export type MarketingFeature = { title: string; body: string };
 export type MarketingStep = { title: string; body: string; proof: string };
 export type MarketingFaq = { q: string; a: string };
-export type DemoStyle = { name: string; caption: string };
 
 export const HERO = {
   eyebrow: "For videos you own",
@@ -42,7 +45,7 @@ export const VALUE_STRIP = {
 export const FEATURES: MarketingFeature[] = [
   {
     title: "AI finds the moments",
-    body: "Transcription plus highlight picking surfaces the strongest 30–60 second moments, scored by hook, pacing, and engagement. No AI key? Cut moments by hand instead.",
+    body: "Transcription plus highlight picking surfaces the strongest 15–60 second moments, scored by hook, pacing, and engagement. No AI key? Cut moments by hand instead.",
   },
   {
     title: "Word-level captions",
@@ -89,7 +92,7 @@ export const PLATFORM_STRIP =
 export const STEPS: MarketingStep[] = [
   {
     title: "Upload a video you own",
-    body: "Drop a recording into the upload box, or bring a video from your own connected YouTube channel.",
+    body: "Drop a recording into the upload box. The video stays in your browser; only its audio track leaves it, and only for transcription.",
     proof: "Up to 10 minutes and 500 MB in the browser.",
   },
   {
@@ -103,15 +106,6 @@ export const STEPS: MarketingStep[] = [
     proof: "720×1280 vertical output, MP4 where your browser supports it, otherwise WebM.",
   },
 ];
-
-export const DEMO_STYLES: DemoStyle[] = [
-  { name: "Bold word pop", caption: "Your hook, one word at a time." },
-  { name: "Clean lower third", caption: "Quiet captions that stay out of the way." },
-  { name: "Karaoke highlight", caption: "The spoken word lights up as it is said." },
-];
-
-export const DEMO_NOTE =
-  "Illustrated previews of caption styles. Real demo videos from the site owner will replace these drawings.";
 
 export const PLANS_NOTE =
   "Pricing is coming soon. The limits below are placeholders until the owner confirms them — no price is set, and no payment details are collected anywhere on this site.";

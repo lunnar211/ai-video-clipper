@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import HeroUploadBox from "@/components/HeroUploadBox";
 import { getPlans } from "@/lib/billing/plans";
 import {
-  DEMO_NOTE,
-  DEMO_STYLES,
   FEATURES,
   HERO,
   HOME_FAQS,
@@ -14,19 +12,20 @@ import {
 } from "@/lib/marketing";
 
 /**
- * Marketing homepage (ClipForge Phase 7).
+ * Marketing homepage (ClipForge Phase 7, revised Phase 10).
  *
- * Structure follows the reference site (hero → demo → value strip →
- * feature grid → 3 steps → plans comparison → FAQ) with 100% original
- * copy from lib/marketing.ts. The clipper tool itself moved to /create
- * and stays one click away from the hero.
+ * Structure: hero → value strip → see-it-work (the real tool) →
+ * feature grid → 3 steps → plans comparison → FAQ. The Phase 7
+ * illustrated demo section was deleted in Phase 10: no drawings, no
+ * fake clips, no placeholder videos anywhere on the site. The "See it
+ * work" section below reuses the real hero upload box — it opens the
+ * actual clipper, it does not simulate output.
  *
  * Honesty rules enforced here:
  * - no prices: plan prices are unset ("coming soon"), limits come from
  *   the billing config (placeholders until the owner confirms them)
  * - no competitor numbers: the comparison is across this site's own
  *   plans, because no competitor figure was firsthand-verified
- * - demo frames are labelled illustrations, not real creator clips
  * - gated states are stated (publishing off until app approval)
  */
 
@@ -97,32 +96,23 @@ export default function Home() {
         <p className="mt-1 text-on-primary/90">{VALUE_STRIP.body}</p>
       </section>
 
-      {/* Demo: illustrated caption-style previews */}
-      <section aria-labelledby="demo-title" className="space-y-4">
-        <h2 id="demo-title" className="text-2xl font-bold text-foreground">
-          See what captioned clips look like
+      {/* See it work: the real tool, not a preview (Phase 10). */}
+      <section aria-labelledby="see-it-work-title" className="space-y-4">
+        <h2 id="see-it-work-title" className="text-2xl font-bold text-foreground">
+          See it work — for real
         </h2>
-        <div className="flex flex-wrap gap-6">
-          {DEMO_STYLES.map((style) => (
-            <figure key={style.name} className="w-44">
-              <div
-                aria-hidden="true"
-                className="flex aspect-[9/16] flex-col justify-end rounded-2xl border border-border bg-slate-900 p-3"
-              >
-                <div className="h-1.5 w-full rounded bg-slate-700">
-                  <div className="h-1.5 w-2/3 rounded bg-accent" />
-                </div>
-                <p className="mt-3 text-center text-sm font-bold text-white">
-                  {style.caption}
-                </p>
-              </div>
-              <figcaption className="mt-2 text-center text-sm font-semibold text-foreground">
-                {style.name}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground">{DEMO_NOTE}</p>
+        <p className="text-muted-foreground">
+          No preview video, no staged result. The box below is the real
+          tool: choose a video you own and it opens in the clipper,
+          where transcription, moments, captions, and rendering happen
+          for real, on your own recording.
+        </p>
+        <HeroUploadBox id="see-it-work-upload" />
+        <p className="text-sm text-muted-foreground">
+          Real demo clips from the site owner will appear here once he
+          provides a video. Until then, this page shows no demo clips
+          at all — only the working tool.
+        </p>
       </section>
 
       {/* Feature grid */}

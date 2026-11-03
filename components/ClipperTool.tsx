@@ -31,6 +31,7 @@ import {
   shouldWatermark,
 } from "@/lib/usage/quota";
 import { takePendingUpload } from "@/lib/upload-pending";
+import { stageServerCopy } from "@/lib/storage/stage-upload";
 import type { Moment } from "@/lib/ai/highlights";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
@@ -141,6 +142,13 @@ export default function ClipperTool() {
   const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
   const [shareLinks, setShareLinks] = useState<Record<string, string>>({});
   const [zipBusy, setZipBusy] = useState(false);
+  // ClipForge Phase 10: optional server staging (opt-in only — the
+  // video never leaves the browser unless the user presses the button).
+  const [stageStatus, setStageStatus] = useState<
+    "idle" | "staging" | "staged" | "not-configured" | "error"
+  >("idle");
+  const [stageError, setStageError] = useState<string | null>(null);
+  const [stageProgress, setStageProgress] = useState(0);
   const previewRef = useRef<HTMLVideoElement | null>(null);
 
   const toggleRights = useCallback(
@@ -191,6 +199,9 @@ export default function ClipperTool() {
     setEditingClipId(null);
     setThumbnails({});
     setShareLinks({});
+    setStageStatus("idle");
+    setStageError(null);
+    setStageProgress(0);
     if (f.size > MAX_FILE_BYTES) {
       setError(
         "That file is over 500 MB. The browser cannot hold larger videos — use a shorter or more compressed recording.",
@@ -245,6 +256,34 @@ export default function ClipperTool() {
       setDuration(v.duration);
     }
   }, []);
+
+  // ClipForge Phase 10: optional server staging. Never runs on file
+  // pick — only when the user presses the button, because staging
+  // sends the full video to server storage (unlike the default
+  // browser flow, where only the audio track leaves for transcription).
+  const stageToServer = useCallback(async () => {
+    if (!file || stageStatus === "staging") return;
+    setStageError(null);
+    setStageProgress(0);
+    setStageStatus("staging");
+    try {
+      const result = await stageServerCopy(file, {
+        onProgress: (uploaded, total) =>
+          setStageProgress(total > 0 ? Math.round((uploaded / total) * 100) : 0),
+      });
+      if (result.staged) {
+        setStageProgress(100);
+        setStageStatus("staged");
+      } else {
+        setStageStatus("not-configured");
+      }
+    } catch (error) {
+      setStageError(
+        error instanceof Error ? error.message : "Server staging failed.",
+      );
+      setStageStatus("error");
+    }
+  }, [file, stageStatus]);
 
   const transcribe = useCallback(async () => {
     if (!file) return;
@@ -814,6 +853,48 @@ export default function ClipperTool() {
           </p>
         )}
       </div>
+
+      {/* Optional server copy (Phase 10): the first UI caller of the
+          chunked-upload client. Opt-in only — without it, the video
+          never leaves this browser. */}
+      {file && (
+        <div className="rounded-xl bg-card p-5 shadow-sm">
+          <h2 className="text-lg font-semibold">Server copy (optional)</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Save a server copy of this video for future publishing. This
+            uploads the full video to server storage in 8 MB chunks.
+            Without it, your video never leaves this browser.
+          </p>
+          <button
+            className="mt-3 inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
+            onClick={stageToServer}
+            disabled={stageStatus === "staging" || stageStatus === "staged"}
+          >
+            {stageStatus === "staging"
+              ? `Staging… ${stageProgress}%`
+              : stageStatus === "staged"
+                ? "Server copy saved"
+                : "Stage a server copy"}
+          </button>
+          {stageStatus === "staged" && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Server copy saved. Publishing and sharing can use it later;
+              clipping itself still runs in this browser.
+            </p>
+          )}
+          {stageStatus === "not-configured" && (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Server storage is not set up yet — your video stays in this
+              browser, and everything still works.
+            </p>
+          )}
+          {stageStatus === "error" && stageError && (
+            <p className="mt-2 text-sm text-red-800 dark:text-red-200">
+              Staging failed: {stageError} Nothing was reported as saved.
+            </p>
+          )}
+        </div>
+      )}
 
       {videoUrl && (
         <video

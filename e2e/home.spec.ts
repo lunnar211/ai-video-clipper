@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Marketing homepage specs (ClipForge Phase 7).
+ * Marketing homepage specs (ClipForge Phase 7, revised Phase 10: the
+ * illustrated demo section was deleted; the "See it work" section
+ * replaced it).
  * No accounts, no AI calls, no uploads to any server.
  */
 
@@ -13,7 +15,7 @@ test("homepage shows every marketing section", async ({ page }) => {
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "See what captioned clips look like" }),
+    page.getByRole("heading", { name: "See it work — for real" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
