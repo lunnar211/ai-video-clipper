@@ -29,16 +29,16 @@ export default function AdminEvents() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Live event feed</h1>
-      <p className="mt-2 text-sm text-slate-600">{status}</p>
+      <h1 className="text-xl font-bold text-foreground">Live event feed</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{status}</p>
       <ul className="mt-4 space-y-2">
         {frames.map((f, i) => (
-          <li key={i} className="rounded border p-3 text-sm">
-            <pre className="overflow-auto text-xs text-slate-700">{f}</pre>
+          <li key={i} className="rounded border border-border p-3 text-sm">
+            <pre className="overflow-auto text-xs text-muted-foreground">{f}</pre>
           </li>
         ))}
         {frames.length === 0 && (
-          <li className="text-sm text-slate-600">
+          <li className="text-sm text-muted-foreground">
             No events yet — entries appear here as they are recorded.
           </li>
         )}

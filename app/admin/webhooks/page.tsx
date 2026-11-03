@@ -108,23 +108,23 @@ export default function AdminWebhooks() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Webhooks</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-xl font-bold text-foreground">Webhooks</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
         HMAC-signed event payloads (X-ClipForge-Signature +
         X-ClipForge-Timestamp). Verification steps for receivers are in
         docs/PHASE5.md. Endpoints must use HTTPS.
       </p>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
       {secret && (
-        <p className="mt-4 rounded border border-red-300 bg-red-50 p-4 font-mono text-sm break-all">
+        <p className="mt-4 rounded border border-red-300 bg-red-50 p-4 font-mono text-sm break-all dark:border-red-800 dark:bg-red-950">
           Signing secret (copy now): {secret}
         </p>
       )}
-      <div className="mt-4 rounded border p-4">
+      <div className="mt-4 rounded border border-border p-4">
         <label className="block text-sm font-semibold" htmlFor="wh-url">
           Endpoint URL
         </label>
@@ -133,7 +133,7 @@ export default function AdminWebhooks() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://example.com/clipforge-hook"
-          className="mt-1 w-full rounded border px-2 py-1 text-sm"
+          className="mt-1 w-full rounded border border-border px-2 py-1 text-sm"
         />
         <p className="mt-3 text-sm font-semibold">Events</p>
         <div className="mt-1 flex flex-wrap gap-3">
@@ -157,23 +157,23 @@ export default function AdminWebhooks() {
         <button
           type="button"
           onClick={create}
-          className="mt-3 rounded bg-violet-700 px-3 py-1 text-sm text-white"
+          className="mt-3 rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Create endpoint
         </button>
       </div>
       <ul className="mt-4 space-y-3">
         {endpoints.map((endpoint) => (
-          <li key={endpoint.id} className="rounded border p-4">
+          <li key={endpoint.id} className="rounded border border-border p-4">
             <p className="font-mono text-sm break-all">{endpoint.url}</p>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               {endpoint.events.join(", ")} ·{" "}
               {endpoint.active ? "active" : "inactive"}
             </p>
             <button
               type="button"
               onClick={() => loadDeliveries(endpoint.id)}
-              className="mt-2 text-sm text-violet-700 underline"
+              className="mt-2 text-sm text-primary underline"
             >
               View deliveries
             </button>
@@ -185,7 +185,7 @@ export default function AdminWebhooks() {
           <h2 className="font-bold">Deliveries</h2>
           <ul className="mt-2 space-y-2">
             {deliveries.map((delivery) => (
-              <li key={delivery.id} className="rounded border p-3 text-sm">
+              <li key={delivery.id} className="rounded border border-border p-3 text-sm">
                 {delivery.event} · {delivery.status} · attempts{" "}
                 {delivery.attempts}
                 {delivery.last_error ? ` · ${delivery.last_error}` : ""}
@@ -193,7 +193,7 @@ export default function AdminWebhooks() {
                   <button
                     type="button"
                     onClick={() => replay(delivery.id)}
-                    className="ml-3 text-violet-700 underline"
+                    className="ml-3 text-primary underline"
                   >
                     Replay
                   </button>

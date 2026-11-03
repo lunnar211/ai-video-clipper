@@ -30,15 +30,15 @@ export default function AdminApiDocs() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">API docs</h1>
+      <h1 className="text-xl font-bold text-foreground">API docs</h1>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
       {spec && (
         <>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 text-sm text-muted-foreground">
             {spec.info?.title} v{spec.info?.version} —{" "}
             {spec.info?.description}
           </p>
@@ -49,17 +49,17 @@ export default function AdminApiDocs() {
           </p>
           <ul className="mt-4 space-y-3">
             {Object.entries(spec.paths ?? {}).map(([path, methods]) => (
-              <li key={path} className="rounded border p-4">
+              <li key={path} className="rounded border border-border p-4">
                 <p className="font-mono text-sm font-semibold">
                   GET /api/v1{path}
                 </p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   {Object.values(methods)[0]?.summary ?? ""}
                 </p>
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="mt-4 text-sm text-muted-foreground">
             Write endpoints (clip creation, rendering, publishing) are
             deliberately absent from v1: those operations carry
             rights-gate, quota, and cost side effects the console UI

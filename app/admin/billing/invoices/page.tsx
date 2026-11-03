@@ -38,7 +38,7 @@ export default function AdminBillingInvoices() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Invoices</h1>
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {invoices.map((inv) => (
           <li key={inv.id} className="border p-3">
@@ -46,17 +46,17 @@ export default function AdminBillingInvoices() {
               <span className="font-semibold">{inv.number}</span> —{" "}
               {inv.status} — {inv.total_minor} {inv.currency} (minor units)
             </p>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               User {inv.user_id} · {inv.provider} ·{" "}
               {new Date(inv.created_at).toLocaleString()}
             </p>
           </li>
         ))}
         {invoices.length === 0 && !message && (
-          <li className="text-gray-600">No invoices found.</li>
+          <li className="text-muted-foreground">No invoices found.</li>
         )}
       </ul>
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-4 text-sm text-muted-foreground">
         PDF download is a later slice — today each invoice is a stored
         record with line items, viewable on the user billing page.
       </p>

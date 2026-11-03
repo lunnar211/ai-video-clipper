@@ -117,7 +117,7 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
               type="url"
               inputMode="url"
               placeholder="https://commons.wikimedia.org/wiki/File:… or https://archive.org/details/…"
-              className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm"
+              className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
               value={link}
               onChange={(e) => setLink(e.target.value)}
               onKeyDown={(e) => {

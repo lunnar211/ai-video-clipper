@@ -61,20 +61,20 @@ export default function AdminAlerts() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Alerts</h1>
+      <h1 className="text-xl font-bold text-foreground">Alerts</h1>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
       {!data && !message && (
-        <p className="mt-4 text-sm text-slate-600">Loading…</p>
+        <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
       )}
       {data && (
         <>
           <section className="mt-4">
             <h2 className="font-semibold">Current anomalies</h2>
-            <ul className="text-sm text-slate-700">
+            <ul className="text-sm text-muted-foreground">
               {data.anomalies.map((a, i) => (
                 <li key={i}>
                   [{a.severity}] {a.rule}: {a.detail}
@@ -85,12 +85,12 @@ export default function AdminAlerts() {
           </section>
           <section className="mt-4">
             <h2 className="font-semibold">Thresholds</h2>
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-muted-foreground">
               Unusual volume: {data.thresholds.volumeThresholdPerHour}{" "}
               events/hour · Many accounts per IP:{" "}
               {data.thresholds.ipUsersThreshold} users
             </p>
-            <p className="text-sm text-slate-700">
+            <p className="text-sm text-muted-foreground">
               Channels configured — Slack:{" "}
               {data.channelsConfigured.slack ? "yes" : "no"} · Discord:{" "}
               {data.channelsConfigured.discord ? "yes" : "no"} · Email:{" "}
@@ -101,13 +101,13 @@ export default function AdminAlerts() {
             type="button"
             disabled={busy}
             onClick={dispatch}
-            className="mt-4 rounded bg-violet-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="mt-4 rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
           >
             {busy ? "Dispatching…" : "Evaluate + dispatch now"}
           </button>
           <section className="mt-4">
             <h2 className="font-semibold">Stored alerts</h2>
-            <ul className="text-sm text-slate-700">
+            <ul className="text-sm text-muted-foreground">
               {data.storedAlerts.map((a) => (
                 <li key={a.id}>
                   [{a.severity}] {a.rule}: {a.detail} (

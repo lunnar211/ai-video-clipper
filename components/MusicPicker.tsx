@@ -44,9 +44,9 @@ export default function MusicPicker({
   };
 
   return (
-    <div className="rounded-lg border p-3 text-sm">
+    <div className="rounded-lg border border-border p-3 text-sm">
       <p className="font-medium">Background music (optional)</p>
-      <p className="mt-1 text-slate-600">
+      <p className="mt-1 text-muted-foreground">
         This site ships no music. Pick a track from a royalty-free source
         below, or upload a track you already hold a licence for — it is
         mixed into renders at low volume. Never upload music you do not
@@ -60,7 +60,7 @@ export default function MusicPicker({
           {ROYALTY_FREE_SOURCES.map((s) => (
             <li key={s.name}>
               <strong>{s.name}</strong> — {s.note}{" "}
-              <span className="text-slate-500">{s.licenceNote}</span>
+              <span className="text-muted-foreground">{s.licenceNote}</span>
             </li>
           ))}
           {LICENSED_TRACKS.length > 0 && (
@@ -81,7 +81,7 @@ export default function MusicPicker({
         <label className="flex flex-col">
           Licence of the track you upload
           <select
-            className="mt-1 rounded border px-2 py-1"
+            className="mt-1 rounded border border-border px-2 py-1"
             value={licence}
             onChange={(e) => setLicence(e.target.value)}
           >
@@ -104,7 +104,7 @@ export default function MusicPicker({
         {selected && (
           <button
             type="button"
-            className="rounded border px-3 py-1.5"
+            className="rounded border border-border px-3 py-1.5"
             onClick={() => onSelect(null)}
           >
             Remove track
@@ -112,24 +112,24 @@ export default function MusicPicker({
         )}
       </div>
       {selected && (
-        <p className="mt-2 text-slate-700">
+        <p className="mt-2 text-muted-foreground">
           Selected: {selected.name} — licence: {selected.licence}
         </p>
       )}
       {attribution && (
-        <div className="mt-2 rounded-lg bg-slate-50 p-3">
-          <p className="text-slate-700">
+        <div className="mt-2 rounded-lg bg-muted p-3">
+          <p className="text-muted-foreground">
             Attribution required — include this credit with the clip:
           </p>
-          <p className="mt-1 font-medium text-slate-900">{attribution}</p>
+          <p className="mt-1 font-medium text-foreground">{attribution}</p>
           <button
             type="button"
-            className="mt-2 rounded border px-3 py-1.5"
+            className="mt-2 rounded border border-border px-3 py-1.5"
             onClick={copyAttribution}
           >
             {copied ? "Copied" : "Copy attribution"}
           </button>
-          <p className="mt-1 text-slate-500">
+          <p className="mt-1 text-muted-foreground">
             The same text is written into the ZIP export as
             ATTRIBUTION.txt.
           </p>

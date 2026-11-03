@@ -49,12 +49,12 @@ export default function AdminBanner() {
   };
 
   return (
-    <div className="border-b-4 border-amber-500 bg-amber-50 px-4 py-3">
-      <p className="text-sm font-semibold text-amber-900">
+    <div className="border-b-4 border-amber-500 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950">
+      <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
         Viewing as user {viewAs.targetUserId} — read-only. Reason:{" "}
         {viewAs.reason}
       </p>
-      <p className="text-xs text-amber-800">
+      <p className="text-xs text-amber-800 dark:text-amber-200">
         You cannot publish, bill, or change anything as this user. End
         view-as to return to your own admin session.
       </p>
@@ -62,7 +62,7 @@ export default function AdminBanner() {
         type="button"
         onClick={end}
         disabled={ending}
-        className="mt-2 rounded bg-amber-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+        className="mt-2 rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
       >
         {ending ? "Ending…" : "End view-as"}
       </button>

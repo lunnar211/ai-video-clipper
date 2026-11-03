@@ -186,7 +186,7 @@ export default function CcPasteImport({
           type="url"
           inputMode="url"
           placeholder="https://commons.wikimedia.org/wiki/File:… or https://archive.org/details/…"
-          className="min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm"
+          className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => {
@@ -230,7 +230,7 @@ export default function CcPasteImport({
               <span className="font-medium">Choose a file from this item</span>
               <select
                 id={`${idPrefix}-file`}
-                className="mt-1 block w-full max-w-full rounded border px-2 py-2 text-sm text-foreground"
+                className="mt-1 block w-full max-w-full rounded border border-border px-2 py-2 text-sm text-foreground"
                 value={selectedUrl ?? ""}
                 onChange={(e) => setSelectedUrl(e.target.value)}
               >

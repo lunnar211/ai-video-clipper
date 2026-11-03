@@ -138,7 +138,7 @@ function BillingInner() {
           Load
         </button>
       </div>
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       {limits && (
         <div className="mt-6 text-sm">
           <p>
@@ -146,7 +146,7 @@ function BillingInner() {
             {limits.placeholder ? " (limits are placeholders the owner sets before launch)" : ""}
           </p>
           {limits.limits && (
-            <p className="mt-1 text-gray-600">
+            <p className="mt-1 text-muted-foreground">
               {limits.limits.minutesPerMonth} minutes/month ·{" "}
               {limits.limits.projects === -1
                 ? "unlimited"
@@ -179,7 +179,7 @@ function BillingInner() {
           </li>
         ))}
         {subs.length === 0 && (
-          <li className="text-gray-600">No subscriptions found.</li>
+          <li className="text-muted-foreground">No subscriptions found.</li>
         )}
       </ul>
       <h2 className="mt-8 text-lg font-semibold">Invoices</h2>
@@ -188,7 +188,7 @@ function BillingInner() {
           <li key={inv.id} className="border p-3">
             <a
               href={`/billing/invoices/${inv.id}?userId=${encodeURIComponent(userId)}`}
-              className="text-violet-700 underline"
+              className="text-primary underline"
             >
               {inv.number}
             </a>{" "}
@@ -196,7 +196,7 @@ function BillingInner() {
           </li>
         ))}
         {invoices.length === 0 && (
-          <li className="text-gray-600">No invoices found.</li>
+          <li className="text-muted-foreground">No invoices found.</li>
         )}
       </ul>
       <h2 className="mt-8 text-lg font-semibold">Notices</h2>
@@ -207,11 +207,11 @@ function BillingInner() {
           </li>
         ))}
         {notifications.length === 0 && (
-          <li className="text-gray-600">No notices.</li>
+          <li className="text-muted-foreground">No notices.</li>
         )}
       </ul>
       <h2 className="mt-8 text-lg font-semibold">Referrals</h2>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         Share your code; commissions are records only until the owner
         picks a payout rail — no payout date or method is promised.
       </p>
@@ -223,7 +223,7 @@ function BillingInner() {
           Your code: <span className="font-semibold">{referralCode}</span>
         </p>
       )}
-      <p className="mt-8 text-sm text-gray-600">
+      <p className="mt-8 text-sm text-muted-foreground">
         Canceling a plan never deletes your projects or clips — cancel
         and delete are separate actions.
       </p>

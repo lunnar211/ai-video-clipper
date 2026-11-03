@@ -122,7 +122,7 @@ export default function ComplianceChecklist({
   return (
     <section className="rounded-xl border p-4 text-sm" aria-label="Pre-publish compliance checklist">
       <h3 className="font-semibold">Pre-publish compliance checklist</h3>
-      <p className="mt-1 text-slate-600">
+      <p className="mt-1 text-muted-foreground">
         Tick this list per post, not once for all posts. Publishing
         stays blocked until every item passes and the music policy
         allows it. Phase 3 will enforce this against real posts.
@@ -130,7 +130,7 @@ export default function ComplianceChecklist({
       <label className="mt-3 flex flex-col">
         Post (clip)
         <select
-          className="mt-1 rounded border px-2 py-1"
+          className="mt-1 rounded border border-border px-2 py-1"
           value={selected.id}
           onChange={(e) => setClipId(e.target.value)}
         >
@@ -141,7 +141,7 @@ export default function ComplianceChecklist({
           ))}
         </select>
       </label>
-      <p className="mt-2 text-slate-600">
+      <p className="mt-2 text-muted-foreground">
         Fingerprint state for this clip:{" "}
         {fingerprintScanned
           ? fingerprintDetected
@@ -160,7 +160,7 @@ export default function ComplianceChecklist({
             />
             <span>
               <strong>{item.label}</strong>
-              <span className="text-slate-500"> — {item.help}</span>
+              <span className="text-muted-foreground"> — {item.help}</span>
             </span>
           </label>
         ))}
@@ -182,7 +182,7 @@ export default function ComplianceChecklist({
       <label className="mt-3 flex flex-col">
         Licence proof for matched music (optional unless a match was found)
         <input
-          className="mt-1 rounded border px-2 py-1"
+          className="mt-1 rounded border border-border px-2 py-1"
           value={licenceProof}
           onChange={(e) => setLicenceProof(e.target.value)}
           placeholder="Licence name, order/invoice ref, or URL"
@@ -191,7 +191,7 @@ export default function ComplianceChecklist({
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
-          className="rounded-lg bg-violet-600 px-3 py-1.5 font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-3 py-1.5 font-medium text-on-primary disabled:opacity-50"
           onClick={runCheck}
           disabled={busy}
         >
@@ -199,7 +199,7 @@ export default function ComplianceChecklist({
         </button>
         <button
           type="button"
-          className="rounded-lg border px-3 py-1.5 disabled:opacity-50"
+          className="rounded-lg border border-border px-3 py-1.5 disabled:opacity-50"
           onClick={saveRecord}
           disabled={busy}
         >
@@ -207,7 +207,7 @@ export default function ComplianceChecklist({
         </button>
       </div>
       {verdict && (
-        <div className="mt-3 space-y-1 rounded-lg bg-slate-50 p-3">
+        <div className="mt-3 space-y-1 rounded-lg bg-muted p-3">
           <p className="font-medium">
             Verdict: {verdict.ready ? "ready to publish" : "not ready"} — policy:{" "}
             {verdict.policy.outcome}
@@ -219,7 +219,7 @@ export default function ComplianceChecklist({
           ))}
         </div>
       )}
-      {note && <p className="mt-2 text-slate-700">{note}</p>}
+      {note && <p className="mt-2 text-muted-foreground">{note}</p>}
     </section>
   );
 }

@@ -45,7 +45,11 @@ export default function RootLayout({
         />
         <header className="border-b border-border bg-card">
           <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-4 px-4 py-3">
-            <Link href="/" className="inline-flex min-h-[44px] items-center text-lg font-bold text-primary">
+            <Link href="/" className="inline-flex min-h-[44px] items-center text-lg font-bold tracking-tight text-primary">
+              <span
+                aria-hidden="true"
+                className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-accent"
+              />
               AI Video Clipper
             </Link>
             <Link href="/create" className="inline-flex min-h-[44px] items-center text-sm font-semibold text-foreground">
@@ -80,9 +84,10 @@ export default function RootLayout({
         <footer className="border-t border-border bg-card">
           <div className="mx-auto max-w-4xl px-4 py-6 text-sm text-muted-foreground">
             <p>
-              Clip your own videos only — you must own the rights to the
-              video you clip. This tool never downloads videos from any
-              platform.
+              Clip your own videos only — you must own the rights to
+              the video you clip, or use a link to a video with a
+              verified free licence. This tool never downloads videos
+              from YouTube, TikTok, or Instagram.
             </p>
             <p className="mt-2 flex flex-wrap gap-4">
               <a className="inline-flex min-h-[44px] items-center underline" href="/privacy">Privacy Policy</a>

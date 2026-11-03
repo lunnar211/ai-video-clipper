@@ -8,9 +8,9 @@ import {
 import { isPrivateIp, hostAllowed } from "@/lib/imports/ssrf";
 import {
   buildAttribution,
-  CC_ALLOWED_HOSTS,
   ccImportSchema,
 } from "@/lib/imports/index";
+import { CC_VERIFY_HOSTS } from "@/lib/imports/cc-verify";
 import { enqueueJob } from "@/lib/queue/index";
 import {
   signWorkerRequest,
@@ -79,9 +79,10 @@ describe("SSRF guard", () => {
     expect(isPrivateIp("93.184.216.34")).toBe(false);
   });
   it("matches wildcard hosts", () => {
-    expect(hostAllowed("images.pexels.com", CC_ALLOWED_HOSTS)).toBe(true);
-    expect(hostAllowed("evil-pexels.com", CC_ALLOWED_HOSTS)).toBe(false);
-    expect(hostAllowed("upload.wikimedia.org", CC_ALLOWED_HOSTS)).toBe(true);
+    expect(hostAllowed("commons.wikimedia.org", CC_VERIFY_HOSTS)).toBe(true);
+    expect(hostAllowed("upload.wikimedia.org", CC_VERIFY_HOSTS)).toBe(true);
+    expect(hostAllowed("evil-wikimedia.org", CC_VERIFY_HOSTS)).toBe(false);
+    expect(hostAllowed("archive.org", CC_VERIFY_HOSTS)).toBe(true);
   });
 });
 

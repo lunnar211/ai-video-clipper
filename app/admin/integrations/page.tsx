@@ -53,25 +53,25 @@ export default function AdminIntegrations() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Integrations</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-xl font-bold text-foreground">Integrations</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
         Pluggable integrations. Nothing here claims a live connection
         without credentials — see docs/PHASE5.md for what each entry
         needs. Named third-party integrations beyond this list wait on
         the backends list from the owner.
       </p>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
       <ul className="mt-4 space-y-3">
         {items.map((item) => (
-          <li key={item.id} className="rounded border p-4">
+          <li key={item.id} className="rounded border border-border p-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-semibold text-slate-900">{item.name}</p>
-                <p className="text-sm text-slate-600">{item.description}</p>
+                <p className="font-semibold text-foreground">{item.name}</p>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
                 <p className="mt-1 text-sm">
                   Status:{" "}
                   <span className="font-mono text-xs">{item.status}</span>
@@ -81,7 +81,7 @@ export default function AdminIntegrations() {
                 type="button"
                 disabled={item.status === "interface_only"}
                 onClick={() => toggle(item.id, !item.enabled)}
-                className="rounded bg-violet-700 px-3 py-1 text-sm text-white disabled:opacity-40"
+                className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-40"
               >
                 {item.status === "interface_only"
                   ? "No adapter yet"

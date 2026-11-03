@@ -2,7 +2,7 @@ export default function HowItWorks() {
   const steps = [
     {
       title: "1. Upload a video you own",
-      body: "Drop a video file (up to 10 minutes, 500 MB). It stays in your browser — the site has no upload of the raw video, and no video database.",
+      body: "Drop a video file (up to 10 minutes, 500 MB), or paste a link to a video with a verified free licence from Wikimedia Commons or Internet Archive. The file stays in your browser — the site has no upload of the raw video, and no video database.",
     },
     {
       title: "2. Transcribe (AI, optional)",
@@ -10,7 +10,7 @@ export default function HowItWorks() {
     },
     {
       title: "3. Pick moments (AI, optional)",
-      body: "The transcript text (never the video) goes to a text model — Groq first, then Gemini, then OpenRouter — which picks up to 5 moments of 30–60 seconds with a title and hashtags each.",
+      body: "The transcript text (never the video) goes to a text model — Groq first, then Gemini, then OpenRouter — which picks up to 5 moments of 15–60 seconds with a title and hashtags each.",
     },
     {
       title: "4. Or cut by hand (always works)",
@@ -23,11 +23,11 @@ export default function HowItWorks() {
   ];
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">How it works</h1>
+      <h1 className="text-3xl font-bold tracking-tight">How it works</h1>
       {steps.map((s) => (
-        <section key={s.title} className="rounded-xl bg-white p-5 shadow-sm">
+        <section key={s.title} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold">{s.title}</h2>
-          <p className="mt-1 text-slate-700">{s.body}</p>
+          <p className="mt-1 text-muted-foreground">{s.body}</p>
         </section>
       ))}
     </div>

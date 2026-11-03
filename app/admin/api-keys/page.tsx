@@ -76,23 +76,23 @@ export default function AdminApiKeys() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">API keys</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-xl font-bold text-foreground">API keys</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
         Keys for the public v1 API and MCP. Send the key as
         X-ClipForge-Key or Authorization: Bearer. Scopes: read (lists),
         write (MCP write tools, flag-gated), admin (implies both).
       </p>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
       {secret && (
-        <p className="mt-4 rounded border border-red-300 bg-red-50 p-4 font-mono text-sm break-all">
+        <p className="mt-4 rounded border border-red-300 bg-red-50 p-4 font-mono text-sm break-all dark:border-red-800 dark:bg-red-950">
           Secret (copy now): {secret}
         </p>
       )}
-      <div className="mt-4 rounded border p-4">
+      <div className="mt-4 rounded border border-border p-4">
         <label className="block text-sm font-semibold" htmlFor="key-name">
           Name
         </label>
@@ -101,7 +101,7 @@ export default function AdminApiKeys() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="CI runner"
-          className="mt-1 w-full rounded border px-2 py-1 text-sm"
+          className="mt-1 w-full rounded border border-border px-2 py-1 text-sm"
         />
         <p className="mt-3 text-sm font-semibold">Scopes</p>
         <div className="mt-1 flex gap-3">
@@ -125,17 +125,17 @@ export default function AdminApiKeys() {
         <button
           type="button"
           onClick={create}
-          className="mt-3 rounded bg-violet-700 px-3 py-1 text-sm text-white"
+          className="mt-3 rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Create key
         </button>
       </div>
       <ul className="mt-4 space-y-3">
         {keys.map((key) => (
-          <li key={key.id} className="rounded border p-4">
+          <li key={key.id} className="rounded border border-border p-4">
             <p className="font-semibold">{key.name}</p>
             <p className="font-mono text-sm">{key.key_prefix}…</p>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               {key.scopes.join(", ")} ·{" "}
               {key.revoked_at ? "revoked" : "active"}
               {key.last_used_at ? ` · last used ${key.last_used_at}` : ""}
@@ -144,7 +144,7 @@ export default function AdminApiKeys() {
               <button
                 type="button"
                 onClick={() => revoke(key.id)}
-                className="mt-2 text-sm text-red-700 underline"
+                className="mt-2 text-sm text-red-700 underline dark:text-red-300"
               >
                 Revoke
               </button>

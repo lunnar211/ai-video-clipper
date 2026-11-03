@@ -18,11 +18,11 @@
  *      Commons and Internet Archive links only (public APIs, no
  *      key), and the browser loads the file straight from the
  *      source host into the browser pipeline; attribution text is
- *      auto-built and travels into ZIP exports. The legacy
- *      POST /api/imports "cc-licensed" branch below still accepts a
- *      caller-declared licence for API compatibility — no UI uses
- *      it, and it must not be presented as verified (follow-up:
- *      route it through the same verification or remove it);
+ *      auto-built and travels into ZIP exports. Since Phase 12 the
+ *      legacy POST /api/imports "cc-licensed" branch runs that same
+ *      verification and ignores caller-declared licence facts — no
+ *      route in this codebase answers "validated" for an unverified
+ *      licence anymore;
  *  (d) direct file upload — the normal browser flow.
  *
  * There is NO arbitrary-URL import endpoint anywhere in this codebase.
@@ -42,16 +42,6 @@ export const IMPORT_SOURCES = [
 
 export type ImportSource = (typeof IMPORT_SOURCES)[number];
 
-/** Hosts a CC-licensed file URL may come from. */
-export const CC_ALLOWED_HOSTS = [
-  "upload.wikimedia.org",
-  "commons.wikimedia.org",
-  "*.pexels.com",
-  "images.pexels.com",
-  "cdn.pixabay.com",
-  "*.archive.org",
-];
-
 /** API hosts for connected-account imports (never arbitrary hosts). */
 export const CONNECTED_API_HOSTS: Record<string, string[]> = {
   "youtube-owned": ["*.googleapis.com"],
@@ -66,8 +56,11 @@ export type CcLicense = (typeof CC_LICENSES)[number];
 export const ccImportSchema = z.object({
   source: z.literal("cc-licensed"),
   url: z.string().url().max(2048),
-  license: z.enum(CC_LICENSES),
-  author: z.string().min(1).max(200),
+  // Accepted for API compatibility but IGNORED since Phase 12: the
+  // route verifies the licence itself and answers from verified
+  // facts only (see app/api/imports/route.ts).
+  license: z.enum(CC_LICENSES).optional(),
+  author: z.string().min(1).max(200).optional(),
   title: z.string().min(1).max(300).optional(),
 });
 

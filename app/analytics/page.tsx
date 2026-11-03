@@ -84,16 +84,16 @@ export default function Analytics() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-2xl font-bold">Analytics</h1>
-      <p className="mt-2 text-slate-600">
+      <p className="mt-2 text-muted-foreground">
         Views, likes, and comments synced from each platform&apos;s own
         API for your published posts. Numbers are only ever what the
         platform reported — nothing here is estimated or invented.
       </p>
       {message && (
-        <p className="mt-4 rounded bg-slate-100 p-3 text-sm">{message}</p>
+        <p className="mt-4 rounded bg-muted p-3 text-sm">{message}</p>
       )}
       <button
-        className="mt-4 rounded bg-violet-700 px-4 py-2 text-white disabled:opacity-50"
+        className="mt-4 rounded bg-primary px-4 py-2 text-on-primary disabled:opacity-50"
         disabled={busy}
         onClick={sync}
       >

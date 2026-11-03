@@ -44,8 +44,8 @@ export default function AdminDashboard() {
   if (message) {
     return (
       <main>
-        <h1 className="text-xl font-bold text-slate-900">Admin dashboard</h1>
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <h1 className="text-xl font-bold text-foreground">Admin dashboard</h1>
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message} To set up the admin console: apply
           supabase/clipper-schema.sql, then migrations 001, 002, 003 and
           004 in the Supabase SQL editor, set NEXT_PUBLIC_SUPABASE_URL
@@ -58,25 +58,25 @@ export default function AdminDashboard() {
   if (!metrics) {
     return (
       <main>
-        <h1 className="text-xl font-bold text-slate-900">Admin dashboard</h1>
-        <p className="mt-4 text-sm text-slate-600">Loading…</p>
+        <h1 className="text-xl font-bold text-foreground">Admin dashboard</h1>
+        <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
       </main>
     );
   }
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Admin dashboard</h1>
+      <h1 className="text-xl font-bold text-foreground">Admin dashboard</h1>
       <section className="mt-4">
         <h2 className="font-semibold">Activity</h2>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-muted-foreground">
           Daily active users: {metrics.dauMau.dau} · Monthly active
           users: {metrics.dauMau.mau}
         </p>
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Funnel</h2>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-muted-foreground">
           Signups: {metrics.funnel.signups} · First clip:{" "}
           {metrics.funnel.firstClip} · First publish:{" "}
           {metrics.funnel.firstPublish} · Paid: {metrics.funnel.paid}
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Queue health</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {Object.entries(metrics.queueHealth).map(([k, v]) => (
             <li key={k}>
               {k}: {v}
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">AI cost (recorded only)</h2>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-muted-foreground">
           {Object.keys(metrics.costByFeature).length === 0
             ? "No AI cost recorded yet (costs are recorded only when a provider reports them; nothing is estimated)."
             : Object.entries(metrics.costByFeature).map(([k, v]) => (
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Revenue</h2>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-muted-foreground">
           {Object.entries(metrics.revenue.planCounts).map(([k, v]) => (
             <span key={k}>
               {k}: {v}{" "}
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Publish success by platform</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {Object.entries(metrics.publishSuccessByPlatform).map(
             ([platform, s]) => (
               <li key={platform}>
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Top errors</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {metrics.topErrors.map((e) => (
             <li key={e.error}>
               {e.error} ×{e.count}
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Strikes</h2>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-muted-foreground">
           {Object.entries(metrics.strikeStats).map(([k, v]) => (
             <span key={k}>
               {k}: {v}{" "}
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Anomaly alerts</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {metrics.anomalies.map((a, i) => (
             <li key={i}>
               [{a.severity}] {a.rule}: {a.detail}

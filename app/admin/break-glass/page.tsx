@@ -65,14 +65,14 @@ export default function AdminBreakGlass() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Break-glass access</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-xl font-bold text-foreground">Break-glass access</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
         Admins never see video content, transcripts, or tokens by
         default. Break-glass is the only exception: one item, one
         reason, 15 minutes, single use, fully audited.
       </p>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
@@ -80,7 +80,7 @@ export default function AdminBreakGlass() {
         <select
           value={itemType}
           onChange={(e) => setItemType(e.target.value)}
-          className="rounded border px-2 py-1 text-sm"
+          className="rounded border border-border px-2 py-1 text-sm"
         >
           <option value="project">Project</option>
           <option value="clip">Clip</option>
@@ -89,19 +89,19 @@ export default function AdminBreakGlass() {
           value={itemId}
           onChange={(e) => setItemId(e.target.value)}
           placeholder="Item id"
-          className="flex-1 rounded border px-2 py-1 text-sm"
+          className="flex-1 rounded border border-border px-2 py-1 text-sm"
         />
         <input
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Reason (at least 10 characters)"
-          className="flex-1 rounded border px-2 py-1 text-sm"
+          className="flex-1 rounded border border-border px-2 py-1 text-sm"
         />
         <button
           type="button"
           disabled={busy || !itemId.trim() || reason.trim().length < 10}
           onClick={requestGrant}
-          className="rounded bg-violet-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+          className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
         >
           Request grant
         </button>
@@ -112,20 +112,20 @@ export default function AdminBreakGlass() {
             value={fetchId}
             onChange={(e) => setFetchId(e.target.value)}
             placeholder="Grant id"
-            className="flex-1 rounded border px-2 py-1 text-sm"
+            className="flex-1 rounded border border-border px-2 py-1 text-sm"
           />
           <button
             type="button"
             disabled={busy || !fetchId.trim()}
             onClick={fetchItem}
-            className="rounded bg-amber-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
           >
             Fetch item (consumes grant)
           </button>
         </div>
       )}
       {item && (
-        <pre className="mt-4 overflow-auto rounded border p-4 text-sm">
+        <pre className="mt-4 overflow-auto rounded border border-border p-4 text-sm">
           {JSON.stringify(item, null, 2)}
         </pre>
       )}

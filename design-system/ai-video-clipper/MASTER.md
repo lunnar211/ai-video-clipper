@@ -8,46 +8,77 @@
 
 **Project:** AI Video Clipper
 **Generated:** 2026-11-03 03:11:28
+**Revised:** 2026-11-03, ClipForge Phase 12 — "Ink + Record" identity
+(replaces the Phase 9 generic trust-blue + orange SaaS palette, which
+the owner judged as looking AI vibe-coded).
 **Category:** SaaS (General)
 
 ---
 
 ## Global Rules
 
-### Color Palette
+### Color Palette — "Ink + Record" (Phase 12)
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#2563EB` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#3B82F6` | `--color-secondary` |
-| On Secondary | `#000000` | `--color-on-secondary` |
-| Accent/CTA | `#EA580C` | `--color-accent` |
-| On Accent/CTA | `#000000` | `--color-on-accent` |
-| Background | `#F8FAFC` | `--color-background` |
-| Foreground | `#1E293B` | `--color-foreground` |
-| Card | `#FFFFFF` | `--color-card` |
-| Card Foreground | `#1E293B` | `--color-card-foreground` |
-| Muted | `#E9EFF8` | `--color-muted` |
-| Muted Foreground | `#475569` | `--color-muted-foreground` |
-| Border | `#E2E8F0` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| On Destructive | `#FFFFFF` | `--color-on-destructive` |
-| Ring | `#2563EB` | `--color-ring` |
+Deliberately monochrome-professional: near-black ink for brand
+surfaces and text, with ONE signal-red accent (the record dot) for
+calls to action. No gradients, no violet, no generic SaaS blue.
+Status hues (amber warnings, red errors, green success, sky info)
+are kept ONLY for status meaning, never for brand. All pairs clear
+4.5:1 (checked 2026-11-03): light ink #171717 on white 17.7:1,
+signal red #DC2626 on white 4.83:1, muted #525252 on paper 7.6:1;
+dark paper #FAFAFA on ink #171717 17.7:1, signal #F87171 on black
+7.9:1, muted #A3A3A3 on card #171717 7.0:1.
 
-**Color Notes:** Trust blue + orange CTA contrast [Accent adjusted from #F97316]
+| Role | Light | Dark | CSS Variable |
+|------|-------|------|--------------|
+| Primary (ink) | `#171717` | `#FAFAFA` | `--color-primary` |
+| On Primary | `#FFFFFF` | `#171717` | `--color-on-primary` |
+| Secondary | `#404040` | `#D4D4D4` | `--color-secondary` |
+| On Secondary | `#FFFFFF` | `#171717` | `--color-on-secondary` |
+| Accent/CTA (record red) | `#DC2626` | `#F87171` | `--color-accent` |
+| On Accent/CTA | `#FFFFFF` | `#000000` | `--color-on-accent` |
+| Background (paper) | `#FAFAF9` | `#0A0A0A` | `--color-background` |
+| Foreground | `#171717` | `#FAFAFA` | `--color-foreground` |
+| Card | `#FFFFFF` | `#171717` | `--color-card` |
+| Card Foreground | `#171717` | `#FAFAFA` | `--color-card-foreground` |
+| Muted | `#F5F5F4` | `#262626` | `--color-muted` |
+| Muted Foreground | `#525252` | `#A3A3A3` | `--color-muted-foreground` |
+| Border | `#E5E5E5` | `#262626` | `--color-border` |
+| Destructive | `#B91C1C` | `#F87171` | `--color-destructive` |
+| On Destructive | `#FFFFFF` | `#000000` | `--color-on-destructive` |
+| Ring | `#171717` | `#FAFAFA` | `--color-ring` |
+
+**Wordmark:** "AI Video Clipper" in bold ink with a small solid
+record-red dot (SVG-free CSS circle, `aria-hidden`) before the text
+— the product's own mark, not a platform logo. Never an emoji.
+
+**Color Notes:** Phase 9 palette (trust blue #2563EB + orange #EA580C)
+is SUPERSEDED — do not reintroduce it. Every color on a page must
+come from the token table above or a status hue; raw Tailwind color
+scales (`slate-*`, `violet-*`, `bg-white`) are banned outside the
+video workspace (true black preview) and caption overlays.
 
 ### Typography
 
 - **Heading Font:** Plus Jakarta Sans
 - **Body Font:** Plus Jakarta Sans
-- **Mood:** friendly, modern, saas, clean, approachable, professional
-- **Google Fonts:** [Plus Jakarta Sans + Plus Jakarta Sans](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap)
+- **Mood:** confident, plain, professional, product-led
+- **Google Fonts:** [Plus Jakarta Sans](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap)
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-```
+**Type scale (Phase 12 — hierarchy with real sizes):**
+
+| Role | Size / line-height | Usage |
+|------|--------------------|-------|
+| Display (hero) | 36px mobile, 48px desktop / 1.1, `tracking-tight` | Homepage H1 only |
+| H1 (tool/content) | 30px / 1.25, `tracking-tight` | Page titles |
+| H2 (section) | 24px / 1.25, `tracking-tight` | Section headings |
+| H3 (card) | 20px / 1.4 | Card / step titles |
+| Body | 16px / 1.6 | Main text |
+| Small | 14px / 1.5 | Secondary text, form hints |
+| Caption | 12px / 1.4 | Footnotes, timestamps |
+
+Body copy inside cards uses `leading-relaxed` (1.625) — dense
+paragraphs are a generic-template tell.
 
 ### Spacing Variables
 
@@ -56,31 +87,37 @@
 | `--space-xs` | `4px` / `0.25rem` | Tight gaps |
 | `--space-sm` | `8px` / `0.5rem` | Icon gaps, inline spacing |
 | `--space-md` | `16px` / `1rem` | Standard padding |
-| `--space-lg` | `24px` / `1.5rem` | Section padding |
+| `--space-lg` | `24px` / `1.5rem` | Section padding, card padding |
 | `--space-xl` | `32px` / `2rem` | Large gaps |
-| `--space-2xl` | `48px` / `3rem` | Section margins |
+| `--space-2xl` | `48px` / `3rem` | Section margins (homepage rhythm) |
 | `--space-3xl` | `64px` / `4rem` | Hero padding |
+
+**Rhythm rule:** homepage sections sit 48px apart (`space-y-12`);
+feature grid uses 20px gaps with 24px card padding; cards always
+carry a `border-border` edge, never a bare shadow on flat
+background. Section cards use `p-6`, not `p-5`.
 
 ### Shadow Depths
 
 | Level | Value | Usage |
 |-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
+| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Cards, sections |
+| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Upload box, dropdowns |
 | `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
 | `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
 
----
+Shadows stay subtle: cards use `shadow-sm` only. A heavy shadow on
+every card is a generic-template tell.
 
 ## Component Specs
 
 ### Buttons
 
 ```css
-/* Primary Button */
+/* Primary Button (ink) */
 .btn-primary {
-  background: #EA580C;
-  color: #000000;
+  background: #171717;
+  color: #FFFFFF;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -90,19 +127,49 @@
 
 .btn-primary:hover {
   opacity: 0.9;
-  transform: translateY(-1px);
 }
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #2563EB;
-  border: 2px solid #2563EB;
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+}
+
+/* CTA Button (record red) */
+.btn-cta {
+  background: #DC2626;
+  color: #FFFFFF;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
   transition: all 200ms ease;
   cursor: pointer;
+}
+
+.btn-cta:hover {
+  opacity: 0.9;
+}
+
+.btn-cta:active {
+  opacity: 0.8;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: transparent;
+  color: #171717;
+  border: 1px solid #E5E5E5;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #F5F5F4;
 }
 ```
 
@@ -110,17 +177,16 @@
 
 ```css
 .card {
-  background: #F8FAFC;
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 200ms ease;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  border-color: rgba(23, 23, 23, 0.4);
 }
 ```
 
@@ -129,16 +195,30 @@
 ```css
 .input {
   padding: 12px 16px;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #E5E5E5;
   border-radius: 8px;
   font-size: 16px;
+  background: #FAFAF9;
+  color: #171717;
   transition: border-color 200ms ease;
 }
 
-.input:focus {
-  border-color: #2563EB;
-  outline: none;
-  box-shadow: 0 0 0 3px #2563EB20;
+.input:focus-visible {
+  outline: 2px solid #171717;
+  outline-offset: 2px;
+}
+
+.input:disabled {
+  opacity: 0.5;
+}
+```
+
+### Tables
+
+```css
+/* Plan comparison: rows highlight on hover; no zebra striping. */
+.table-row:hover {
+  background: rgba(245, 245, 244, 0.6);
 }
 ```
 
@@ -164,13 +244,17 @@
 
 ## Style Guidelines
 
-**Style:** Glassmorphism
+**Style:** Ink + Record (monochrome professional with one signal accent)
 
-**Keywords:** Frosted glass, transparent, blurred background, layered, vibrant background, light source, depth, multi-layer
+**Keywords:** Editorial, confident, restrained, product-led, real tool
+first, no decoration that is not the product
 
-**Best For:** Modern SaaS, financial dashboards, high-end corporate, lifestyle apps, modal overlays, navigation
+**Best For:** Creator tools, video products, professional SaaS where
+the product interface is the proof
 
-**Key Effects:** Backdrop blur (10-20px), subtle border (1px solid rgba white 0.2), light reflection, Z-depth
+**Key Effects:** Thin token borders, subtle shadows, one accent color
+used sparingly (CTAs, record dot, selected range) — never large
+gradient washes or frosted-glass panels
 
 ### Page Pattern
 
@@ -186,6 +270,11 @@
 
 - ❌ Excessive animation
 - ❌ Dark mode by default
+- ❌ Generic gradients (oversized hero gradient washes)
+- ❌ Generic SaaS blue + orange palette (superseded Phase 9 look)
+- ❌ Raw Tailwind color scales in themed UI (`slate-*`, `violet-*`, `bg-white`) — use tokens
+- ❌ Borderless inputs (a `border` with no color renders as currentColor — always pair with `border-border`)
+- ❌ Stale copy: any claim the code no longer supports (link-box wording after the CC paste feature, 30–60s after the 15–60s windows) — re-verify every claim on every copy touch
 
 ### Additional Forbidden Patterns
 
@@ -212,3 +301,7 @@ Before delivering any UI code, verify:
 - [ ] Responsive: 375px, 768px, 1024px, 1440px
 - [ ] No content hidden behind fixed navbars
 - [ ] No horizontal scroll on mobile
+- [ ] Phase 12 identity: no gradients, no violet, no slate/gray color
+      scales in themed UI — tokens only
+- [ ] Every marketing claim re-verified against the code on any copy
+      touch (link scope, moment windows, limits, language count)

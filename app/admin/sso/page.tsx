@@ -73,9 +73,9 @@ export default function AdminSso() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Admin SSO</h1>
+      <h1 className="text-xl font-bold text-foreground">Admin SSO</h1>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
@@ -85,14 +85,14 @@ export default function AdminSso() {
             State: <span className="font-mono text-xs">{sso.state}</span>
             {sso.provider ? ` · provider: ${sso.provider}` : ""}
           </p>
-          <ul className="mt-2 list-disc pl-5 text-sm text-slate-600">
+          <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">
             {sso.setupSteps.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ul>
         </>
       )}
-      <div className="mt-4 rounded border p-4">
+      <div className="mt-4 rounded border border-border p-4">
         <label className="block text-sm font-semibold" htmlFor="sso-provider">
           Provider
         </label>
@@ -100,7 +100,7 @@ export default function AdminSso() {
           id="sso-provider"
           value={provider}
           onChange={(e) => setProvider(e.target.value)}
-          className="mt-1 rounded border px-2 py-1 text-sm"
+          className="mt-1 rounded border border-border px-2 py-1 text-sm"
         >
           <option value="oidc">OIDC</option>
           <option value="saml">SAML</option>
@@ -111,20 +111,20 @@ export default function AdminSso() {
               value={issuer}
               onChange={(e) => setIssuer(e.target.value)}
               placeholder="Issuer URL"
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded border border-border px-2 py-1 text-sm"
             />
             <input
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               placeholder="Client ID"
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded border border-border px-2 py-1 text-sm"
             />
             <input
               type="password"
               value={clientSecret}
               onChange={(e) => setClientSecret(e.target.value)}
               placeholder="Client secret (stored encrypted)"
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded border border-border px-2 py-1 text-sm"
             />
           </div>
         ) : (
@@ -133,26 +133,26 @@ export default function AdminSso() {
               value={entityId}
               onChange={(e) => setEntityId(e.target.value)}
               placeholder="Entity ID"
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded border border-border px-2 py-1 text-sm"
             />
             <input
               value={ssoUrl}
               onChange={(e) => setSsoUrl(e.target.value)}
               placeholder="SSO URL"
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded border border-border px-2 py-1 text-sm"
             />
             <textarea
               value={certificate}
               onChange={(e) => setCertificate(e.target.value)}
               placeholder="IdP certificate (stored encrypted)"
-              className="w-full rounded border px-2 py-1 text-sm"
+              className="w-full rounded border border-border px-2 py-1 text-sm"
             />
           </div>
         )}
         <button
           type="button"
           onClick={save}
-          className="mt-3 rounded bg-violet-700 px-3 py-1 text-sm text-white"
+          className="mt-3 rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Save SSO config
         </button>

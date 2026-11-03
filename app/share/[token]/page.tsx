@@ -67,14 +67,14 @@ export default function SharePage({
     <main className="mx-auto max-w-2xl space-y-4 p-6">
       <h1 className="text-2xl font-bold">Shared clip</h1>
       {error && (
-        <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+        <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
           {error}
         </p>
       )}
       {data && (
-        <div className="space-y-3 rounded-xl bg-white p-5 shadow-sm">
+        <div className="space-y-3 rounded-xl bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold">{data.title}</h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Clip {fmt(data.clipStart)} – {fmt(data.clipEnd)} · {data.views}{" "}
             view{data.views === 1 ? "" : "s"}
           </p>
@@ -85,13 +85,13 @@ export default function SharePage({
               className="w-full rounded-lg bg-black"
             />
           ) : (
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               No hosted video is attached to this share link — the clip
               was rendered in the creator&apos;s browser. The creator can
               attach a hosted video URL when creating the link.
             </p>
           )}
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             This link is public to anyone who has it. View counts come
             from the share database, never invented.
           </p>

@@ -13,7 +13,7 @@ export default function RightsConsent({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-start gap-2 rounded-xl border border-violet-300 bg-violet-50 p-4 text-sm">
+    <label className="flex items-start gap-2 rounded-xl border border-primary/40 bg-muted p-4 text-sm">
       <input
         type="checkbox"
         checked={checked}

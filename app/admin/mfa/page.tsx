@@ -89,13 +89,13 @@ export default function AdminMfa() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">MFA setup</h1>
+      <h1 className="text-xl font-bold text-foreground">MFA setup</h1>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
-      <p className="mt-4 text-sm text-slate-700">
+      <p className="mt-4 text-sm text-muted-foreground">
         Enrolled: {status ? (status.enrolled ? "yes" : "no") : "…"} ·
         Verified: {status ? (status.verified ? "yes" : "no") : "…"}
       </p>
@@ -103,16 +103,16 @@ export default function AdminMfa() {
         type="button"
         disabled={busy}
         onClick={setup}
-        className="mt-4 rounded bg-violet-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+        className="mt-4 rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
       >
         {status?.enrolled ? "Re-enrol (replaces the old secret)" : "Enrol TOTP"}
       </button>
       {secret && (
-        <div className="mt-4 rounded border p-4">
+        <div className="mt-4 rounded border border-border p-4">
           <p className="text-sm font-semibold">Your secret (shown once):</p>
           <p className="mt-1 break-all font-mono text-sm">{secret}</p>
           {otpauthUrl && (
-            <p className="mt-2 break-all text-xs text-slate-600">
+            <p className="mt-2 break-all text-xs text-muted-foreground">
               Authenticator URL: {otpauthUrl}
             </p>
           )}
@@ -124,13 +124,13 @@ export default function AdminMfa() {
           onChange={(e) => setCode(e.target.value)}
           placeholder="6-digit code"
           inputMode="numeric"
-          className="w-48 rounded border px-2 py-1 text-sm"
+          className="w-48 rounded border border-border px-2 py-1 text-sm"
         />
         <button
           type="button"
           disabled={busy || !/^\d{6}$/.test(code)}
           onClick={verify}
-          className="rounded bg-violet-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+          className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
         >
           Verify code
         </button>

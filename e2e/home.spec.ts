@@ -15,11 +15,11 @@ test("homepage shows every marketing section", async ({ page }) => {
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "See it work — for real" }),
+    page.getByRole("heading", { name: "See it work" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", {
-      name: "Everything the clipper does, in one place",
+      name: "What the clipper does",
     }),
   ).toBeVisible();
   await expect(
@@ -29,7 +29,7 @@ test("homepage shows every marketing section", async ({ page }) => {
     page.getByRole("heading", { name: "Plans at a glance" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Questions, answered honestly" }),
+    page.getByRole("heading", { name: "Common questions" }),
   ).toBeVisible();
 });
 
@@ -64,8 +64,12 @@ test("hero upload hands a file to the tool", async ({ page }) => {
 test("homepage states the no-downloader rule", async ({ page }) => {
   await page.goto("/");
   // Scoped to <main>: the footer repeats the same rule, and an
-  // unscoped match would hit both.
+  // unscoped match would hit both. Phase 12 wording names the
+  // refused platforms (the old "from any platform" phrasing went
+  // stale when CC-verified paste landed in Phase 11).
   await expect(
-    page.locator("main").getByText("never downloads videos from any platform"),
+    page
+      .locator("main")
+      .getByText("never downloads videos from YouTube, TikTok, or Instagram"),
   ).toBeVisible();
 });

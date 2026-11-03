@@ -1,7 +1,7 @@
 const faqs = [
   {
     q: "Can I paste a YouTube, TikTok or Instagram link and clip that video?",
-    a: "No. This tool has no link box and no downloader of any kind, on purpose. Clipping other people's videos gets channels struck for reused content and copyright. Only upload videos you recorded or own the rights to.",
+    a: "No. Links from those platforms are refused, and there is no downloader of any kind. Clipping other people's videos gets channels struck for reused content and copyright. You can upload a video you recorded or own the rights to, or paste a link to a video with a verified free licence from Wikimedia Commons or Internet Archive — the licence is checked before anything loads, and attribution is added automatically.",
   },
   {
     q: "What exactly leaves my browser?",
@@ -54,9 +54,9 @@ export default function Faq() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">FAQ</h1>
       {faqs.map((f) => (
-        <section key={f.q} className="rounded-xl bg-white p-5 shadow-sm">
+        <section key={f.q} className="rounded-xl bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold">{f.q}</h2>
-          <p className="mt-1 text-slate-700">{f.a}</p>
+          <p className="mt-1 text-muted-foreground">{f.a}</p>
         </section>
       ))}
     </div>

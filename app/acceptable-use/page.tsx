@@ -1,13 +1,13 @@
 export default function AcceptableUse() {
   return (
-    <div className="space-y-4 text-sm text-slate-700">
-      <h1 className="text-2xl font-bold text-slate-900">Acceptable Use</h1>
+    <div className="space-y-4 text-sm text-muted-foreground">
+      <h1 className="text-2xl font-bold text-foreground">Acceptable Use</h1>
       <p>
         AI Video Clipper is for clipping videos you own or hold a
         licence for. These rules protect other creators and keep the
         service running for everyone.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">You must not</h2>
+      <h2 className="text-lg font-semibold text-foreground">You must not</h2>
       <ul className="list-disc space-y-1 pl-5">
         <li>Clip videos or music you do not own or hold a licence for.</li>
         <li>
@@ -34,7 +34,7 @@ export default function AcceptableUse() {
           on the site.
         </li>
       </ul>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What happens on a violation
       </h2>
       <p>
@@ -46,7 +46,7 @@ export default function AcceptableUse() {
         serious or illegal abuse may be reported to the relevant
         platform or authority.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         No promises
       </h2>
       <p>

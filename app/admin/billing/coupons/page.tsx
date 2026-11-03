@@ -69,7 +69,7 @@ export default function AdminBillingCoupons() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Coupons</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         A coupon code must also exist in the MoR dashboard for the
         price cut to apply at checkout — the app validates the code,
         the MoR cuts the price. If the MoR has no such code, checkout
@@ -100,7 +100,7 @@ export default function AdminBillingCoupons() {
           Create
         </button>
       </div>
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {coupons.map((coupon) => (
           <li key={coupon.id} className="border p-3">
@@ -109,7 +109,7 @@ export default function AdminBillingCoupons() {
               {coupon.kind} {coupon.value}
               {coupon.plan ? ` · plan ${coupon.plan}` : ""}
             </p>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Used {coupon.uses_count}
               {coupon.max_uses !== null ? ` / ${coupon.max_uses}` : ""} ·
               per-user-once {coupon.per_user_once ? "yes" : "no"}
@@ -118,7 +118,7 @@ export default function AdminBillingCoupons() {
           </li>
         ))}
         {coupons.length === 0 && !message && (
-          <li className="text-gray-600">No coupons found.</li>
+          <li className="text-muted-foreground">No coupons found.</li>
         )}
       </ul>
     </div>

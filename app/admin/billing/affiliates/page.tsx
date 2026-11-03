@@ -48,12 +48,12 @@ export default function AdminBillingAffiliates() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Affiliates</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         Commissions are records of what a referrer earned. Payouts are
         manual — no payout rail is wired, and nothing here promises a
         payout date or method.
       </p>
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <h2 className="mt-6 text-lg font-semibold">Referrals</h2>
       <ul className="mt-2 space-y-2 text-sm">
         {referrals.map((r) => (
@@ -62,7 +62,7 @@ export default function AdminBillingAffiliates() {
           </li>
         ))}
         {referrals.length === 0 && !message && (
-          <li className="text-gray-600">No referrals found.</li>
+          <li className="text-muted-foreground">No referrals found.</li>
         )}
       </ul>
       <h2 className="mt-6 text-lg font-semibold">Commissions</h2>
@@ -74,7 +74,7 @@ export default function AdminBillingAffiliates() {
           </li>
         ))}
         {commissions.length === 0 && !message && (
-          <li className="text-gray-600">No commissions found.</li>
+          <li className="text-muted-foreground">No commissions found.</li>
         )}
       </ul>
     </div>

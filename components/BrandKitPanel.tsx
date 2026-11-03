@@ -23,9 +23,9 @@ export default function BrandKitPanel(props: {
 }) {
   const { kit, onChange } = props;
   return (
-    <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm">
+    <section className="space-y-3 rounded-xl bg-card p-5 shadow-sm">
       <h2 className="text-lg font-semibold">Brand kit (optional)</h2>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-muted-foreground">
         Your logo, colors and fonts are drawn onto rendered clips. The
         logo stays in this browser session only; colors, fonts and
         watermark text are remembered on this device.
@@ -58,7 +58,7 @@ export default function BrandKitPanel(props: {
         <label className="flex flex-col">
           Caption font
           <select
-            className="mt-1 rounded border px-2 py-1"
+            className="mt-1 rounded border border-border px-2 py-1"
             value={kit.fontFamily}
             onChange={(e) => onChange({ ...kit, fontFamily: e.target.value })}
           >
@@ -72,7 +72,7 @@ export default function BrandKitPanel(props: {
         <label className="flex flex-col">
           Watermark text (your brand, optional)
           <input
-            className="mt-1 rounded border px-2 py-1"
+            className="mt-1 rounded border border-border px-2 py-1"
             value={kit.watermarkText}
             onChange={(e) => onChange({ ...kit, watermarkText: e.target.value })}
           />

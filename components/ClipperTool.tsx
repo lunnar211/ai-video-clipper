@@ -826,15 +826,15 @@ export default function ClipperTool() {
     <div className="space-y-6">
       <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
         <strong>Clip your own videos only</strong> — you must own the rights
-        to the video you clip. This tool never downloads videos from
-        YouTube, TikTok, Instagram, or any platform: there is no link box,
-        and your video never leaves this browser except for the audio sent
-        for transcription (see FAQ).
+        to the video you clip, or use a link to a video with a verified
+        free licence. This tool never downloads videos from YouTube,
+        TikTok, or Instagram, and your video never leaves this browser
+        except for the audio sent for transcription (see FAQ).
       </div>
 
       <RightsConsent checked={rightsOk} onChange={toggleRights} />
       {rightsOk && declarationState === "server" && (
-        <p className="text-sm text-emerald-800">
+        <p className="text-sm text-emerald-800 dark:text-emerald-300">
           Declaration stored server-side as an immutable record for
           this project.
         </p>
@@ -847,7 +847,7 @@ export default function ClipperTool() {
         </p>
       )}
       {!rightsOk && (
-        <p className="text-sm text-amber-800">
+        <p className="text-sm text-amber-800 dark:text-amber-200">
           Transcription and rendering are blocked until you confirm the
           rights checkbox above.
         </p>
@@ -923,7 +923,7 @@ export default function ClipperTool() {
             Without it, your video never leaves this browser.
           </p>
           <button
-            className="mt-3 inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
+            className="mt-3 inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 active:opacity-80 disabled:opacity-50"
             onClick={stageToServer}
             disabled={stageStatus === "staging" || stageStatus === "staged"}
           >
@@ -985,14 +985,14 @@ export default function ClipperTool() {
           </p>
           <div className="flex flex-wrap gap-3">
             <button
-              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
+              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 active:opacity-80 disabled:opacity-50"
               onClick={transcribe}
               disabled={transcribing || !rightsOk}
             >
               {transcribing ? "Transcribing…" : "Transcribe with AI"}
             </button>
             <button
-              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
+              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 active:opacity-80 disabled:opacity-50"
               onClick={findHighlights}
               disabled={finding || !transcript}
             >
@@ -1001,7 +1001,7 @@ export default function ClipperTool() {
             <label className="flex items-center gap-2 text-sm">
               Clip length target
               <select
-                className="rounded border px-2 py-1"
+                className="rounded border border-border px-2 py-1"
                 value={targetSeconds ?? ""}
                 onChange={(e) =>
                   setTargetSeconds(e.target.value ? Number(e.target.value) : null)
@@ -1020,7 +1020,7 @@ export default function ClipperTool() {
                 <label className="flex flex-col">
                   Find clips about…
                   <input
-                    className="mt-1 rounded border px-2 py-1"
+                    className="mt-1 rounded border border-border bg-background px-2 py-1"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="e.g. pasta sauce"
@@ -1036,7 +1036,7 @@ export default function ClipperTool() {
                 <label className="flex items-center gap-2">
                   Translate captions to
                   <select
-                    className="rounded border px-2 py-1"
+                    className="rounded border border-border px-2 py-1"
                     value={translateLang}
                     onChange={(e) => setTranslateLang(e.target.value)}
                   >
@@ -1056,7 +1056,7 @@ export default function ClipperTool() {
                 </button>
                 {translatedTranscript && (
                   <button
-                    className="rounded border px-3 py-2"
+                    className="rounded border border-border px-3 py-2"
                     onClick={() => setTranslatedTranscript(null)}
                   >
                     Use original captions
@@ -1066,12 +1066,12 @@ export default function ClipperTool() {
               {searchResults.length > 0 && (
                 <ul className="space-y-2 text-sm">
                   {searchResults.map((w, i) => (
-                    <li key={i} className="flex items-center justify-between gap-3 rounded border p-2">
+                    <li key={i} className="flex items-center justify-between gap-3 rounded border border-border p-2">
                       <span>
                         {fmtTime(w.start)} – {fmtTime(w.end)} · {w.title}
                       </span>
                       <button
-                        className="rounded border px-2 py-1"
+                        className="rounded border border-border px-2 py-1"
                         onClick={() =>
                           setClips((prev) => [
                             ...prev,
@@ -1123,7 +1123,7 @@ export default function ClipperTool() {
             <label className="flex flex-col">
               Start (seconds)
               <input
-                className="mt-1 rounded border px-2 py-1"
+                className="mt-1 rounded border border-border bg-background px-2 py-1"
                 inputMode="decimal"
                 value={manualStart}
                 onChange={(e) => setManualStart(e.target.value)}
@@ -1133,7 +1133,7 @@ export default function ClipperTool() {
             <label className="flex flex-col">
               End (seconds)
               <input
-                className="mt-1 rounded border px-2 py-1"
+                className="mt-1 rounded border border-border bg-background px-2 py-1"
                 inputMode="decimal"
                 value={manualEnd}
                 onChange={(e) => setManualEnd(e.target.value)}
@@ -1143,7 +1143,7 @@ export default function ClipperTool() {
             <label className="flex flex-col">
               Title (optional)
               <input
-                className="mt-1 rounded border px-2 py-1"
+                className="mt-1 rounded border border-border bg-background px-2 py-1"
                 value={manualTitle}
                 onChange={(e) => setManualTitle(e.target.value)}
               />
@@ -1151,7 +1151,7 @@ export default function ClipperTool() {
             <label className="flex flex-col">
               Caption shown on the clip (optional)
               <input
-                className="mt-1 rounded border px-2 py-1"
+                className="mt-1 rounded border border-border bg-background px-2 py-1"
                 value={manualCaption}
                 onChange={(e) => setManualCaption(e.target.value)}
               />
@@ -1181,7 +1181,7 @@ export default function ClipperTool() {
             <label className="flex items-center gap-2">
               Crop
               <select
-                className="rounded border px-2 py-1"
+                className="rounded border border-border px-2 py-1"
                 value={cropMode}
                 onChange={(e) => setCropMode(e.target.value as CropMode)}
               >
@@ -1228,7 +1228,7 @@ export default function ClipperTool() {
             {clips.map((clip) => {
               const out = rendered[clip.id];
               return (
-                <li key={clip.id} className="rounded-lg border p-4">
+                <li key={clip.id} className="rounded-lg border border-border p-4">
                   <p className="font-medium">{clip.title}</p>
                   <p className="text-sm text-muted-foreground">
                     {fmtTime(clip.start)} – {fmtTime(clip.end)} ·{" "}
@@ -1237,7 +1237,7 @@ export default function ClipperTool() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2 text-sm">
                     <button
-                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-3 py-1.5 font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
+                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-3 py-1.5 font-medium text-on-primary transition-colors duration-200 hover:opacity-90 active:opacity-80 disabled:opacity-50"
                       onClick={() => renderOne(clip)}
                       disabled={renderingId !== null || !rightsOk}
                     >
@@ -1355,7 +1355,7 @@ export default function ClipperTool() {
                     </p>
                   )}
                   {musicCheck[clip.id]?.status === "detected" && (
-                    <div className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+                    <div className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
                       <strong>Copyrighted music detected in this clip.</strong>{" "}
                       {musicCheck[clip.id].match
                         ? `${musicCheck[clip.id].match!.artist} — ${musicCheck[clip.id].match!.title}. `
@@ -1380,7 +1380,7 @@ export default function ClipperTool() {
                     </div>
                   )}
                   {musicCheck[clip.id]?.status === "clear" && (
-                    <p className="mt-3 text-sm text-emerald-800">
+                    <p className="mt-3 text-sm text-emerald-800 dark:text-emerald-300">
                       Music check: no known recorded music detected in this
                       clip&apos;s sample.
                     </p>
@@ -1406,7 +1406,7 @@ export default function ClipperTool() {
                         Download clip ({out.mimeType})
                       </a>
                       {!out.voiceoverOk && (
-                        <span className="ml-2 text-amber-700">
+                        <span className="ml-2 text-amber-700 dark:text-amber-300">
                           Voiceover did not play — clip has original audio only.
                         </span>
                       )}

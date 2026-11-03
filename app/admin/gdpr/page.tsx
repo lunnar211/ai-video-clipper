@@ -64,19 +64,19 @@ export default function AdminGdpr() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">GDPR export &amp; deletion</h1>
-      <p className="mt-2 text-sm text-slate-600">
+      <h1 className="text-xl font-bold text-foreground">GDPR export &amp; deletion</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
         Export downloads everything held about a user (safe columns
         only — never tokens, hashes, secrets, transcripts, or video).
         Deletion is permanent and cannot be undone. Audit rows and
         strike records are deliberately retained — see docs/PHASE5.md.
       </p>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
-      <div className="mt-4 rounded border p-4">
+      <div className="mt-4 rounded border border-border p-4">
         <label className="block text-sm font-semibold" htmlFor="gdpr-user">
           User ID
         </label>
@@ -84,13 +84,13 @@ export default function AdminGdpr() {
           id="gdpr-user"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          className="mt-1 w-full rounded border px-2 py-1 text-sm"
+          className="mt-1 w-full rounded border border-border px-2 py-1 text-sm"
         />
         <div className="mt-3 flex gap-3">
           <button
             type="button"
             onClick={runExport}
-            className="rounded bg-violet-700 px-3 py-1 text-sm text-white"
+            className="rounded bg-primary px-3 py-1 text-sm text-on-primary"
           >
             Export archive
           </button>
@@ -112,7 +112,7 @@ export default function AdminGdpr() {
         </div>
       </div>
       {result && (
-        <pre className="mt-4 overflow-auto rounded border p-4 text-xs">
+        <pre className="mt-4 overflow-auto rounded border border-border p-4 text-xs">
           {result}
         </pre>
       )}

@@ -51,13 +51,33 @@ describe("marketing copy honesty", () => {
 
   it("never promises a paste-any-link flow", () => {
     for (const text of allCopy()) {
-      expect(text.toLowerCase()).not.toContain("paste a link");
       expect(text.toLowerCase()).not.toContain("paste any link");
+      // "Paste a link" may appear ONLY with the CC scope stated in
+      // the same text (Phase 11 feature, Phase 12 copy fix): the
+      // two verified sources and the word "verified" must be there,
+      // so the phrase can never read as paste-any-link.
+      if (text.toLowerCase().includes("paste a link")) {
+        expect(text).toContain("Wikimedia Commons");
+        expect(text).toContain("Internet Archive");
+        expect(text.toLowerCase()).toContain("verified");
+      }
     }
   });
 
   it("states the no-downloader rule on the hero", () => {
     expect(HERO.rightsNote).toContain("never downloads videos");
+    expect(HERO.rightsNote).toContain("verified free licence");
+  });
+
+  it("homepage FAQ states the CC paste scope and the platform refusal", () => {
+    const faq = HOME_FAQS.find((f) =>
+      f.q.toLowerCase().includes("youtube"),
+    );
+    expect(faq).toBeDefined();
+    expect(faq!.a).toContain("Wikimedia Commons");
+    expect(faq!.a).toContain("Internet Archive");
+    expect(faq!.a.toLowerCase()).toContain("refused");
+    expect(faq!.a.toLowerCase()).not.toContain("no link box");
   });
 });
 

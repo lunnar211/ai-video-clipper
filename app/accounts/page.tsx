@@ -155,31 +155,31 @@ function AccountsInner() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-2xl font-bold">Connected accounts</h1>
-      <p className="mt-2 text-slate-600">
+      <p className="mt-2 text-muted-foreground">
         Connect the social accounts you own. Each platform stays off
         until its feature flag is on and its app review is approved —
         the status below says exactly where each one stands. Tokens
         are encrypted on the server and never shown here.
       </p>
       {notice && (
-        <p className="mt-4 rounded bg-slate-100 p-3 text-sm">{notice}</p>
+        <p className="mt-4 rounded bg-muted p-3 text-sm">{notice}</p>
       )}
       {connectedParam && (
-        <p className="mt-4 rounded bg-slate-100 p-3 text-sm">
+        <p className="mt-4 rounded bg-muted p-3 text-sm">
           Connected to {connectedParam}.
         </p>
       )}
       {errorParam && (
-        <p className="mt-4 rounded bg-slate-100 p-3 text-sm">
+        <p className="mt-4 rounded bg-muted p-3 text-sm">
           Connection failed: {errorParam}.
         </p>
       )}
       <section className="mt-6 grid gap-4">
         {platforms.map((platform) => (
-          <article key={platform.id} className="rounded border p-4">
+          <article key={platform.id} className="rounded border border-border p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="font-semibold">{platform.label}</h2>
-              <span className="rounded bg-slate-100 px-2 py-1 text-xs">
+              <span className="rounded bg-muted px-2 py-1 text-xs">
                 {platform.status === "live"
                   ? "Live"
                   : platform.status === "pending_approval"
@@ -187,11 +187,11 @@ function AccountsInner() {
                     : "Disabled"}
               </span>
             </div>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-muted-foreground">
               Scopes requested: {platform.scopes.join(", ")}
             </p>
             <button
-              className="mt-3 rounded bg-violet-700 px-4 py-2 text-white disabled:opacity-50"
+              className="mt-3 rounded bg-primary px-4 py-2 text-on-primary disabled:opacity-50"
               disabled={busy || platform.status === "disabled"}
               onClick={() => connect(platform.id)}
             >
@@ -205,15 +205,15 @@ function AccountsInner() {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Your accounts</h2>
         {accounts.length === 0 ? (
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-muted-foreground">
             No accounts connected yet.
           </p>
         ) : (
           <ul className="mt-3 grid gap-3">
             {accounts.map((account) => (
-              <li key={account.id} className="rounded border p-4">
+              <li key={account.id} className="rounded border border-border p-4">
                 <p className="font-medium">{account.account_label}</p>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   {account.platform} · {account.status}
                   {account.token_expires_at
                     ? ` · token expires ${new Date(account.token_expires_at).toLocaleString()}`
@@ -221,14 +221,14 @@ function AccountsInner() {
                 </p>
                 <div className="mt-2 flex gap-2">
                   <button
-                    className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+                    className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50"
                     disabled={busy}
                     onClick={() => refresh(account.id)}
                   >
                     Refresh tokens
                   </button>
                   <button
-                    className="rounded border px-3 py-1 text-sm disabled:opacity-50"
+                    className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50"
                     disabled={busy}
                     onClick={() => disconnect(account.id)}
                   >

@@ -187,14 +187,14 @@ export default function Publish() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       <h1 className="text-2xl font-bold">Publish</h1>
-      <p className="mt-2 text-slate-600">
+      <p className="mt-2 text-muted-foreground">
         Compose a post, schedule it, and publish it to every linked
         account. Publishing re-checks the compliance checklist, the
         publishing-pause flag, the fingerprint verdict, and each
         platform&apos;s limits before any upload is attempted.
       </p>
       {result && (
-        <p className="mt-4 whitespace-pre-line rounded bg-slate-100 p-3 text-sm">
+        <p className="mt-4 whitespace-pre-line rounded bg-muted p-3 text-sm">
           {result}
         </p>
       )}
@@ -202,7 +202,7 @@ export default function Publish() {
         <label className="grid gap-1 text-sm">
           Clip ref
           <input
-            className="rounded border px-3 py-2"
+            className="rounded border border-border px-3 py-2"
             value={form.clipRef}
             onChange={(e) => set("clipRef", e.target.value)}
             placeholder="clip-1"
@@ -211,7 +211,7 @@ export default function Publish() {
         <label className="grid gap-1 text-sm">
           Project id
           <input
-            className="rounded border px-3 py-2"
+            className="rounded border border-border px-3 py-2"
             value={form.projectId}
             onChange={(e) => set("projectId", e.target.value)}
             placeholder="project-1"
@@ -220,7 +220,7 @@ export default function Publish() {
         <label className="grid gap-1 text-sm">
           Staged media key (from resumable upload; empty = browser clip)
           <input
-            className="rounded border px-3 py-2"
+            className="rounded border border-border px-3 py-2"
             value={form.mediaKey}
             onChange={(e) => set("mediaKey", e.target.value)}
             placeholder="tmp/publish/… or uploads/…"
@@ -229,7 +229,7 @@ export default function Publish() {
         <label className="grid gap-1 text-sm">
           Checklist post ref (from the per-post compliance checklist)
           <input
-            className="rounded border px-3 py-2"
+            className="rounded border border-border px-3 py-2"
             value={form.checklistPostRef}
             onChange={(e) => set("checklistPostRef", e.target.value)}
             placeholder="draft id used for the checklist"
@@ -239,7 +239,7 @@ export default function Publish() {
           <label className="grid gap-1 text-sm">
             Schedule at (empty = draft)
             <input
-              className="rounded border px-3 py-2"
+              className="rounded border border-border px-3 py-2"
               type="datetime-local"
               value={form.scheduleAt}
               onChange={(e) => set("scheduleAt", e.target.value)}
@@ -248,7 +248,7 @@ export default function Publish() {
           <label className="grid gap-1 text-sm">
             Timezone
             <input
-              className="rounded border px-3 py-2"
+              className="rounded border border-border px-3 py-2"
               value={form.timezone}
               onChange={(e) => set("timezone", e.target.value)}
             />
@@ -258,7 +258,7 @@ export default function Publish() {
           <label className="grid gap-1 text-sm">
             Duration (sec)
             <input
-              className="rounded border px-3 py-2"
+              className="rounded border border-border px-3 py-2"
               value={form.durationSec}
               onChange={(e) => set("durationSec", e.target.value)}
             />
@@ -266,7 +266,7 @@ export default function Publish() {
           <label className="grid gap-1 text-sm">
             Size (MB)
             <input
-              className="rounded border px-3 py-2"
+              className="rounded border border-border px-3 py-2"
               value={form.sizeMB}
               onChange={(e) => set("sizeMB", e.target.value)}
             />
@@ -274,7 +274,7 @@ export default function Publish() {
           <label className="grid gap-1 text-sm">
             Aspect
             <input
-              className="rounded border px-3 py-2"
+              className="rounded border border-border px-3 py-2"
               value={form.aspect}
               onChange={(e) => set("aspect", e.target.value)}
             />
@@ -300,12 +300,12 @@ export default function Publish() {
       <section className="mt-6">
         <h2 className="font-semibold">Targets</h2>
         {targets.map((target, i) => (
-          <div key={i} className="mt-3 grid gap-2 rounded border p-3">
+          <div key={i} className="mt-3 grid gap-2 rounded border border-border p-3">
             <div className="grid grid-cols-2 gap-2">
               <label className="grid gap-1 text-sm">
                 Platform
                 <select
-                  className="rounded border px-2 py-2"
+                  className="rounded border border-border px-2 py-2"
                   value={target.platform}
                   onChange={(e) => {
                     const next = [...targets];
@@ -330,7 +330,7 @@ export default function Publish() {
               <label className="grid gap-1 text-sm">
                 Account id (from Connected accounts)
                 <input
-                  className="rounded border px-2 py-2"
+                  className="rounded border border-border px-2 py-2"
                   value={target.accountId}
                   onChange={(e) => {
                     const next = [...targets];
@@ -343,7 +343,7 @@ export default function Publish() {
             <label className="grid gap-1 text-sm">
               Title (YouTube)
               <input
-                className="rounded border px-2 py-2"
+                className="rounded border border-border px-2 py-2"
                 value={target.title}
                 onChange={(e) => {
                   const next = [...targets];
@@ -355,7 +355,7 @@ export default function Publish() {
             <label className="grid gap-1 text-sm">
               Description / caption
               <textarea
-                className="rounded border px-2 py-2"
+                className="rounded border border-border px-2 py-2"
                 value={target.description}
                 onChange={(e) => {
                   const next = [...targets];
@@ -367,7 +367,7 @@ export default function Publish() {
             <label className="grid gap-1 text-sm">
               Tags (comma-separated)
               <input
-                className="rounded border px-2 py-2"
+                className="rounded border border-border px-2 py-2"
                 value={target.tags}
                 onChange={(e) => {
                   const next = [...targets];
@@ -379,7 +379,7 @@ export default function Publish() {
           </div>
         ))}
         <button
-          className="mt-3 rounded border px-3 py-1 text-sm"
+          className="mt-3 rounded border border-border px-3 py-1 text-sm"
           onClick={() => setTargets([...targets, { ...EMPTY_TARGET }])}
         >
           Add target
@@ -387,14 +387,14 @@ export default function Publish() {
       </section>
       <div className="mt-6 flex gap-2">
         <button
-          className="rounded bg-violet-700 px-4 py-2 text-white disabled:opacity-50"
+          className="rounded bg-primary px-4 py-2 text-on-primary disabled:opacity-50"
           disabled={busy}
           onClick={createPost}
         >
           Create post
         </button>
         <button
-          className="rounded border px-4 py-2 disabled:opacity-50"
+          className="rounded border border-border px-4 py-2 disabled:opacity-50"
           disabled={busy || !postId}
           onClick={publishNow}
         >
@@ -404,11 +404,11 @@ export default function Publish() {
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Queue</h2>
         {!queue ? (
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 text-muted-foreground">
             Queue needs database setup on the server.
           </p>
         ) : (
-          <pre className="mt-2 overflow-auto rounded bg-slate-100 p-3 text-xs">
+          <pre className="mt-2 overflow-auto rounded bg-muted p-3 text-xs">
             {JSON.stringify(queue, null, 2)}
           </pre>
         )}

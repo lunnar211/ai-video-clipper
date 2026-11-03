@@ -72,9 +72,9 @@ export default function AdminAudit() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Audit log</h1>
+      <h1 className="text-xl font-bold text-foreground">Audit log</h1>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
@@ -83,30 +83,30 @@ export default function AdminAudit() {
           value={actor}
           onChange={(e) => setActor(e.target.value)}
           placeholder="Filter by actor"
-          className="rounded border px-2 py-1 text-sm"
+          className="rounded border border-border px-2 py-1 text-sm"
         />
         <input
           value={action}
           onChange={(e) => setAction(e.target.value)}
           placeholder="Filter by action"
-          className="rounded border px-2 py-1 text-sm"
+          className="rounded border border-border px-2 py-1 text-sm"
         />
         <button
           type="button"
           onClick={load}
-          className="rounded bg-violet-600 px-3 py-1 text-sm text-white"
+          className="rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Filter
         </button>
         <a
           href="/api/admin/audit/export?format=csv"
-          className="rounded bg-slate-200 px-3 py-1 text-sm text-slate-800"
+          className="rounded bg-muted px-3 py-1 text-sm text-foreground"
         >
           Export CSV
         </a>
         <a
           href="/api/admin/audit/export?format=json"
-          className="rounded bg-slate-200 px-3 py-1 text-sm text-slate-800"
+          className="rounded bg-muted px-3 py-1 text-sm text-foreground"
         >
           Export JSON
         </a>
@@ -120,20 +120,20 @@ export default function AdminAudit() {
       </div>
       <ul className="mt-4 space-y-2">
         {entries.map((e) => (
-          <li key={e.id} className="rounded border p-3 text-sm">
+          <li key={e.id} className="rounded border border-border p-3 text-sm">
             <span className="font-semibold">{e.action}</span> · actor{" "}
             {e.actor}
             {e.target ? ` · target ${e.target}` : ""} ·{" "}
             {new Date(e.created_at).toLocaleString()}
             {e.metadata ? (
-              <pre className="mt-1 overflow-auto text-xs text-slate-600">
+              <pre className="mt-1 overflow-auto text-xs text-muted-foreground">
                 {JSON.stringify(e.metadata)}
               </pre>
             ) : null}
           </li>
         ))}
         {entries.length === 0 && (
-          <li className="text-sm text-slate-600">No audit entries yet.</li>
+          <li className="text-sm text-muted-foreground">No audit entries yet.</li>
         )}
       </ul>
     </main>

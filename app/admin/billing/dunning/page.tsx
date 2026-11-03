@@ -63,7 +63,7 @@ export default function AdminBillingDunning() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Dunning queue</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         Failed payments retry on the configured schedule (default days
         1, 3, 7) and cancel after the grace period (default 14 days).
         Notifications go in-app; email stays inert until a working
@@ -73,7 +73,7 @@ export default function AdminBillingDunning() {
         Run dunning step
       </button>
       {result && <p className="mt-2 text-sm">{result}</p>}
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {subs.map((sub) => (
           <li key={sub.id} className="border p-3">
@@ -81,7 +81,7 @@ export default function AdminBillingDunning() {
               <span className="font-semibold">{sub.plan}</span> —{" "}
               {sub.status} — user {sub.user_id}
             </p>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Attempts {sub.dunning_attempts} · started{" "}
               {sub.dunning_started_at ?? "unknown"} · next retry{" "}
               {sub.dunning_next_retry_at ?? "none scheduled"}
@@ -89,7 +89,7 @@ export default function AdminBillingDunning() {
           </li>
         ))}
         {subs.length === 0 && !message && (
-          <li className="text-gray-600">Dunning queue is empty.</li>
+          <li className="text-muted-foreground">Dunning queue is empty.</li>
         )}
       </ul>
     </div>

@@ -2,15 +2,15 @@ export default function Pricing() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Pricing</h1>
-      <section className="rounded-xl bg-white p-5 shadow-sm">
+      <section className="rounded-xl bg-card p-5 shadow-sm">
         <h2 className="text-lg font-semibold">Free — for now</h2>
-        <p className="mt-2 text-slate-700">
+        <p className="mt-2 text-muted-foreground">
           This tool is free to use in its current version: upload your own
           video, transcribe, find highlights, and render vertical clips
           with captions. There is no price, no checkout, and no paid plan —
           because paid plans are not configured yet.
         </p>
-        <p className="mt-2 text-slate-700">
+        <p className="mt-2 text-muted-foreground">
           The free tier allows 3 rendered clips per day, and free clips
           carry a small watermark. Sign-in (Google) is available once
           the owner configures it; until then everyone uses the free
@@ -20,9 +20,9 @@ export default function Pricing() {
           collected anywhere on this site.
         </p>
       </section>
-      <section className="rounded-xl bg-white p-5 shadow-sm">
+      <section className="rounded-xl bg-card p-5 shadow-sm">
         <h2 className="text-lg font-semibold">What costs the operator money</h2>
-        <p className="mt-2 text-slate-700">
+        <p className="mt-2 text-muted-foreground">
           Honestly: the AI calls. Transcription and highlight picking are
           billed per use to the site operator by the AI providers, while
           rendering runs on your own device for free. That is why the

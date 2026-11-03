@@ -11,7 +11,9 @@
  * tests/phase10-real.test.ts):
  * - no prices anywhere (billing prices are unset — "coming soon")
  * - no "100+" languages, no "10k+" clips, no earnings promises
- * - no "copyright-free" claims, no paste-any-link flow
+ * - no "copyright-free" claims, no paste-any-link flow: paste is
+ *   described only for verified free-licence links (Phase 11), and
+ *   YouTube / TikTok / Instagram links are stated as refused
  * - features described are built, or their gated state is stated
  * - NO demo content: Phase 10 deleted the illustrated demo section
  *   entirely. The homepage shows the real tool, not drawings, and
@@ -30,16 +32,16 @@ export type MarketingFaq = { q: string; a: string };
 export const HERO = {
   eyebrow: "For videos you own",
   title: "Turn a video you own into vertical clips",
-  sub: "Upload your own recording. AI transcribes it, finds the moments worth posting, and renders them as captioned 9:16 clips for TikTok, Reels, and Shorts — right in your browser.",
+  sub: "Upload a video you own. AI transcribes it, picks the moments worth posting, and renders captioned 9:16 clips for TikTok, Reels, and Shorts — in your browser.",
   reassurance:
     "No account needed to try. Your video never leaves your device; only the audio track goes out for transcription, and only when AI is connected.",
   rightsNote:
-    "Clip only videos you recorded or own the rights to. This tool has no link box and never downloads videos from any platform.",
+    "Clip only videos you recorded or own the rights to, or videos with a verified free licence. This tool never downloads videos from YouTube, TikTok, or Instagram.",
 };
 
 export const VALUE_STRIP = {
   title: "One video you own, several ready-to-post clips",
-  body: "Record once, cut the moments that matter, and post them where your audience already watches.",
+  body: "Record once, keep the moments that land, and post them as vertical clips.",
 };
 
 export const FEATURES: MarketingFeature[] = [
@@ -113,7 +115,7 @@ export const PLANS_NOTE =
 export const HOME_FAQS: MarketingFaq[] = [
   {
     q: "Can I paste a YouTube, TikTok, or Instagram link?",
-    a: "No. There is no link box and no downloader, on purpose. Clipping other people's videos risks copyright strikes. Only upload videos you recorded or own the rights to.",
+    a: "No. Links from those platforms are refused, and there is no downloader — clipping other people's videos risks copyright strikes. You can upload a video file, or paste a link to a video with a verified free licence from Wikimedia Commons or Internet Archive: the licence is checked before anything loads, and attribution is added automatically.",
   },
   {
     q: "What leaves my browser?",

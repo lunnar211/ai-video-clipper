@@ -59,36 +59,36 @@ export default function AdminBilling() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Billing</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         Plans, subscriptions, invoices, coupons, affiliates, and dunning.
         Prices live in the merchant-of-record dashboard — this console
         never invents a price and never shows payment details.
       </p>
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       {overview && (
         <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div>
-            <dt className="text-gray-600">Subscriptions</dt>
+            <dt className="text-muted-foreground">Subscriptions</dt>
             <dd className="font-semibold">{overview.subscriptionCount}</dd>
           </div>
           <div>
-            <dt className="text-gray-600">Dunning queue (past due)</dt>
+            <dt className="text-muted-foreground">Dunning queue (past due)</dt>
             <dd className="font-semibold">{overview.dunningQueue}</dd>
           </div>
           <div>
-            <dt className="text-gray-600">Invoices</dt>
+            <dt className="text-muted-foreground">Invoices</dt>
             <dd className="font-semibold">{overview.invoiceCount}</dd>
           </div>
           <div>
-            <dt className="text-gray-600">Invoiced total (minor units)</dt>
+            <dt className="text-muted-foreground">Invoiced total (minor units)</dt>
             <dd className="font-semibold">{overview.invoiceTotalMinor}</dd>
           </div>
           <div>
-            <dt className="text-gray-600">Coupons</dt>
+            <dt className="text-muted-foreground">Coupons</dt>
             <dd className="font-semibold">{overview.couponCount}</dd>
           </div>
           <div>
-            <dt className="text-gray-600">Referrals / commissions</dt>
+            <dt className="text-muted-foreground">Referrals / commissions</dt>
             <dd className="font-semibold">
               {overview.referralCount} / {overview.commissionCount} (
               {overview.commissionTotalMinor} minor units)
@@ -97,7 +97,7 @@ export default function AdminBilling() {
         </dl>
       )}
       {overview && (
-        <p className="mt-4 text-sm text-gray-600">
+        <p className="mt-4 text-sm text-muted-foreground">
           By status:{" "}
           {Object.entries(overview.subscriptionsByStatus)
             .map(([status, count]) => `${status}: ${count}`)
@@ -106,7 +106,7 @@ export default function AdminBilling() {
       )}
       <h2 className="mt-8 text-lg font-semibold">Fraud signals</h2>
       {flags.length === 0 ? (
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-muted-foreground">
           No velocity flags in the recent window.
         </p>
       ) : (
@@ -121,23 +121,23 @@ export default function AdminBilling() {
         </ul>
       )}
       <p className="mt-8 text-sm">
-        <a href="/admin/billing/subscriptions" className="text-violet-700 underline">
+        <a href="/admin/billing/subscriptions" className="text-primary underline">
           Subscriptions
         </a>{" "}
         ·{" "}
-        <a href="/admin/billing/invoices" className="text-violet-700 underline">
+        <a href="/admin/billing/invoices" className="text-primary underline">
           Invoices
         </a>{" "}
         ·{" "}
-        <a href="/admin/billing/coupons" className="text-violet-700 underline">
+        <a href="/admin/billing/coupons" className="text-primary underline">
           Coupons
         </a>{" "}
         ·{" "}
-        <a href="/admin/billing/affiliates" className="text-violet-700 underline">
+        <a href="/admin/billing/affiliates" className="text-primary underline">
           Affiliates
         </a>{" "}
         ·{" "}
-        <a href="/admin/billing/dunning" className="text-violet-700 underline">
+        <a href="/admin/billing/dunning" className="text-primary underline">
           Dunning
         </a>
       </p>

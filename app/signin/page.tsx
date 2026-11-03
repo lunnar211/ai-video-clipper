@@ -30,8 +30,8 @@ export default function SignInPage() {
   if (!isSupabaseConfigured()) {
     return (
       <main>
-        <h1 className="text-xl font-bold text-slate-900">Sign in</h1>
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <h1 className="text-xl font-bold text-foreground">Sign in</h1>
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           Sign-in is not configured yet.
         </p>
       </main>
@@ -78,12 +78,12 @@ export default function SignInPage() {
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">Sign in</h1>
+      <h1 className="text-xl font-bold text-foreground">Sign in</h1>
       <form
         onSubmit={submit}
         className="mt-4 flex max-w-sm flex-col gap-3"
       >
-        <label className="text-sm text-slate-700">
+        <label className="text-sm text-muted-foreground">
           Email
           <input
             type="email"
@@ -91,10 +91,10 @@ export default function SignInPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2 text-slate-900"
+            className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-foreground"
           />
         </label>
-        <label className="text-sm text-slate-700">
+        <label className="text-sm text-muted-foreground">
           Password
           <input
             type="password"
@@ -102,18 +102,18 @@ export default function SignInPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2 text-slate-900"
+            className="mt-1 w-full rounded border border-border bg-background px-3 py-2 text-foreground"
           />
         </label>
         {error ? (
-          <p role="alert" className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-900">
+          <p role="alert" className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
             {error}
           </p>
         ) : null}
         <button
           type="submit"
           disabled={busy}
-          className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-on-primary disabled:opacity-50"
         >
           {busy ? "Signing in…" : "Sign in with email"}
         </button>
@@ -122,11 +122,11 @@ export default function SignInPage() {
         <button
           type="button"
           onClick={signInWithGoogle}
-          className="rounded-lg border px-3 py-2 text-sm font-medium text-slate-800"
+          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground"
         >
           Sign in with Google
         </button>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           No account? Accounts are created by the site owner in the
           Supabase dashboard — there is no public sign-up here. Password
           resets are also done in the Supabase dashboard.

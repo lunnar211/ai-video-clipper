@@ -4,15 +4,22 @@
    (set pre-paint by the layout script) activates `dark:` variants. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Design tokens (ClipForge Phase 9, ui-ux-pro-max design system
-   persisted at design-system/ai-video-clipper/MASTER.md).
-   Tailwind v4 `@theme inline` maps each utility (bg-primary,
-   text-foreground, border-border, ...) to a CSS variable, and the
-   `.dark` block redefines the variable — so one class adapts to both
-   themes and no page can end up with a light card inside dark chrome.
-   Token pairs are chosen so text always clears 4.5:1: primary blue
-   with white text in light mode and near-black text on the lighter
-   dark-mode blue; accent orange with black text in both modes. */
+/* Design tokens (ClipForge Phase 12: "Ink + Record" identity —
+   replaces the Phase 9 generic trust-blue + orange SaaS palette).
+   The identity is deliberately monochrome-professional: near-black
+   ink for brand surfaces and text, with a single signal-red accent
+   (the record dot) for calls to action. No gradients, no violet,
+   no generic SaaS blue. Tailwind v4 `@theme inline` maps each
+   utility (bg-primary, text-foreground, border-border, ...) to a
+   CSS variable, and the `.dark` block redefines the variable — so
+   one class adapts to both themes and no page can end up with a
+   light card inside dark chrome.
+   Token pairs are chosen so text always clears 4.5:1 (checked
+   2026-11-03): light ink #171717 on white 17.7:1, signal red
+   #DC2626 on white 4.83:1, muted #525252 on paper 7.6:1; dark
+   paper #FAFAFA on ink #171717 17.7:1, signal #F87171 on black
+   7.9:1, muted #A3A3A3 on card #171717 7.0:1.
+   Full identity spec: design-system/ai-video-clipper/MASTER.md. */
 @theme inline {
   --color-primary: var(--color-primary);
   --color-on-primary: var(--color-on-primary);
@@ -34,41 +41,41 @@
 }
 
 :root {
-  --color-primary: #2563eb;
+  --color-primary: #171717;
   --color-on-primary: #ffffff;
-  --color-secondary: #3b82f6;
-  --color-on-secondary: #000000;
-  --color-accent: #ea580c;
-  --color-on-accent: #000000;
-  --color-background: #f8fafc;
-  --color-foreground: #1e293b;
+  --color-secondary: #404040;
+  --color-on-secondary: #ffffff;
+  --color-accent: #dc2626;
+  --color-on-accent: #ffffff;
+  --color-background: #fafaf9;
+  --color-foreground: #171717;
   --color-card: #ffffff;
-  --color-card-foreground: #1e293b;
-  --color-muted: #e9eff8;
-  --color-muted-foreground: #475569;
-  --color-border: #e2e8f0;
-  --color-destructive: #dc2626;
+  --color-card-foreground: #171717;
+  --color-muted: #f5f5f4;
+  --color-muted-foreground: #525252;
+  --color-border: #e5e5e5;
+  --color-destructive: #b91c1c;
   --color-on-destructive: #ffffff;
-  --color-ring: #2563eb;
+  --color-ring: #171717;
 }
 
 .dark {
-  --color-primary: #60a5fa;
-  --color-on-primary: #0f172a;
-  --color-secondary: #93c5fd;
-  --color-on-secondary: #0f172a;
-  --color-accent: #fb923c;
+  --color-primary: #fafafa;
+  --color-on-primary: #171717;
+  --color-secondary: #d4d4d4;
+  --color-on-secondary: #171717;
+  --color-accent: #f87171;
   --color-on-accent: #000000;
-  --color-background: #020617;
-  --color-foreground: #f1f5f9;
-  --color-card: #0f172a;
-  --color-card-foreground: #f1f5f9;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
-  --color-border: #1e293b;
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  --color-card: #171717;
+  --color-card-foreground: #fafafa;
+  --color-muted: #262626;
+  --color-muted-foreground: #a3a3a3;
+  --color-border: #262626;
   --color-destructive: #f87171;
   --color-on-destructive: #000000;
-  --color-ring: #60a5fa;
+  --color-ring: #fafafa;
 }
 
 body {

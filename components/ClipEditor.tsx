@@ -244,10 +244,10 @@ export default function ClipEditor(props: {
     : null;
 
   return (
-    <div className="mt-4 space-y-4 rounded-lg border border-violet-200 bg-violet-50 p-4">
+    <div className="mt-4 space-y-4 rounded-lg border border-border bg-muted p-4">
       <div className="flex items-center justify-between">
         <h4 className="font-semibold">Editor — {clip.title}</h4>
-        <button className="rounded border px-2 py-1 text-sm" onClick={props.onClose}>
+        <button className="rounded border border-border px-2 py-1 text-sm" onClick={props.onClose}>
           Close editor
         </button>
       </div>
@@ -293,19 +293,19 @@ export default function ClipEditor(props: {
         <div className="w-full">
           <div
             ref={trackRef}
-            className="relative h-8 w-full rounded bg-slate-200"
+            className="relative h-8 w-full rounded bg-muted"
             role="group"
             aria-label="Clip timeline trim"
           >
             <div
-              className="absolute top-0 h-8 rounded bg-violet-400"
+              className="absolute top-0 h-8 rounded bg-accent"
               style={{
                 left: `${(start / duration) * 100}%`,
                 width: `${((end - start) / duration) * 100}%`,
               }}
             />
             <div
-              className="absolute top-0 h-8 w-3 cursor-ew-resize rounded bg-violet-700"
+              className="absolute top-0 h-8 w-3 cursor-ew-resize rounded bg-primary"
               style={{ left: `calc(${(start / duration) * 100}% - 6px)` }}
               role="slider"
               aria-label="Clip start"
@@ -314,7 +314,7 @@ export default function ClipEditor(props: {
               onPointerDown={(e) => onTrackPointer(e, "start")}
             />
             <div
-              className="absolute top-0 h-8 w-3 cursor-ew-resize rounded bg-violet-700"
+              className="absolute top-0 h-8 w-3 cursor-ew-resize rounded bg-primary"
               style={{ left: `calc(${(end / duration) * 100}% - 6px)` }}
               role="slider"
               aria-label="Clip end"
@@ -331,7 +331,7 @@ export default function ClipEditor(props: {
             <label className="flex items-center gap-1">
               Start
               <input
-                className="w-20 rounded border px-2 py-1"
+                className="w-20 rounded border border-border px-2 py-1"
                 inputMode="decimal"
                 value={start.toFixed(1)}
                 onChange={(e) => {
@@ -344,7 +344,7 @@ export default function ClipEditor(props: {
             <label className="flex items-center gap-1">
               End
               <input
-                className="w-20 rounded border px-2 py-1"
+                className="w-20 rounded border border-border px-2 py-1"
                 inputMode="decimal"
                 value={end.toFixed(1)}
                 onChange={(e) => {
@@ -354,17 +354,17 @@ export default function ClipEditor(props: {
                 onBlur={() => applyTimes(start, end)}
               />
             </label>
-            <button className="rounded border px-2 py-1" onClick={undo} disabled={historyIdx <= 0}>
+            <button className="rounded border border-border px-2 py-1" onClick={undo} disabled={historyIdx <= 0}>
               Undo
             </button>
             <button
-              className="rounded border px-2 py-1"
+              className="rounded border border-border px-2 py-1"
               onClick={redo}
               disabled={historyIdx >= history.length - 1}
             >
               Redo
             </button>
-            <span className="text-slate-500">
+            <span className="text-muted-foreground">
               {fmt(start)} – {fmt(end)} ({fmt(end - start)})
             </span>
           </div>
@@ -375,7 +375,7 @@ export default function ClipEditor(props: {
         <label className="flex items-center gap-2">
           Caption style
           <select
-            className="rounded border px-2 py-1"
+            className="rounded border border-border px-2 py-1"
             value={props.presetId}
             onChange={(e) => props.onPresetChange(e.target.value)}
           >
@@ -398,7 +398,7 @@ export default function ClipEditor(props: {
           />
         </label>
         <button
-          className="rounded border px-2 py-1"
+          className="rounded border border-border px-2 py-1"
           onClick={() => props.onSetSplitBackground(null)}
         >
           Remove background
@@ -406,16 +406,16 @@ export default function ClipEditor(props: {
       </div>
 
       <div className="flex flex-wrap gap-3 text-sm">
-        <button className="rounded border px-2 py-1" onClick={detectSilence} disabled={detecting || !props.file}>
+        <button className="rounded border border-border px-2 py-1" onClick={detectSilence} disabled={detecting || !props.file}>
           {detecting ? "Detecting silence…" : "Detect silence"}
         </button>
         {silent && silent.length > 0 && (
-          <button className="rounded border px-2 py-1" onClick={splitSilences}>
+          <button className="rounded border border-border px-2 py-1" onClick={splitSilences}>
             Split out {silent.length} silent part{silent.length === 1 ? "" : "s"}
           </button>
         )}
         {silent && silent.length === 0 && (
-          <span className="text-slate-600">No silences over 1 second found.</span>
+          <span className="text-muted-foreground">No silences over 1 second found.</span>
         )}
       </div>
 
@@ -426,7 +426,7 @@ export default function ClipEditor(props: {
           </summary>
           <div className="mt-2 max-h-48 space-y-1 overflow-auto">
             {transcript.map((s, i) => (
-              <label key={i} className="flex items-start gap-2 text-slate-700">
+              <label key={i} className="flex items-start gap-2 text-muted-foreground">
                 <input
                   type="checkbox"
                   checked={excluded.has(i)}
@@ -442,13 +442,13 @@ export default function ClipEditor(props: {
                   className="text-left"
                   onClick={() => seekTo(s.start)}
                 >
-                  <span className="text-slate-400">[{fmt(s.start)}] </span>
+                  <span className="text-muted-foreground">[{fmt(s.start)}] </span>
                   {s.text}
                 </button>
               </label>
             ))}
           </div>
-          <button className="mt-2 rounded border px-2 py-1" onClick={applyCuts} disabled={excluded.size === 0}>
+          <button className="mt-2 rounded border border-border px-2 py-1" onClick={applyCuts} disabled={excluded.size === 0}>
             Cut ticked lines (split into remaining parts)
           </button>
         </details>
@@ -456,18 +456,18 @@ export default function ClipEditor(props: {
 
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <input
-          className="rounded border px-2 py-1"
+          className="rounded border border-border px-2 py-1"
           value={versionLabel}
           onChange={(e) => setVersionLabel(e.target.value)}
           placeholder="Version label (optional)"
         />
-        <button className="rounded border px-2 py-1" onClick={saveVersion}>
+        <button className="rounded border border-border px-2 py-1" onClick={saveVersion}>
           Save version
         </button>
         {versions.map((v, i) => (
           <button
             key={i}
-            className="rounded border px-2 py-1"
+            className="rounded border border-border px-2 py-1"
             onClick={() => {
               applyTimes(v.start, v.end);
               props.onPresetChange(v.presetId);

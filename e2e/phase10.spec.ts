@@ -20,7 +20,7 @@ test("homepage has no illustration demo section", async ({ page }) => {
 test("see-it-work section is the real tool entry", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "See it work — for real" }),
+    page.getByRole("heading", { name: "See it work" }),
   ).toBeVisible();
   await expect(
     page.getByText("No preview video, no staged result."),

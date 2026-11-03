@@ -57,7 +57,7 @@ function InvoiceInner() {
   if (!id || !userId) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-6">
-        <p className="text-sm text-red-700">
+        <p className="text-sm text-red-700 dark:text-red-300">
           An invoice id and userId are required.
         </p>
       </div>
@@ -66,21 +66,21 @@ function InvoiceInner() {
   if (message) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-6">
-        <p className="text-sm text-red-700">{message}</p>
+        <p className="text-sm text-red-700 dark:text-red-300">{message}</p>
       </div>
     );
   }
   if (!invoice) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-6">
-        <p className="text-sm text-gray-600">Loading invoice…</p>
+        <p className="text-sm text-muted-foreground">Loading invoice…</p>
       </div>
     );
   }
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
       <h1 className="text-2xl font-bold">Invoice {invoice.number}</h1>
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-muted-foreground">
         Status: {invoice.status} · Provider: {invoice.provider} ·{" "}
         {new Date(invoice.created_at).toLocaleString()}
       </p>

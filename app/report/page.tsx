@@ -95,12 +95,12 @@ export default function Report() {
   };
 
   const field =
-    "mt-1 w-full rounded border px-2 py-1.5";
+    "mt-1 w-full rounded border border-border px-2 py-1.5";
 
   return (
-    <div className="space-y-8 text-sm text-slate-700">
+    <div className="space-y-8 text-sm text-muted-foreground">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-foreground">
           Report copyright infringement
         </h1>
         <p className="mt-2">
@@ -112,7 +112,7 @@ export default function Report() {
       </div>
 
       <section className="space-y-3 rounded-xl border p-4">
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Takedown notice
         </h2>
         <label className="block">
@@ -152,7 +152,7 @@ export default function Report() {
         </label>
         <button
           type="button"
-          className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
           onClick={submitNotice}
           disabled={busy}
         >
@@ -162,7 +162,7 @@ export default function Report() {
       </section>
 
       <section className="space-y-3 rounded-xl border p-4">
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-lg font-semibold text-foreground">
           Appeal a strike
         </h2>
         <p>
@@ -193,7 +193,7 @@ export default function Report() {
         </label>
         <button
           type="button"
-          className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
           onClick={submitAppeal}
           disabled={busy}
         >

@@ -91,13 +91,13 @@ export default function AdminUserDetail({
   if (!data) {
     return (
       <main>
-        <h1 className="text-xl font-bold text-slate-900">User</h1>
+        <h1 className="text-xl font-bold text-foreground">User</h1>
         {message ? (
-          <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
             {message}
           </p>
         ) : (
-          <p className="mt-4 text-sm text-slate-600">Loading…</p>
+          <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
         )}
       </main>
     );
@@ -105,20 +105,20 @@ export default function AdminUserDetail({
 
   return (
     <main>
-      <h1 className="text-xl font-bold text-slate-900">{data.user.email}</h1>
-      <p className="mt-2 text-sm text-slate-700">
+      <h1 className="text-xl font-bold text-foreground">{data.user.email}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
         Plan: {data.user.plan} · Role: {data.user.role} · Status:{" "}
         {data.user.status} · Usage: {data.usageMinutes} min · Clips:{" "}
         {data.clipCount} · Credit balance: {data.creditBalanceClips} clips
       </p>
       {message && (
-        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+        <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
         </p>
       )}
       <section className="mt-4">
         <h2 className="font-semibold">Connected accounts (status only)</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {data.accounts.map((a) => (
             <li key={a.id}>
               {a.platform}: {a.account_label} — {a.status}
@@ -129,7 +129,7 @@ export default function AdminUserDetail({
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Posts timeline</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {data.posts.map((p) => (
             <li key={p.id}>
               {p.clip_ref} — {p.status}
@@ -141,7 +141,7 @@ export default function AdminUserDetail({
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Compliance</h2>
-        <p className="text-sm text-slate-700">
+        <p className="text-sm text-muted-foreground">
           Declarations: {data.compliance.declarationCount} · Fingerprint
           scans: {data.compliance.fingerprintScanCount} · Strikes:{" "}
           {data.compliance.strikeCount} (upheld:{" "}
@@ -151,10 +151,10 @@ export default function AdminUserDetail({
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Support notes</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {data.supportNotes.map((n) => (
             <li key={n.id}>
-              {n.note} <span className="text-slate-500">({n.admin_id})</span>
+              {n.note} <span className="text-muted-foreground">({n.admin_id})</span>
             </li>
           ))}
           {data.supportNotes.length === 0 && <li>No notes.</li>}
@@ -164,13 +164,13 @@ export default function AdminUserDetail({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Support note"
-            className="flex-1 rounded border px-2 py-1 text-sm"
+            className="flex-1 rounded border border-border px-2 py-1 text-sm"
           />
           <button
             type="button"
             disabled={busy || !note.trim()}
             onClick={() => act("/notes", { note })}
-            className="rounded bg-violet-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
           >
             Add note
           </button>
@@ -178,7 +178,7 @@ export default function AdminUserDetail({
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Credit adjustments</h2>
-        <ul className="text-sm text-slate-700">
+        <ul className="text-sm text-muted-foreground">
           {data.creditAdjustments.map((a) => (
             <li key={a.id}>
               {a.delta_clips > 0 ? "+" : ""}
@@ -192,13 +192,13 @@ export default function AdminUserDetail({
             value={delta}
             onChange={(e) => setDelta(e.target.value)}
             placeholder="Delta clips (e.g. 5 or -2)"
-            className="w-48 rounded border px-2 py-1 text-sm"
+            className="w-48 rounded border border-border px-2 py-1 text-sm"
           />
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Reason (required)"
-            className="flex-1 rounded border px-2 py-1 text-sm"
+            className="flex-1 rounded border border-border px-2 py-1 text-sm"
           />
           <button
             type="button"
@@ -206,7 +206,7 @@ export default function AdminUserDetail({
             onClick={() =>
               act("/credits", { deltaClips: Number(delta), reason })
             }
-            className="rounded bg-violet-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
           >
             Adjust
           </button>
@@ -225,14 +225,14 @@ export default function AdminUserDetail({
           type="button"
           disabled={busy}
           onClick={() => act("/restore", {})}
-          className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+          className="rounded bg-green-600 px-3 py-1 text-sm text-black disabled:opacity-50"
         >
           Restore
         </button>
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">View as this user (read-only)</h2>
-        <p className="text-xs text-slate-600">
+        <p className="text-xs text-muted-foreground">
           Requires a reason. View-as never exposes tokens and never lets
           you publish or bill as this user. A banner shows during the
           session and the start/end are audited.
@@ -242,7 +242,7 @@ export default function AdminUserDetail({
             value={viewAsReason}
             onChange={(e) => setViewAsReason(e.target.value)}
             placeholder="Reason (at least 10 characters)"
-            className="flex-1 rounded border px-2 py-1 text-sm"
+            className="flex-1 rounded border border-border px-2 py-1 text-sm"
           />
           <button
             type="button"
@@ -265,7 +265,7 @@ export default function AdminUserDetail({
               else router.push("/admin");
               setBusy(false);
             }}
-            className="rounded bg-amber-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            className="rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
           >
             View as
           </button>

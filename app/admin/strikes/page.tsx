@@ -70,8 +70,8 @@ export default function AdminStrikes() {
   };
 
   return (
-    <div className="space-y-4 text-sm text-slate-700">
-      <h1 className="text-2xl font-bold text-slate-900">
+    <div className="space-y-4 text-sm text-muted-foreground">
+      <h1 className="text-2xl font-bold text-foreground">
         Admin: strike review queue
       </h1>
       <p>
@@ -80,16 +80,16 @@ export default function AdminStrikes() {
         strikes flag an account for review, 3 auto-pause its
         publishing. Overturning recomputes the pause.
       </p>
-      {error && <p className="text-red-700">{error}</p>}
+      {error && <p className="text-red-700 dark:text-red-300">{error}</p>}
       {strikes === null && !error && <p>Loading…</p>}
       {strikes !== null && strikes.length === 0 && <p>No strikes filed yet.</p>}
       <ul className="space-y-3">
         {(strikes ?? []).map((s) => (
-          <li key={s.id} className="rounded-lg border p-4">
+          <li key={s.id} className="rounded-lg border border-border p-4">
             <p className="font-medium">
               {s.status} — {s.work_description.slice(0, 120)}
             </p>
-            <p className="text-slate-500">
+            <p className="text-muted-foreground">
               From {s.reporter_name} ({s.reporter_email}) · ref: {s.infringing_ref} ·
               id: {s.id}
             </p>
@@ -97,7 +97,7 @@ export default function AdminStrikes() {
               {s.status === "submitted" && (
                 <button
                   type="button"
-                  className="rounded border px-3 py-1.5 disabled:opacity-50"
+                  className="rounded border border-border px-3 py-1.5 disabled:opacity-50"
                   disabled={busyId === s.id}
                   onClick={() => review(s.id, "under_review")}
                 >
@@ -108,7 +108,7 @@ export default function AdminStrikes() {
                 <>
                   <button
                     type="button"
-                    className="rounded border px-3 py-1.5 disabled:opacity-50"
+                    className="rounded border border-border px-3 py-1.5 disabled:opacity-50"
                     disabled={busyId === s.id}
                     onClick={() => review(s.id, "upheld")}
                   >
@@ -116,7 +116,7 @@ export default function AdminStrikes() {
                   </button>
                   <button
                     type="button"
-                    className="rounded border px-3 py-1.5 disabled:opacity-50"
+                    className="rounded border border-border px-3 py-1.5 disabled:opacity-50"
                     disabled={busyId === s.id}
                     onClick={() => review(s.id, "overturned")}
                   >

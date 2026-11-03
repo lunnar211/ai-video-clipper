@@ -1,12 +1,12 @@
 export default function Terms() {
   return (
-    <div className="space-y-4 text-sm text-slate-700">
-      <h1 className="text-2xl font-bold text-slate-900">Terms of Use</h1>
+    <div className="space-y-4 text-sm text-muted-foreground">
+      <h1 className="text-2xl font-bold text-foreground">Terms of Use</h1>
       <p>
         By using AI Video Clipper you agree to these terms. If you do
         not agree, do not use the site.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Your videos, your responsibility
       </h2>
       <p>
@@ -21,17 +21,20 @@ export default function Terms() {
         post to. Before publishing, the per-post compliance checklist
         must be ticked for that post.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What the tool does not do
       </h2>
       <p>
-        This tool never downloads videos from YouTube, TikTok,
-        Instagram, or any other platform, and it contains no feature
-        designed to evade copyright detection. The music check is a
-        detection aid, not legal advice and not a guarantee that a clip
-        is clear to publish.
+        The server never downloads video bytes. The only link import
+        loads a file with a verified free licence, in your browser,
+        from Wikimedia Commons or Internet Archive. The tool never
+        downloads videos from YouTube, TikTok, Instagram, or any
+        other platform, and it contains no feature designed to evade
+        copyright detection. The music check is a detection aid, not
+        legal advice and not a guarantee that a clip is clear to
+        publish.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         No guarantees about results
       </h2>
       <p>
@@ -40,7 +43,7 @@ export default function Terms() {
         pricing or payout figure is shown until a real billing plan is
         configured by the owner.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Availability and limits
       </h2>
       <p>
@@ -49,7 +52,7 @@ export default function Terms() {
         features, or stop operating at any time. Rendered clips are
         created in your browser; the site does not keep copies of them.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Acceptable use
       </h2>
       <p>

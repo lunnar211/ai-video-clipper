@@ -29,49 +29,49 @@ export default async function AdminLayout({
     <div className="mx-auto max-w-4xl px-4 py-6">
       <AdminBanner />
       <nav className="mb-6 flex flex-wrap gap-4 border-b pb-3 text-sm">
-        <Link href="/admin" className="text-violet-700 underline">
+        <Link href="/admin" className="text-primary underline">
           Dashboard
         </Link>
-        <Link href="/admin/users" className="text-violet-700 underline">
+        <Link href="/admin/users" className="text-primary underline">
           Users
         </Link>
-        <Link href="/admin/audit" className="text-violet-700 underline">
+        <Link href="/admin/audit" className="text-primary underline">
           Audit log
         </Link>
-        <Link href="/admin/alerts" className="text-violet-700 underline">
+        <Link href="/admin/alerts" className="text-primary underline">
           Alerts
         </Link>
-        <Link href="/admin/mfa" className="text-violet-700 underline">
+        <Link href="/admin/mfa" className="text-primary underline">
           MFA setup
         </Link>
-        <Link href="/admin/break-glass" className="text-violet-700 underline">
+        <Link href="/admin/break-glass" className="text-primary underline">
           Break-glass
         </Link>
-        <Link href="/admin/events" className="text-violet-700 underline">
+        <Link href="/admin/events" className="text-primary underline">
           Live feed
         </Link>
-        <Link href="/admin/strikes" className="text-violet-700 underline">
+        <Link href="/admin/strikes" className="text-primary underline">
           Strikes queue
         </Link>
-        <Link href="/admin/integrations" className="text-violet-700 underline">
+        <Link href="/admin/integrations" className="text-primary underline">
           Integrations
         </Link>
-        <Link href="/admin/webhooks" className="text-violet-700 underline">
+        <Link href="/admin/webhooks" className="text-primary underline">
           Webhooks
         </Link>
-        <Link href="/admin/api-keys" className="text-violet-700 underline">
+        <Link href="/admin/api-keys" className="text-primary underline">
           API keys
         </Link>
-        <Link href="/admin/api-docs" className="text-violet-700 underline">
+        <Link href="/admin/api-docs" className="text-primary underline">
           API docs
         </Link>
-        <Link href="/admin/sso" className="text-violet-700 underline">
+        <Link href="/admin/sso" className="text-primary underline">
           SSO
         </Link>
-        <Link href="/admin/gdpr" className="text-violet-700 underline">
+        <Link href="/admin/gdpr" className="text-primary underline">
           GDPR
         </Link>
-        <Link href="/admin/billing" className="text-violet-700 underline">
+        <Link href="/admin/billing" className="text-primary underline">
           Billing
         </Link>
       </nav>

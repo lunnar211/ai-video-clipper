@@ -1,13 +1,13 @@
 export default function Privacy() {
   return (
-    <div className="space-y-4 text-sm text-slate-700">
-      <h1 className="text-2xl font-bold text-slate-900">Privacy Policy</h1>
+    <div className="space-y-4 text-sm text-muted-foreground">
+      <h1 className="text-2xl font-bold text-foreground">Privacy Policy</h1>
       <p>
         AI Video Clipper is built so that as little as possible leaves
         your browser. This page describes what is sent where, in plain
         language.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What stays in your browser
       </h2>
       <p>
@@ -15,7 +15,7 @@ export default function Privacy() {
         burn-in and rendering all run on-device. Clips you render are
         stored only as browser object URLs until you download them.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What is sent to the server
       </h2>
       <ul className="list-disc space-y-1 pl-5">
@@ -40,7 +40,7 @@ export default function Privacy() {
           provider (NVIDIA) for a content check.
         </li>
       </ul>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         AI and data flow, in plain words
       </h2>
       <p>
@@ -53,7 +53,7 @@ export default function Privacy() {
         email, or video. Translation sends transcript text through the
         same text providers.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What is stored, and for how long
       </h2>
       <ul className="list-disc space-y-1 pl-5">
@@ -76,7 +76,7 @@ export default function Privacy() {
           never the audio sample.
         </li>
       </ul>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Admin activity logging
       </h2>
       <p>
@@ -112,7 +112,7 @@ export default function Privacy() {
         to configured Slack, Discord, or email webhooks (inert until a
         webhook URL is configured; in-console alerts always work).
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Publishing (only if you use it)
       </h2>
       <p>
@@ -123,7 +123,7 @@ export default function Privacy() {
         description and tags you chose. Publishing is off by default and
         requires your explicit connection and consent for each platform.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Accounts and cookies
       </h2>
       <p>
@@ -135,7 +135,7 @@ export default function Privacy() {
         never edits or deletes. The site uses no advertising trackers.
         See the Cookie Policy for what cookies are used.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">Contact</h2>
+      <h2 className="text-lg font-semibold text-foreground">Contact</h2>
       <p>
         Privacy questions go to the contact address on the Contact page.
         The address there is a placeholder until the owner publishes a

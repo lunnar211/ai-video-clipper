@@ -1,12 +1,13 @@
 /**
- * Phase 9 polish pins (ui-ux-pro-max design system).
- *
- * These tests pin the visual contract, not pixel output: the persisted
- * design system exists with the chosen palette, the token CSS is in
- * place (light + dark values, focus-visible rule, reduced-motion
- * rule), and the pages touched by the polish use tokens instead of
- * the old violet/slate palette. They read source files because the
- * contract lives in classes and CSS, not in runtime behavior.
+ * Phase 9 polish pins (ui-ux-pro-max design system), revised by
+ * Phase 12: the visual contract is the same (persisted design
+ * system, light + dark tokens, focus-visible, reduced motion,
+ * token-only pages), but the PALETTE changed on purpose — the
+ * Phase 9 trust-blue + orange SaaS palette is superseded by the
+ * Phase 12 "Ink + Record" identity. These tests pin the NEW values;
+ * the old values must not reappear in the token CSS.
+ * They read source files because the contract lives in classes and
+ * CSS, not in runtime behavior.
  */
 import { readFileSync, existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -24,18 +25,21 @@ describe("phase 9 design system", () => {
     const master = "design-system/ai-video-clipper/MASTER.md";
     expect(existsSync(master)).toBe(true);
     const text = read(master);
-    expect(text).toContain("#2563EB");
-    expect(text).toContain("#EA580C");
+    expect(text).toContain("Ink + Record");
+    expect(text).toContain("#171717");
+    expect(text).toContain("#DC2626");
     expect(text).toContain("Plus Jakarta Sans");
   });
 
   it("defines light + dark token values, focus-visible, reduced motion", () => {
     const css = read("app/globals.css");
     expect(css).toContain("@theme inline");
-    expect(css).toContain("--color-primary: #2563eb");
-    expect(css).toContain("--color-accent: #ea580c");
+    expect(css).toContain("--color-primary: #171717");
+    expect(css).toContain("--color-accent: #dc2626");
+    expect(css).not.toContain("--color-primary: #2563eb");
+    expect(css).not.toContain("--color-accent: #ea580c");
     expect(css).toContain(".dark {");
-    expect(css).toContain("--color-background: #020617");
+    expect(css).toContain("--color-background: #0a0a0a");
     expect(css).toContain("background-color: var(--color-background)");
     expect(css).toContain(":focus-visible");
     expect(css).toContain("prefers-reduced-motion: reduce");

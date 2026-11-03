@@ -29,7 +29,7 @@ const momentsSchema = z.object({
  * output is never trusted: fenced code blocks are stripped, unknown
  * fields dropped, and moments are clamped to the video.
  *
- * Rules (the default 30–60 s promise): moments longer than `maxLen`
+ * Rules (the default 15–60 s window): moments longer than `maxLen`
  * are cut to it; moments shorter than `minLen` are dropped; overlaps
  * are resolved by keeping the earliest; everything is sorted by start.
  * Length targets (ClipForge Phase 1) pass their own window — e.g. a

@@ -1,12 +1,12 @@
 export default function Cookies() {
   return (
-    <div className="space-y-4 text-sm text-slate-700">
-      <h1 className="text-2xl font-bold text-slate-900">Cookie Policy</h1>
+    <div className="space-y-4 text-sm text-muted-foreground">
+      <h1 className="text-2xl font-bold text-foreground">Cookie Policy</h1>
       <p>
         AI Video Clipper uses as few cookies as possible, and no
         advertising trackers at all.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Strictly necessary cookies
       </h2>
       <ul className="list-disc space-y-1 pl-5">
@@ -20,7 +20,7 @@ export default function Cookies() {
           abuse prevention and load balancing.
         </li>
       </ul>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What is NOT stored in cookies
       </h2>
       <p>
@@ -31,7 +31,7 @@ export default function Cookies() {
         Policy page. No analytics, advertising, or cross-site tracking
         cookies are set by this site.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Your choice
       </h2>
       <p>

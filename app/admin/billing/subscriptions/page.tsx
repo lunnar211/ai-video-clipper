@@ -67,7 +67,7 @@ export default function AdminBillingSubscriptions() {
           Filter
         </button>
       </div>
-      {message && <p className="mt-4 text-sm text-red-700">{message}</p>}
+      {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {subs.map((sub) => (
           <li key={sub.id} className="border p-3">
@@ -76,20 +76,20 @@ export default function AdminBillingSubscriptions() {
               {sub.status}
               {sub.cancel_at_period_end ? " (cancel at period end)" : ""}
             </p>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               User {sub.user_id} · {sub.provider}
               {sub.provider_subscription_id
                 ? ` · ${sub.provider_subscription_id}`
                 : " · no MoR id yet (pending checkout)"}
             </p>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Period ends {sub.current_period_end ?? "unknown"} ·
               dunning attempts {sub.dunning_attempts}
             </p>
           </li>
         ))}
         {subs.length === 0 && !message && (
-          <li className="text-gray-600">No subscriptions found.</li>
+          <li className="text-muted-foreground">No subscriptions found.</li>
         )}
       </ul>
     </div>

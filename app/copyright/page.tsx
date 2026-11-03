@@ -1,7 +1,7 @@
 export default function Copyright() {
   return (
-    <div className="space-y-4 text-sm text-slate-700">
-      <h1 className="text-2xl font-bold text-slate-900">
+    <div className="space-y-4 text-sm text-muted-foreground">
+      <h1 className="text-2xl font-bold text-foreground">
         Copyright / DMCA
       </h1>
       <p>
@@ -9,7 +9,7 @@ export default function Copyright() {
         not host user videos, and it contains no feature designed to
         evade copyright detection.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         If your work was used without permission
       </h2>
       <p>
@@ -38,7 +38,7 @@ export default function Copyright() {
         </li>
         <li>Your physical or electronic signature.</li>
       </ol>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         What happens next
       </h2>
       <p>
@@ -51,7 +51,7 @@ export default function Copyright() {
         upheld appeal means the strike stands; an overturned appeal
         reverses it and recomputes any publishing pause it caused.
       </p>
-      <h2 className="text-lg font-semibold text-slate-900">
+      <h2 className="text-lg font-semibold text-foreground">
         Repeat infringers
       </h2>
       <p>
