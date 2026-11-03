@@ -34,7 +34,7 @@ export default function AuthButtons() {
   if (!ready) return null;
   if (!isSupabaseConfigured()) {
     return (
-      <span className="text-xs text-slate-500">
+      <span className="text-xs text-muted-foreground">
         Sign-in is not configured yet
       </span>
     );
@@ -42,10 +42,10 @@ export default function AuthButtons() {
   if (email) {
     return (
       <span className="flex items-center gap-2 text-sm">
-        <span className="text-slate-600">{email}</span>
+        <span className="text-muted-foreground">{email}</span>
         <button
           type="button"
-          className="rounded border px-2 py-1 text-xs"
+          className="inline-flex min-h-[44px] cursor-pointer items-center rounded border border-border bg-card px-2 py-1 text-xs text-foreground transition-colors duration-200 hover:bg-muted"
           onClick={async () => {
             // Clear the httpOnly admin MFA marker server-side first
             // (browser JS cannot clear httpOnly cookies), then sign
@@ -70,7 +70,7 @@ export default function AuthButtons() {
     <span className="flex items-center gap-2">
       <button
         type="button"
-        className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-white"
+        className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90"
         onClick={async () => {
           const client = createSupabaseBrowserClient();
           await client?.auth.signInWithOAuth({
@@ -85,7 +85,7 @@ export default function AuthButtons() {
       </button>
       <a
         href="/signin"
-        className="rounded-lg border px-3 py-1.5 text-sm font-medium text-slate-800"
+        className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors duration-200 hover:bg-muted"
       >
         Sign in with email
       </a>

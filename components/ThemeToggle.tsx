@@ -48,9 +48,23 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={themeToggleLabel(theme)}
-      className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+      className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors duration-200 hover:bg-muted"
     >
-      {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+      {/* Inline SVG sun/moon (stroke 2px, one icon family): emojis are
+          never used as icons — they render inconsistently and cannot
+          be themed. The icons are decorative; the visible text + the
+          aria-label carry the meaning. */}
+      {theme === "dark" ? (
+        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+      ) : (
+        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+        </svg>
+      )}
+      {theme === "dark" ? "Light" : "Dark"}
     </button>
   );
 }

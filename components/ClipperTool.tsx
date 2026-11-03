@@ -755,7 +755,7 @@ export default function ClipperTool() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
         <strong>Clip your own videos only</strong> — you must own the rights
         to the video you clip. This tool never downloads videos from
         YouTube, TikTok, Instagram, or any platform: there is no link box,
@@ -771,7 +771,7 @@ export default function ClipperTool() {
         </p>
       )}
       {rightsOk && declarationState !== "server" && (
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-muted-foreground">
           Session-only record: the immutable server record activates
           once database setup lands — until then this confirmation
           lives only in this browser session.
@@ -785,7 +785,7 @@ export default function ClipperTool() {
       )}
 
       <div
-        className="rounded-xl border-2 border-dashed border-slate-300 bg-white p-6 text-center"
+        className="rounded-xl border-2 border-dashed border-border bg-card p-6 text-center"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
@@ -794,12 +794,12 @@ export default function ClipperTool() {
         }}
       >
         <p className="font-medium">Drop your video here, or choose a file</p>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Up to 10 minutes, up to 500 MB. MP4, MOV, WebM and other browser
           formats. The video stays in this browser.
         </p>
         <input
-          className="mt-4"
+          className="mt-4 block w-full max-w-full"
           type="file"
           accept="video/*"
           onChange={(e) => {
@@ -808,7 +808,7 @@ export default function ClipperTool() {
           }}
         />
         {file && (
-          <p className="mt-3 text-sm text-slate-700">
+          <p className="mt-3 text-sm text-muted-foreground">
             {file.name} — {(file.size / 1024 / 1024).toFixed(1)} MB
             {duration > 0 && ` — ${fmtTime(duration)}`}
           </p>
@@ -826,20 +826,20 @@ export default function ClipperTool() {
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+        <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
           {error}
         </div>
       )}
       {notice && (
-        <div className="rounded-xl border border-sky-300 bg-sky-50 p-4 text-sm text-sky-900">
+        <div className="rounded-xl border border-sky-300 bg-sky-50 p-4 text-sm text-sky-900 dark:border-sky-800 dark:bg-sky-950 dark:text-sky-200">
           {notice}
         </div>
       )}
 
       {file && duration > 0 && (
-        <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm">
+        <section className="space-y-3 rounded-xl bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold">1. AI transcript &amp; highlights</h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">
             Transcription sends only the audio track to the server (Groq
             Whisper). Highlight picking sends only transcript text. If no AI
             key is configured, both steps say so honestly — step 2 below
@@ -847,14 +847,14 @@ export default function ClipperTool() {
           </p>
           <div className="flex flex-wrap gap-3">
             <button
-              className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
               onClick={transcribe}
               disabled={transcribing || !rightsOk}
             >
               {transcribing ? "Transcribing…" : "Transcribe with AI"}
             </button>
             <button
-              className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
               onClick={findHighlights}
               disabled={finding || !transcript}
             >
@@ -889,7 +889,7 @@ export default function ClipperTool() {
                   />
                 </label>
                 <button
-                  className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white disabled:opacity-50"
+                  className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-muted disabled:opacity-50"
                   onClick={runSearch}
                   disabled={searching || searchQuery.trim().length < 3}
                 >
@@ -910,7 +910,7 @@ export default function ClipperTool() {
                   </select>
                 </label>
                 <button
-                  className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white disabled:opacity-50"
+                  className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-muted disabled:opacity-50"
                   onClick={runTranslate}
                   disabled={translating}
                 >
@@ -963,8 +963,8 @@ export default function ClipperTool() {
               </summary>
               <div className="mt-2 max-h-48 space-y-1 overflow-auto">
                 {transcript.map((s, i) => (
-                  <p key={i} className="text-slate-700">
-                    <span className="text-slate-400">
+                  <p key={i} className="text-muted-foreground">
+                    <span className="text-muted-foreground">
                       [{fmtTime(s.start)}]{" "}
                     </span>
                     {s.text}
@@ -977,7 +977,7 @@ export default function ClipperTool() {
       )}
 
       {file && duration > 0 && (
-        <section className="space-y-3 rounded-xl bg-white p-5 shadow-sm">
+        <section className="space-y-3 rounded-xl bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold">
             2. Cut a clip by hand (always works, no AI needed)
           </h2>
@@ -1019,13 +1019,13 @@ export default function ClipperTool() {
               />
             </label>
             <button
-              className="rounded-lg bg-slate-800 px-4 py-2 font-medium text-white"
+              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-muted"
               onClick={addManualClip}
             >
               Add clip
             </button>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Clips are capped at 3 minutes so rendering stays fast in the
             browser.
           </p>
@@ -1037,7 +1037,7 @@ export default function ClipperTool() {
       )}
 
       {clips.length > 0 && (
-        <section className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
+        <section className="space-y-4 rounded-xl bg-card p-5 shadow-sm">
           <h2 className="text-lg font-semibold">3. Render vertical clips</h2>
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <label className="flex items-center gap-2">
@@ -1065,12 +1065,12 @@ export default function ClipperTool() {
               you get an honest message and the original audio)
             </label>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Face-centered uses on-device face detection and falls back to
             smart crop, then centre. Output is 720×1280 vertical video —
             MP4 where your browser supports it, otherwise WebM.
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Free tier: {Math.max(0, FREE_CLIPS_PER_DAY - usedToday)} of{" "}
             {FREE_CLIPS_PER_DAY} clips left today. Free clips carry a
             small “AI Video Clipper” watermark; paid tiers are not
@@ -1078,7 +1078,7 @@ export default function ClipperTool() {
           </p>
           {Object.keys(rendered).length > 0 && (
             <button
-              className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:bg-muted disabled:opacity-50"
               onClick={downloadAllZip}
               disabled={zipBusy}
             >
@@ -1092,14 +1092,14 @@ export default function ClipperTool() {
               return (
                 <li key={clip.id} className="rounded-lg border p-4">
                   <p className="font-medium">{clip.title}</p>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-muted-foreground">
                     {fmtTime(clip.start)} – {fmtTime(clip.end)} ·{" "}
                     {clip.source === "ai" ? "AI highlight" : "Manual"}
                     {clip.hashtags.length > 0 && ` · ${clip.hashtags.join(" ")}`}
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2 text-sm">
                     <button
-                      className="rounded-lg bg-violet-600 px-3 py-1.5 font-medium text-white disabled:opacity-50"
+                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-3 py-1.5 font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
                       onClick={() => renderOne(clip)}
                       disabled={renderingId !== null || !rightsOk}
                     >
@@ -1108,7 +1108,7 @@ export default function ClipperTool() {
                         : "Render clip"}
                     </button>
                     <button
-                      className="rounded-lg border px-3 py-1.5"
+                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                       onClick={() => checkMusic(clip)}
                       disabled={musicCheck[clip.id]?.status === "checking"}
                     >
@@ -1118,7 +1118,7 @@ export default function ClipperTool() {
                     </button>
                     {transcript && (
                       <button
-                        className="rounded-lg border px-3 py-1.5"
+                        className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                         onClick={() => downloadSrt(clip)}
                       >
                         Download SRT captions
@@ -1126,14 +1126,14 @@ export default function ClipperTool() {
                     )}
                     {transcript && (
                       <button
-                        className="rounded-lg border px-3 py-1.5"
+                        className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                         onClick={() => downloadVtt(clip)}
                       >
                         Download VTT captions
                       </button>
                     )}
                     <button
-                      className="rounded-lg border px-3 py-1.5"
+                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                       onClick={() =>
                         setEditingClipId(editingClipId === clip.id ? null : clip.id)
                       }
@@ -1141,21 +1141,21 @@ export default function ClipperTool() {
                       {editingClipId === clip.id ? "Close editor" : "Edit clip"}
                     </button>
                     <button
-                      className="rounded-lg border px-3 py-1.5"
+                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                       onClick={() => makeThumbnail(clip)}
                     >
                       Make thumbnail
                     </button>
                     {out && (
                       <button
-                        className="rounded-lg border px-3 py-1.5"
+                        className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                         onClick={() => makeShare(clip)}
                       >
                         Share link
                       </button>
                     )}
                     <button
-                      className="rounded-lg border px-3 py-1.5"
+                      className="inline-flex min-h-[44px] cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1.5 text-foreground transition-colors duration-200 hover:bg-muted"
                       onClick={() => copyText(clip)}
                     >
                       {copiedId === clip.id ? "Copied!" : "Copy title + hashtags"}
@@ -1194,7 +1194,7 @@ export default function ClipperTool() {
                         className="w-32 rounded-lg"
                       />
                       <a
-                        className="mt-1 block text-sm font-medium text-violet-700 underline"
+                        className="mt-1 block text-sm font-medium text-primary underline"
                         href={thumbnails[clip.id]}
                         download={`${clip.id}-thumbnail.jpg`}
                       >
@@ -1206,7 +1206,7 @@ export default function ClipperTool() {
                     <p className="mt-3 text-sm">
                       Share link:{" "}
                       <a
-                        className="font-medium text-violet-700 underline"
+                        className="font-medium text-primary underline"
                         href={shareLinks[clip.id]}
                         target="_blank"
                         rel="noreferrer"
@@ -1248,7 +1248,7 @@ export default function ClipperTool() {
                     </p>
                   )}
                   {musicCheck[clip.id]?.status === "unavailable" && (
-                    <p className="mt-3 text-sm text-slate-600">
+                    <p className="mt-3 text-sm text-muted-foreground">
                       Not scanned — no recognition key is connected, so
                       this clip has not been checked. Unscanned does
                       not mean clear.
@@ -1261,7 +1261,7 @@ export default function ClipperTool() {
                     ) && (
                     <div className="mt-3 text-sm">
                       <a
-                        className="font-medium text-violet-700 underline"
+                        className="font-medium text-primary underline"
                         href={out.url}
                         download={`${clip.id}.${out.mimeType.includes("mp4") ? "mp4" : "webm"}`}
                       >

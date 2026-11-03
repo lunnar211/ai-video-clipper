@@ -22,10 +22,10 @@ export default function Create() {
   return (
     <div className="space-y-8">
       <section>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-foreground">
           Create clips
         </h1>
-        <p className="mt-2 text-slate-600 dark:text-slate-300">
+        <p className="mt-2 text-muted-foreground">
           Upload a video you own. AI transcribes it and picks the best
           30–60 second moments, then you render them as 9:16 clips with
           burned-in captions, titles and hashtags — ready for TikTok,
@@ -35,8 +35,8 @@ export default function Create() {
       </section>
       <OnboardingChecklist />
       <ClipperTool />
-      <section className="rounded-xl bg-white p-5 text-sm text-slate-700 shadow-sm dark:bg-slate-900 dark:text-slate-300">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+      <section className="rounded-xl bg-card p-5 text-sm text-muted-foreground shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">
           Honest limits, up front
         </h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">

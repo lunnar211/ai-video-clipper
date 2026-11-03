@@ -4,12 +4,94 @@
    (set pre-paint by the layout script) activates `dark:` variants. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-body {
-  background-color: #f8fafc;
-  color: #0f172a;
+/* Design tokens (ClipForge Phase 9, ui-ux-pro-max design system
+   persisted at design-system/ai-video-clipper/MASTER.md).
+   Tailwind v4 `@theme inline` maps each utility (bg-primary,
+   text-foreground, border-border, ...) to a CSS variable, and the
+   `.dark` block redefines the variable — so one class adapts to both
+   themes and no page can end up with a light card inside dark chrome.
+   Token pairs are chosen so text always clears 4.5:1: primary blue
+   with white text in light mode and near-black text on the lighter
+   dark-mode blue; accent orange with black text in both modes. */
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-on-primary: var(--color-on-primary);
+  --color-secondary: var(--color-secondary);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-accent: var(--color-accent);
+  --color-on-accent: var(--color-on-accent);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-border: var(--color-border);
+  --color-destructive: var(--color-destructive);
+  --color-on-destructive: var(--color-on-destructive);
+  --color-ring: var(--color-ring);
+  --font-sans: var(--font-jakarta), ui-sans-system, system-ui, sans-serif;
 }
 
-.dark body {
-  background-color: #020617;
-  color: #f1f5f9;
+:root {
+  --color-primary: #2563eb;
+  --color-on-primary: #ffffff;
+  --color-secondary: #3b82f6;
+  --color-on-secondary: #000000;
+  --color-accent: #ea580c;
+  --color-on-accent: #000000;
+  --color-background: #f8fafc;
+  --color-foreground: #1e293b;
+  --color-card: #ffffff;
+  --color-card-foreground: #1e293b;
+  --color-muted: #e9eff8;
+  --color-muted-foreground: #475569;
+  --color-border: #e2e8f0;
+  --color-destructive: #dc2626;
+  --color-on-destructive: #ffffff;
+  --color-ring: #2563eb;
+}
+
+.dark {
+  --color-primary: #60a5fa;
+  --color-on-primary: #0f172a;
+  --color-secondary: #93c5fd;
+  --color-on-secondary: #0f172a;
+  --color-accent: #fb923c;
+  --color-on-accent: #000000;
+  --color-background: #020617;
+  --color-foreground: #f1f5f9;
+  --color-card: #0f172a;
+  --color-card-foreground: #f1f5f9;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-border: #1e293b;
+  --color-destructive: #f87171;
+  --color-on-destructive: #000000;
+  --color-ring: #60a5fa;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Visible keyboard focus everywhere (WCAG 2.4.7): a single global
+   rule beats per-element rings, which risk double outlines. */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Reduced motion: all transitions/animations collapse to their final
+   state instead of animating (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

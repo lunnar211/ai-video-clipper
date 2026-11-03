@@ -36,7 +36,7 @@ export default function AdminNavLink() {
 
   if (!isSupabaseConfigured() || !signedIn) return null;
   return (
-    <Link href="/admin" className="text-sm text-slate-700">
+    <Link href="/admin" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
       Admin
     </Link>
   );

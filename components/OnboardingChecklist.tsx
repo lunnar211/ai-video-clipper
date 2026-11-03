@@ -45,27 +45,27 @@ export default function OnboardingChecklist() {
   return (
     <section
       aria-label="First-run guide"
-      className="rounded-xl border border-violet-200 bg-violet-50 p-5 dark:border-violet-800 dark:bg-violet-950"
+      className="rounded-xl border border-primary/25 bg-primary/5 p-5 dark:bg-primary/10"
     >
       <div className="flex items-start justify-between gap-4">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+        <h2 className="text-lg font-semibold text-foreground">
           First time here? Four steps to your first clip
         </h2>
         <button
           type="button"
           onClick={dismiss}
           aria-label="Dismiss the first-run guide"
-          className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+          className="inline-flex min-h-[44px] shrink-0 cursor-pointer items-center rounded-lg border border-border bg-card px-3 py-1 text-sm text-foreground transition-colors duration-200 hover:bg-muted"
         >
           Dismiss
         </button>
       </div>
-      <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
+      <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
         {STEPS.map((step) => (
           <li key={step}>{step}</li>
         ))}
       </ol>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-2 text-sm text-muted-foreground">
         Stuck? <a href="/how-it-works" className="underline">How it works</a>{" "}
         explains each step, and <a href="/faq" className="underline">FAQ</a>{" "}
         answers what leaves your browser.

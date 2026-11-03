@@ -23,11 +23,11 @@ export default function HeroUploadBox() {
   };
 
   return (
-    <div className="rounded-xl border-2 border-dashed border-violet-300 bg-white p-5 dark:border-violet-700 dark:bg-slate-900">
+    <div className="rounded-xl border-2 border-dashed border-primary/50 bg-card p-5">
       <label
         htmlFor="hero-upload"
-        className={`block cursor-pointer rounded-lg px-4 py-6 text-center ${
-          dragging ? "bg-violet-50 dark:bg-violet-950" : ""
+        className={`block cursor-pointer rounded-lg px-4 py-6 text-center transition-colors duration-200 ${
+          dragging ? "bg-primary/10" : ""
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -40,10 +40,10 @@ export default function HeroUploadBox() {
           handOff(e.dataTransfer.files?.[0]);
         }}
       >
-        <span className="block text-lg font-semibold text-slate-900 dark:text-white">
+        <span className="block text-lg font-semibold text-foreground">
           Drop your video here, or choose a file
         </span>
-        <span className="mt-1 block text-sm text-slate-600 dark:text-slate-300">
+        <span className="mt-1 block text-sm text-muted-foreground">
           Up to 10 minutes and 500 MB. Only videos you recorded or own the
           rights to.
         </span>
@@ -56,7 +56,7 @@ export default function HeroUploadBox() {
         />
       </label>
       <p className="mt-3 text-center text-sm">
-        <a href="/create" className="font-semibold text-violet-700 underline dark:text-violet-400">
+        <a href="/create" className="inline-flex min-h-[44px] items-center font-semibold text-primary underline">
           Open the clipper without a file
         </a>
       </p>
