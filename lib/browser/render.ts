@@ -3,12 +3,18 @@ import { segmentAtTime, wordAtTime, type CaptionPreset } from "@/lib/captions";
 import { windowForCenterX, type CropMode } from "@/lib/crop";
 import { sampleFaceCenterX, sampleFaceTrack, type FaceTrackPoint } from "@/lib/browser/face";
 import { sampleSmartCropCenterX } from "@/lib/browser/smartcrop";
+import {
+  resolveAudioPlan,
+  type AudioTreatment,
+} from "@/lib/browser/audio-plan";
 
 /**
  * Browser clip renderer (the ffmpeg.wasm equivalent for this MVP).
  * One pass: video frame -> 9:16 canvas crop -> burned-in caption text ->
  * MediaRecorder. Original audio is mixed in through Web Audio; an
- * optional ElevenLabs voiceover track is mixed alongside it. No video
+ * optional ElevenLabs voiceover track is mixed alongside it. The
+ * clean-audio option (Phase 15) can leave the original track out
+ * entirely (muted) or replace it with a picked licensed track. No video
  * data leaves the browser.
  *
  * Output is 720x1280. Format is MP4 where the browser supports it,
@@ -206,7 +212,20 @@ export type RenderOptions = {
   voiceoverUrl?: string;
   /** Optional user-licensed background track, mixed at low volume. */
   musicUrl?: string;
+  /**
+   * Legacy gain override, no longer read: the clean-audio plan
+   * (Phase 15) sets the track gain — background 0.15, replaced 1.0.
+   * Kept in the type so older callers still typecheck.
+   */
   musicGain?: number;
+  /**
+   * Clean-audio choice (ClipForge Phase 15). Default "original"
+   * keeps today's behaviour. "muted" leaves the video's own audio
+   * out of the mix; "replaced" leaves it out and plays the picked
+   * licensed track as the soundtrack instead (falls back to muted
+   * when no track is given — never invent one).
+   */
+  audioTreatment?: AudioTreatment;
   /** Free-tier watermark: small brand text on every frame. */
   watermark?: boolean;
   /** Caption style preset (ClipForge Phase 1). Default = bold pop look. */
@@ -225,6 +244,8 @@ export type RenderResult = {
   blob: Blob;
   mimeType: string;
   voiceoverOk: boolean;
+  /** The audio treatment actually applied (see audio-plan). */
+  audioTreatment: AudioTreatment;
 };
 
 /** Resolved crop centres, so a retry after a blocked playback skips sampling. */
@@ -302,14 +323,25 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available in this browser.");
 
-  // Mix the original audio (and optional voiceover) into the recording.
+  // Clean-audio plan (ClipForge Phase 15): what the mix contains.
+  // The video's own audio is connected only for the "original"
+  // treatment; muted and replaced leave it out entirely, so a muted
+  // render with no voiceover and no track carries no audio track.
+  const audioPlan = resolveAudioPlan(opts.audioTreatment ?? "original", {
+    hasMusic: !!opts.musicUrl,
+    hasVoiceover: !!opts.voiceoverUrl,
+  });
+
+  // Mix the chosen audio (and optional voiceover) into the recording.
   const audioCtx = new AudioContext();
   const dest = audioCtx.createMediaStreamDestination();
-  try {
-    const source = audioCtx.createMediaElementSource(video);
-    source.connect(dest);
-  } catch {
-    // Audio stays silent; the picture still renders.
+  if (audioPlan.connectOriginal) {
+    try {
+      const source = audioCtx.createMediaElementSource(video);
+      source.connect(dest);
+    } catch {
+      // Audio stays silent; the picture still renders.
+    }
   }
   let voiceEl: HTMLAudioElement | null = null;
   if (opts.voiceoverUrl) {
@@ -329,7 +361,9 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
       musicEl.crossOrigin = "anonymous";
       const msource = audioCtx.createMediaElementSource(musicEl);
       const gain = audioCtx.createGain();
-      gain.gain.value = opts.musicGain ?? 0.15;
+      // Replaced tracks play at full volume as the soundtrack;
+      // background tracks keep the existing low-volume mix.
+      gain.gain.value = audioPlan.musicGain ?? 0.15;
       msource.connect(gain);
       gain.connect(dest);
     } catch {
@@ -504,5 +538,10 @@ export async function renderClip(opts: RenderOptions): Promise<RenderResult> {
   await stopped;
   await audioCtx.close().catch(() => undefined);
   const type = mimeType || "video/webm";
-  return { blob: new Blob(chunks, { type }), mimeType: type, voiceoverOk };
+  return {
+    blob: new Blob(chunks, { type }),
+    mimeType: type,
+    voiceoverOk,
+    audioTreatment: audioPlan.treatment,
+  };
 }

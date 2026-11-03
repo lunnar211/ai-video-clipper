@@ -39,6 +39,13 @@ import PostClip from "@/components/PostClip";
 import type { CcImportMeta } from "@/lib/imports/cc-types";
 import { combineAttributionLines } from "@/lib/rights/attribution";
 import type { Moment } from "@/lib/ai/highlights";
+import type { AudioTreatment } from "@/lib/browser/audio-plan";
+import RightsPanel from "@/components/RightsPanel";
+import {
+  sourceLicenceLine,
+  summarizeMusicChecks,
+  buildPanelAttribution,
+} from "@/lib/rights/panel";
 
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
 const MAX_DURATION_SEC = 600;
@@ -58,6 +65,8 @@ type Rendered = {
   url: string;
   mimeType: string;
   voiceoverOk: boolean;
+  /** The clean-audio treatment actually applied at render time. */
+  audioTreatment: AudioTreatment;
 };
 
 function fmtTime(sec: number): string {
@@ -108,6 +117,12 @@ export default function ClipperTool() {
     }
   });
   const [musicTrack, setMusicTrack] = useState<UserTrack | null>(null);
+  // ClipForge Phase 15: clean-audio choice for renders from now on.
+  // Default "original" keeps today's behaviour exactly; "muted"
+  // leaves the video's own audio out; "replaced" is only offered
+  // while a licensed track is picked (see the section below).
+  const [audioTreatment, setAudioTreatment] =
+    useState<AudioTreatment>("original");
   // ClipForge Phase 2: per-project declaration record. The project id
   // is one UUID per browser session; when a database is configured,
   // accepting the checkbox also stores an immutable server record
@@ -497,10 +512,10 @@ export default function ClipperTool() {
             voiceoverUrl = URL.createObjectURL(blob);
           } else if (res.status === 503) {
             setNotice(
-              "Voiceover is not connected yet (no voice key on the server) — rendering with the original audio only.",
+              "Voiceover is not connected yet (no voice key on the server) — continuing without voiceover.",
             );
           } else {
-            setNotice("Voiceover failed — rendering with the original audio only.");
+            setNotice("Voiceover failed — continuing without voiceover.");
           }
         }
         const result = await renderClip({
@@ -512,6 +527,7 @@ export default function ClipperTool() {
           manualCaption: clip.manualCaption,
           voiceoverUrl,
           musicUrl: musicTrack?.url,
+          audioTreatment,
           watermark: shouldWatermark("free"),
           captionPreset: {
             ...captionPresetById(presetByClip[clip.id] ?? "pop"),
@@ -542,6 +558,7 @@ export default function ClipperTool() {
             url,
             mimeType: result.mimeType,
             voiceoverOk: voiceoverUrl ? result.voiceoverOk : true,
+            audioTreatment: result.audioTreatment,
           },
         }));
         if (voiceoverUrl) URL.revokeObjectURL(voiceoverUrl);
@@ -553,7 +570,7 @@ export default function ClipperTool() {
         setRenderingId(null);
       }
     },
-    [videoUrl, cropMode, transcript, translatedTranscript, voiceoverOn, rightsOk, musicTrack, presetByClip, brandKit, splitBgByClip, words],
+    [videoUrl, cropMode, transcript, translatedTranscript, voiceoverOn, rightsOk, musicTrack, audioTreatment, presetByClip, brandKit, splitBgByClip, words],
   );
 
   const checkMusic = useCallback(
@@ -975,6 +992,96 @@ export default function ClipperTool() {
         )}
       </div>
 
+      {/* Clean audio + rights check (Phase 15): the audio treatment
+          applies to every render from now on (default keeps today's
+          behaviour). "Replace" is offered only while a licensed
+          track is picked — the site ships no built-in tracks, so
+          without one the choice is hidden, not faked. The panel
+          below states exactly what the tool knows before export. */}
+      <div className="rounded-xl bg-card p-5 shadow-sm">
+        <h2 className="text-lg font-semibold">Clean audio</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Choose what happens to the video&apos;s own audio when a
+          clip renders. This applies to renders from now on — clips
+          already rendered keep the treatment they were made with.
+        </p>
+        <div className="mt-3 flex flex-col gap-2 text-sm">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="audio-treatment"
+              value="original"
+              checked={audioTreatment === "original"}
+              onChange={() => setAudioTreatment("original")}
+            />
+            Keep original audio
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="audio-treatment"
+              value="muted"
+              checked={audioTreatment === "muted"}
+              onChange={() => setAudioTreatment("muted")}
+            />
+            Mute original audio
+          </label>
+          {musicTrack && (
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="audio-treatment"
+                value="replaced"
+                checked={audioTreatment === "replaced"}
+                onChange={() => setAudioTreatment("replaced")}
+              />
+              Replace original audio with my licensed track (
+              {musicTrack.name})
+            </label>
+          )}
+        </div>
+        {audioTreatment === "muted" && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Muted renders carry no original audio track. Voiceover
+            narration, if enabled, still plays.
+          </p>
+        )}
+        {audioTreatment === "replaced" && musicTrack && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            The licensed track plays at full volume as the soundtrack,
+            and its credit ships in the export.
+          </p>
+        )}
+        {!musicTrack && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            To replace the audio instead of muting it, pick a licensed
+            track in the music picker (it appears once clips are
+            ready).
+          </p>
+        )}
+        <div className="mt-4">
+          <RightsPanel
+            sourceLine={sourceLicenceLine({
+              ccImport,
+              ytImport,
+              rightsOk,
+            })}
+            checkLines={summarizeMusicChecks(musicCheck)}
+            treatment={audioTreatment}
+            trackName={musicTrack?.name ?? null}
+            trackLicence={musicTrack?.licence ?? null}
+            trackCredit={
+              musicTrack ? userTrackAttribution(musicTrack) : null
+            }
+            voiceoverOn={voiceoverOn}
+            renderedTreatments={Object.values(rendered).map(
+              (r) => r.audioTreatment,
+            )}
+            attribution={buildPanelAttribution({ musicTrack, ccImport })}
+          />
+        </div>
+      </div>
+
       {/* Optional server copy (Phase 10): the first UI caller of the
           chunked-upload client. Opt-in only — without it, the video
           never leaves this browser. */}
@@ -1287,7 +1394,16 @@ export default function ClipperTool() {
               {zipBusy ? "Zipping…" : "Download all clips + captions (ZIP)"}
             </button>
           )}
-          <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
+          <MusicPicker
+            selected={musicTrack}
+            onSelect={(t) => {
+              setMusicTrack(t);
+              // Dropping the track while "replaced" is chosen falls
+              // back to "muted" — replace needs a real track.
+              if (!t && audioTreatment === "replaced")
+                setAudioTreatment("muted");
+            }}
+          />
           <ul className="space-y-4">
             {clips.map((clip) => {
               const out = rendered[clip.id];
@@ -1471,7 +1587,11 @@ export default function ClipperTool() {
                       </a>
                       {!out.voiceoverOk && (
                         <span className="ml-2 text-amber-700 dark:text-amber-300">
-                          Voiceover did not play — clip has original audio only.
+                          {out.audioTreatment === "muted"
+                            ? "Voiceover did not play — this clip has no original audio (muted)."
+                            : out.audioTreatment === "replaced"
+                              ? "Voiceover did not play — this clip carries the licensed track only."
+                              : "Voiceover did not play — clip has original audio only."}
                         </span>
                       )}
                     </div>

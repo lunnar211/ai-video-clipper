@@ -113,7 +113,12 @@ test("own-YouTube flow shows the verified banner and Studio step", async ({
   );
   await page.getByRole("button", { name: "Verify ownership" }).click();
   await expect(page.getByText("Ownership verified.")).toBeVisible();
-  await expect(page.getByText("My Channel", { exact: false })).toBeVisible();
+  // The banner sentence, not the bare channel name: since Phase 15
+  // the rights panel also states the verified channel, so the bare
+  // name legitimately appears twice on the page.
+  await expect(
+    page.getByText("is on your connected channel"),
+  ).toBeVisible();
   await expect(
     page.getByRole("link", { name: /upload that file above/ }),
   ).toBeVisible();
