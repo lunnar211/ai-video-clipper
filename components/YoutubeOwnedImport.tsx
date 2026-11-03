@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { isYoutubeLink } from "@/lib/imports/youtube-link";
 import {
   verifyYoutubeOwned,
@@ -30,17 +30,40 @@ import {
 
 export default function YoutubeOwnedImport({
   onVerified,
+  initialUrl = null,
+  autoVerify = false,
 }: {
   onVerified: (meta: YoutubeOwnedMeta) => void;
+  /**
+   * Phase 16: a YouTube link handed over from the homepage hero.
+   * The hero used to drop this link — the user arrived at an empty
+   * box and had to re-paste. initialUrl + autoVerify mirror the CC
+   * flow: the input follows a late-arriving initialUrl, and the
+   * check runs once on arrival so the journey continues where the
+   * hero left off.
+   */
+  initialUrl?: string | null;
+  autoVerify?: boolean;
 }) {
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState(initialUrl ?? "");
   const [phase, setPhase] = useState<"idle" | "checking" | "verified" | "error">(
     "idle",
   );
   const [result, setResult] = useState<YoutubeOwnedResult | null>(null);
+  const autoRan = useRef(false);
 
-  const check = useCallback(async () => {
-    const trimmed = url.trim();
+  // The hero hands the link over after mount (module memory), so
+  // the input must follow a late-arriving initialUrl — useState
+  // alone would keep the first-render empty value forever.
+  // Deferred past commit (queueMicrotask), the same pattern the
+  // CC panel and the tool use for their mount handoffs.
+  useEffect(() => {
+    if (!initialUrl) return;
+    queueMicrotask(() => setUrl(initialUrl));
+  }, [initialUrl]);
+
+  const check = useCallback(async (value?: string) => {
+    const trimmed = (value ?? url).trim();
     if (!trimmed) {
       setResult({
         ok: false,
@@ -71,6 +94,13 @@ export default function YoutubeOwnedImport({
       setPhase("error");
     }
   }, [url, onVerified]);
+
+  useEffect(() => {
+    if (autoVerify && initialUrl && !autoRan.current) {
+      autoRan.current = true;
+      void check(initialUrl);
+    }
+  }, [autoVerify, initialUrl, check]);
 
   const failure = result && !result.ok ? result : null;
 
@@ -151,8 +181,11 @@ export default function YoutubeOwnedImport({
             </p>
           )}
           <p className="mt-2">
-            Or upload a video file directly above — the file route
-            does not need a link.
+            Or{" "}
+            <a href="#upload-dropzone" className="underline">
+              upload a video file directly
+            </a>{" "}
+            — the file route does not need a link.
           </p>
         </div>
       )}

@@ -19,8 +19,15 @@ test("homepage hero boxes both offer a paste-a-link tab", async ({ page }) => {
   await expect(tabs).toHaveCount(2);
   await tabs.first().click();
   await expect(page.locator("#hero-upload-link")).toBeVisible();
+  // Phase 16 relabelled the tab: the old label hid the YouTube
+  // path even though YouTube links were routed. The tab still
+  // exists on both boxes; the label now names the link, and the
+  // subtext names the YouTube routing.
   await expect(
-    page.getByText("Paste a Wikimedia Commons or Internet Archive link"),
+    page.getByText("Paste a video link", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Your own YouTube link goes straight to the ownership check"),
   ).toBeVisible();
 });
 

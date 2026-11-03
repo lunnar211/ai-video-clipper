@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { setPendingUpload, setPendingCcUrl } from "@/lib/upload-pending";
+import { setPendingUpload, setPendingCcUrl, setPendingYtUrl } from "@/lib/upload-pending";
 import { isYoutubeLink } from "@/lib/imports/youtube-link";
 
 /**
@@ -38,9 +38,13 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
     if (!trimmed) return;
     // Phase 14: a YouTube link pasted here goes straight to the
     // own-YouTube flow on /create — the CC box would only route it
-    // there anyway, and this skips the detour. The user re-pastes
-    // in that flow's own box; nothing is verified from the hero.
+    // there anyway, and this skips the detour.
+    // Phase 16: the link itself is carried over (setPendingYtUrl),
+    // so the flow's box arrives pre-filled and verifies on arrival
+    // instead of making the user re-paste. The hero still never
+    // verifies or loads the link itself.
     if (isYoutubeLink(trimmed)) {
+      setPendingYtUrl(trimmed);
       router.push("/create#your-youtube-video");
       return;
     }
@@ -114,10 +118,12 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
             htmlFor={`${id}-link`}
             className="block text-center text-lg font-semibold text-foreground"
           >
-            Paste a Wikimedia Commons or Internet Archive link
+            Paste a video link
           </label>
           <p className="text-center text-sm text-muted-foreground">
-            The licence is checked in the clipper before anything loads.
+            Wikimedia Commons or Internet Archive links are licence
+            checked in the clipper before anything loads. Your own
+            YouTube link goes straight to the ownership check.
             Other links are refused — upload a file instead.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">

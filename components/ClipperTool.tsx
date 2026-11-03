@@ -30,10 +30,11 @@ import {
   recordRenderToday,
   shouldWatermark,
 } from "@/lib/usage/quota";
-import { takePendingUpload, takePendingCcUrl } from "@/lib/upload-pending";
+import { takePendingUpload, takePendingCcUrl, takePendingYtUrl } from "@/lib/upload-pending";
 import { stageServerCopy } from "@/lib/storage/stage-upload";
 import CcPasteImport from "@/components/CcPasteImport";
 import YoutubeOwnedImport from "@/components/YoutubeOwnedImport";
+import YoutubeJourneySteps from "@/components/YoutubeJourneySteps";
 import type { YoutubeOwnedMeta } from "@/lib/imports/youtube-owned-client";
 import PostClip from "@/components/PostClip";
 import type { CcImportMeta } from "@/lib/imports/cc-types";
@@ -173,6 +174,10 @@ export default function ClipperTool() {
   // A CC link handed over from the homepage hero paste tab; the
   // paste panel auto-verifies it once on arrival.
   const [ccInitialUrl, setCcInitialUrl] = useState<string | null>(null);
+  // ClipForge Phase 16: a YouTube link handed over from the
+  // homepage hero paste tab; the YouTube flow auto-verifies it
+  // once on arrival, the same way the CC panel does.
+  const [ytInitialUrl, setYtInitialUrl] = useState<string | null>(null);
   const [presetByClip, setPresetByClip] = useState<Record<string, string>>({});
   const [splitBgByClip, setSplitBgByClip] = useState<Record<string, string>>({});
   const [brandKit, setBrandKit] = useState<BrandKit>(() => loadBrandKit());
@@ -266,6 +271,21 @@ export default function ClipperTool() {
     });
   }, []);
 
+  // ClipForge Phase 16: the single direct-upload path, shared by
+  // the main upload box and the journey's step-3 picker. A direct
+  // upload switches source away from CC (clears ccImport) but
+  // KEEPS a verified YouTube record: that upload is expected to
+  // be the Studio download of the verified video, and the record
+  // attaches to the project automatically. An upload with no
+  // verified record stays honestly unverified in the rights panel.
+  const handleDirectFile = useCallback(
+    (f: File) => {
+      setCcImport(null);
+      resetForFile(f);
+    },
+    [resetForFile],
+  );
+
   // Hero upload handoff (Phase 7): a file chosen in the homepage hero
   // is carried in memory to this tool exactly once (take clears it, so
   // StrictMode's double effect invocation cannot consume it twice).
@@ -281,6 +301,8 @@ export default function ClipperTool() {
       }
       const pendingUrl = takePendingCcUrl();
       if (pendingUrl) setCcInitialUrl(pendingUrl);
+      const pendingYt = takePendingYtUrl();
+      if (pendingYt) setYtInitialUrl(pendingYt);
     });
   }, [resetForFile]);
 
@@ -889,10 +911,7 @@ export default function ClipperTool() {
         onDrop={(e) => {
           e.preventDefault();
           const f = e.dataTransfer.files?.[0];
-          if (f) {
-            setCcImport(null);
-            resetForFile(f);
-          }
+          if (f) handleDirectFile(f);
         }}
       >
         <p className="font-medium">Drop your video here, or choose a file</p>
@@ -906,16 +925,24 @@ export default function ClipperTool() {
           accept="video/*"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) {
-              setCcImport(null);
-              resetForFile(f);
-            }
+            if (f) handleDirectFile(f);
           }}
         />
         {file && (
           <p className="mt-3 text-sm text-muted-foreground">
             {file.name} — {(file.size / 1024 / 1024).toFixed(1)} MB
             {duration > 0 && ` — ${fmtTime(duration)}`}
+          </p>
+        )}
+        {ytImport && !file && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Verified video: “{ytImport.videoTitle}” — upload its
+            Studio download here.
+          </p>
+        )}
+        {ytImport && file && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Your verified source record is attached to this project.
           </p>
         )}
       </div>
@@ -941,21 +968,35 @@ export default function ClipperTool() {
         )}
       </div>
 
-      {/* Your YouTube video (Phase 14): the UI for the Phase 8
-          own-YouTube ownership check. Signed-in users with a
-          connected channel paste their own link; the server proves
-          the video sits on their channel. This verifies ownership
-          ONLY — the video itself is never downloaded from YouTube.
-          The file still arrives via direct upload: the owner
-          downloads their own video from YouTube Studio and uploads
-          it in the box above. */}
+      {/* Your YouTube video (Phase 14 + Phase 16 guided journey):
+          the UI for the Phase 8 own-YouTube ownership check.
+          Signed-in users with a connected channel paste their own
+          link; the server proves the video sits on their channel.
+          This verifies ownership ONLY — the video itself is never
+          downloaded from YouTube. The file still arrives via direct
+          upload: the owner downloads their own video from YouTube
+          Studio and uploads it in the box above (or in step 3
+          below). Phase 16 turns the flow into numbered steps that
+          stay visible, so verification, Studio download, and upload
+          read as one journey instead of three separate boxes. */}
       <div
         id="your-youtube-video"
         className="scroll-mt-24 rounded-xl bg-card p-5 shadow-sm"
       >
         <h2 className="text-lg font-semibold">Your YouTube video</h2>
         <div className="mt-3">
-          <YoutubeOwnedImport onVerified={setYtImport} />
+          <YoutubeJourneySteps
+            verified={ytImport}
+            fileName={file?.name ?? null}
+            onUploadFile={handleDirectFile}
+          />
+        </div>
+        <div className="mt-3">
+          <YoutubeOwnedImport
+            onVerified={setYtImport}
+            initialUrl={ytInitialUrl}
+            autoVerify={ytInitialUrl !== null}
+          />
         </div>
         {ytImport && (
           <div className="mt-3 rounded-lg border border-green-300 bg-green-50 p-4 text-sm text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
@@ -1146,7 +1187,10 @@ export default function ClipperTool() {
       )}
 
       {file && duration > 0 && (
-        <section className="space-y-3 rounded-xl bg-card p-5 shadow-sm">
+        <section
+          id="transcribe"
+          className="scroll-mt-24 space-y-3 rounded-xl bg-card p-5 shadow-sm"
+        >
           <h2 className="text-lg font-semibold">1. AI transcript &amp; highlights</h2>
           <p className="text-sm text-muted-foreground">
             Transcription sends only the audio track to the server (Groq

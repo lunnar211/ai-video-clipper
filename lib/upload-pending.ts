@@ -41,3 +41,22 @@ export function takePendingCcUrl(): string | null {
   pendingCcUrl = null;
   return url;
 }
+
+let pendingYtUrl: string | null = null;
+
+/**
+ * Stage a hero-pasted own-YouTube link for the tool (Phase 16).
+ * The YouTube flow used to drop this link — the user arrived at an
+ * empty box and had to re-paste. Carried the same way as the CC
+ * link so the journey starts where the hero left off.
+ */
+export function setPendingYtUrl(url: string): void {
+  pendingYtUrl = url;
+}
+
+/** Take the staged YouTube link, clearing it so it is consumed exactly once. */
+export function takePendingYtUrl(): string | null {
+  const url = pendingYtUrl;
+  pendingYtUrl = null;
+  return url;
+}

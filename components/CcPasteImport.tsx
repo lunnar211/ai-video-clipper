@@ -277,8 +277,11 @@ export default function CcPasteImport({
             channel. Other people&apos;s YouTube videos stay refused.
           </p>
           <p className="mt-2">
-            Or upload a video file directly above — the file route
-            does not need a link.
+            Or{" "}
+            <a href="#upload-dropzone" className="underline">
+              upload a video file directly
+            </a>{" "}
+            — the file route does not need a link.
           </p>
         </div>
       )}
@@ -302,8 +305,11 @@ export default function CcPasteImport({
           )}
           {!meta && (
             <p className="mt-2">
-              Or upload a video file directly above — the file route
-              does not need a link.
+              Or{" "}
+              <a href="#upload-dropzone" className="underline">
+                upload a video file directly
+              </a>{" "}
+              — the file route does not need a link.
             </p>
           )}
         </div>
