@@ -161,6 +161,28 @@ function AccountsInner() {
         the status below says exactly where each one stands. Tokens
         are encrypted on the server and never shown here.
       </p>
+      <section className="mt-6 rounded border border-border p-4">
+        <h2 className="font-semibold">Post without connecting — available now</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          You do not need any card below to post a finished clip.
+          From a rendered clip in the tool, “Post clip” opens your
+          device&apos;s share sheet, or the platform&apos;s own upload
+          page in a new tab — where you are already signed in on that
+          platform. No login is saved anywhere for that path, and this
+          site never embeds a platform login page (platforms block
+          those inside other websites). The site only records activity
+          — which clip, which platform, and whether it was shared,
+          cancelled, or opened — never a confirmed post, because only
+          the platform itself can confirm a live post.
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The connected cards below are the second path: direct
+          posting through each platform&apos;s official API. That path
+          stays off until each platform&apos;s app review is approved,
+          and it is not live for any platform yet — the statuses below
+          say so honestly.
+        </p>
+      </section>
       {notice && (
         <p className="mt-4 rounded bg-muted p-3 text-sm">{notice}</p>
       )}

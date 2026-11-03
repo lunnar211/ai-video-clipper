@@ -25,6 +25,13 @@ type Metrics = {
 export default function AdminDashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [postActivity, setPostActivity] = useState<{
+    total: number;
+    byPlatform: Record<string, number>;
+    byOutcome: Record<string, number>;
+    truncated: boolean;
+  } | null>(null);
+  const [postActivityNote, setPostActivityNote] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/metrics")
@@ -39,6 +46,31 @@ export default function AdminDashboard() {
         setMetrics(data);
       })
       .catch(() => setMessage("Metrics could not be loaded."));
+    // Post-without-connecting activity is independent of metrics: a
+    // failure here never blocks the dashboard, it just notes itself.
+    fetch("/api/admin/post-activity")
+      .then(async (res) => {
+        const data = (await res.json().catch(() => ({}))) as {
+          total?: number;
+          byPlatform?: Record<string, number>;
+          byOutcome?: Record<string, number>;
+          truncated?: boolean;
+          error?: string;
+        };
+        if (!res.ok || typeof data.total !== "number") {
+          setPostActivityNote(
+            data.error ?? "Post activity could not be loaded.",
+          );
+          return;
+        }
+        setPostActivity({
+          total: data.total,
+          byPlatform: data.byPlatform ?? {},
+          byOutcome: data.byOutcome ?? {},
+          truncated: data.truncated ?? false,
+        });
+      })
+      .catch(() => setPostActivityNote("Post activity could not be loaded."));
   }, []);
 
   if (message) {
@@ -73,6 +105,36 @@ export default function AdminDashboard() {
           Daily active users: {metrics.dauMau.dau} · Monthly active
           users: {metrics.dauMau.mau}
         </p>
+      </section>
+      <section className="mt-4">
+        <h2 className="font-semibold">
+          Post activity (no-connect path only)
+        </h2>
+        {postActivity ? (
+          <p className="text-sm text-muted-foreground">
+            {postActivity.total} events
+            {postActivity.truncated ? " (newest 5000 rows)" : ""} · By
+            platform:{" "}
+            {Object.keys(postActivity.byPlatform).length === 0
+              ? "none yet"
+              : Object.entries(postActivity.byPlatform)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(" · ")}{" "}
+            · By outcome:{" "}
+            {Object.keys(postActivity.byOutcome).length === 0
+              ? "none yet"
+              : Object.entries(postActivity.byOutcome)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(" · ")}
+            . These are shares, cancellations, and opened upload pages
+            — never confirmed published posts, and never logins: the
+            log holds no credentials by construction.
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {postActivityNote ?? "Loading…"}
+          </p>
+        )}
       </section>
       <section className="mt-4">
         <h2 className="font-semibold">Funnel</h2>

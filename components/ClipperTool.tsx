@@ -33,6 +33,7 @@ import {
 import { takePendingUpload, takePendingCcUrl } from "@/lib/upload-pending";
 import { stageServerCopy } from "@/lib/storage/stage-upload";
 import CcPasteImport from "@/components/CcPasteImport";
+import PostClip from "@/components/PostClip";
 import type { CcImportMeta } from "@/lib/imports/cc-types";
 import { combineAttributionLines } from "@/lib/rights/attribution";
 import type { Moment } from "@/lib/ai/highlights";
@@ -1411,6 +1412,21 @@ export default function ClipperTool() {
                         </span>
                       )}
                     </div>
+                  )}
+                  {out &&
+                    !(
+                      musicCheck[clip.id]?.status === "detected" &&
+                      !musicAck[clip.id]
+                    ) && (
+                    <PostClip
+                      clipId={clip.id}
+                      title={clip.title}
+                      hashtags={clip.hashtags}
+                      mimeType={out.mimeType}
+                      getBlob={async () =>
+                        fetch(out.url).then((r) => r.blob())
+                      }
+                    />
                   )}
                   <MetadataCard transcript={transcript ?? []} clip={clip} />
                 </li>

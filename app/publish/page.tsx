@@ -193,6 +193,14 @@ export default function Publish() {
         publishing-pause flag, the fingerprint verdict, and each
         platform&apos;s limits before any upload is attempted.
       </p>
+      <p className="mt-4 rounded border border-border p-3 text-sm text-muted-foreground">
+        Posting without connecting: a finished clip can already be
+        posted from the tool itself, via your device&apos;s share sheet
+        or the platform&apos;s own upload page — no account connection
+        needed, and no login saved anywhere. This composer is only for
+        the connected-account path, which stays off until each
+        platform&apos;s app review is approved.
+      </p>
       {result && (
         <p className="mt-4 whitespace-pre-line rounded bg-muted p-3 text-sm">
           {result}
