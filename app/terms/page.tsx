@@ -1,7 +1,7 @@
 export default function Terms() {
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <h1 className="text-2xl font-bold text-foreground">Terms of Use</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Terms of Use</h1>
       <p>
         By using AI Video Clipper you agree to these terms. If you do
         not agree, do not use the site.

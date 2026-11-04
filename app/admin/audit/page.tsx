@@ -71,8 +71,8 @@ export default function AdminAudit() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Audit log</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Audit log</h1>
       {message && (
         <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
@@ -94,26 +94,26 @@ export default function AdminAudit() {
         <button
           type="button"
           onClick={load}
-          className="rounded bg-primary px-3 py-1 text-sm text-on-primary"
+          className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Filter
         </button>
         <a
           href="/api/admin/audit/export?format=csv"
-          className="rounded bg-muted px-3 py-1 text-sm text-foreground"
+          className="inline-flex min-h-[44px] items-center rounded bg-muted px-3 py-1 text-sm text-foreground"
         >
           Export CSV
         </a>
         <a
           href="/api/admin/audit/export?format=json"
-          className="rounded bg-muted px-3 py-1 text-sm text-foreground"
+          className="inline-flex min-h-[44px] items-center rounded bg-muted px-3 py-1 text-sm text-foreground"
         >
           Export JSON
         </a>
         <button
           type="button"
           onClick={purge}
-          className="rounded bg-red-600 px-3 py-1 text-sm text-white"
+          className="inline-flex min-h-[44px] items-center rounded bg-red-600 px-3 py-1 text-sm text-white"
         >
           Purge old entries
         </button>
@@ -136,6 +136,6 @@ export default function AdminAudit() {
           <li className="text-sm text-muted-foreground">No audit entries yet.</li>
         )}
       </ul>
-    </main>
+    </div>
   );
 }

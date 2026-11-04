@@ -109,7 +109,7 @@ function InvoiceInner() {
       </p>
       <button
         onClick={() => window.print()}
-        className="mt-6 border px-3 py-1 text-sm"
+        className="mt-6 border border-border px-3 py-1 text-sm"
       >
         Print
       </button>

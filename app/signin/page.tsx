@@ -29,12 +29,12 @@ export default function SignInPage() {
 
   if (!isSupabaseConfigured()) {
     return (
-      <main>
-        <h1 className="text-xl font-bold text-foreground">Sign in</h1>
+      <div data-testid="signin-page">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign in</h1>
         <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           Sign-in is not configured yet.
         </p>
-      </main>
+      </div>
     );
   }
 
@@ -77,8 +77,8 @@ export default function SignInPage() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Sign in</h1>
+    <div data-testid="signin-page">
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Sign in</h1>
       <form
         onSubmit={submit}
         className="mt-4 flex max-w-sm flex-col gap-3"
@@ -113,7 +113,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-on-primary disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-primary px-3 py-2 text-sm font-medium text-on-primary disabled:opacity-50"
         >
           {busy ? "Signing in…" : "Sign in with email"}
         </button>
@@ -122,7 +122,7 @@ export default function SignInPage() {
         <button
           type="button"
           onClick={signInWithGoogle}
-          className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground"
         >
           Sign in with Google
         </button>
@@ -132,6 +132,6 @@ export default function SignInPage() {
           resets are also done in the Supabase dashboard.
         </p>
       </div>
-    </main>
+    </div>
   );
 }

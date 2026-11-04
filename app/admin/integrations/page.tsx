@@ -52,8 +52,8 @@ export default function AdminIntegrations() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Integrations</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Integrations</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Pluggable integrations. Nothing here claims a live connection
         without credentials — see docs/PHASE5.md for what each entry
@@ -81,7 +81,7 @@ export default function AdminIntegrations() {
                 type="button"
                 disabled={item.status === "interface_only"}
                 onClick={() => toggle(item.id, !item.enabled)}
-                className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-40"
+                className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-40"
               >
                 {item.status === "interface_only"
                   ? "No adapter yet"
@@ -93,6 +93,6 @@ export default function AdminIntegrations() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

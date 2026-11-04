@@ -1,7 +1,7 @@
 export default function Contact() {
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <h1 className="text-2xl font-bold text-foreground">Contact</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Contact</h1>
       <p>
         For support, privacy questions, or copyright notices, write to:
       </p>

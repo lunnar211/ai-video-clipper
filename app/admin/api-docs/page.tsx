@@ -29,8 +29,8 @@ export default function AdminApiDocs() {
   }, []);
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">API docs</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">API docs</h1>
       {message && (
         <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
@@ -67,6 +67,6 @@ export default function AdminApiDocs() {
           </p>
         </>
       )}
-    </main>
+    </div>
   );
 }

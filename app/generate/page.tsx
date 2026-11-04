@@ -32,6 +32,14 @@ export default function Generate() {
           uploading or linking any video.
         </p>
       </section>
+      <p className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+        Have a video of your own?{" "}
+        <a href="/create" className="font-medium text-primary underline">
+          Clip it instead
+        </a>{" "}
+        — upload it and cut moments from it, rather than generating
+        from a topic.
+      </p>
       <GenerateTool />
     </div>
   );

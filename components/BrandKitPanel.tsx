@@ -49,7 +49,7 @@ export default function BrandKitPanel(props: {
         <label className="flex flex-col">
           Primary color
           <input
-            className="mt-1 h-9 w-16 rounded border"
+            className="mt-1 h-9 w-16 rounded border border-border"
             type="color"
             value={kit.primaryColor}
             onChange={(e) => onChange({ ...kit, primaryColor: e.target.value })}

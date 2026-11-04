@@ -28,8 +28,8 @@ export default function AdminEvents() {
   }, []);
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Live event feed</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Live event feed</h1>
       <p className="mt-2 text-sm text-muted-foreground">{status}</p>
       <ul className="mt-4 space-y-2">
         {frames.map((f, i) => (
@@ -43,6 +43,6 @@ export default function AdminEvents() {
           </li>
         )}
       </ul>
-    </main>
+    </div>
   );
 }

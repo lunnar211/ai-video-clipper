@@ -120,7 +120,7 @@ export default function ComplianceChecklist({
     setTicks((prev) => ({ ...prev, [key]: value }));
 
   return (
-    <section className="rounded-xl border p-4 text-sm" aria-label="Pre-publish compliance checklist">
+    <section className="rounded-xl border border-border p-4 text-sm" aria-label="Pre-publish compliance checklist">
       <h3 className="font-semibold">Pre-publish compliance checklist</h3>
       <p className="mt-1 text-muted-foreground">
         Tick this list per post, not once for all posts. Publishing

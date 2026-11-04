@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     q: "What are the size and length limits?",
-    a: "Videos up to 10 minutes and 500 MB (browser limits). Clips up to 3 minutes. Output is 720×1280 vertical video. Transcription audio is capped at 25 MB by the provider, which is why the browser resamples to 16 kHz mono (~2 MB per minute).",
+    a: "Videos up to 10 minutes and 500 MB (browser limits). Clips up to 3 minutes. Clips from the clipper are 720×1280 vertical video; generated shorts also come in 1280×720 and 720×720. Transcription audio is capped at 25 MB by the provider, which is why the browser resamples to 16 kHz mono (~2 MB per minute).",
   },
   {
     q: "Will my clip be MP4 or WebM?",
@@ -54,7 +54,7 @@ export default function Faq() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">FAQ</h1>
       {faqs.map((f) => (
-        <section key={f.q} className="rounded-xl bg-card p-5 shadow-sm">
+        <section key={f.q} className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold">{f.q}</h2>
           <p className="mt-1 text-muted-foreground">{f.a}</p>
         </section>

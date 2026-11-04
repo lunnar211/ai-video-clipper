@@ -97,7 +97,7 @@ export default function AdminStrikes() {
               {s.status === "submitted" && (
                 <button
                   type="button"
-                  className="rounded border border-border px-3 py-1.5 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded border border-border px-3 py-1.5 disabled:opacity-50"
                   disabled={busyId === s.id}
                   onClick={() => review(s.id, "under_review")}
                 >
@@ -108,7 +108,7 @@ export default function AdminStrikes() {
                 <>
                   <button
                     type="button"
-                    className="rounded border border-border px-3 py-1.5 disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded border border-border px-3 py-1.5 disabled:opacity-50"
                     disabled={busyId === s.id}
                     onClick={() => review(s.id, "upheld")}
                   >
@@ -116,7 +116,7 @@ export default function AdminStrikes() {
                   </button>
                   <button
                     type="button"
-                    className="rounded border border-border px-3 py-1.5 disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded border border-border px-3 py-1.5 disabled:opacity-50"
                     disabled={busyId === s.id}
                     onClick={() => review(s.id, "overturned")}
                   >

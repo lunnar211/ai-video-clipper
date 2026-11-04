@@ -98,12 +98,12 @@ export default function Report() {
     "mt-1 w-full rounded border border-border px-2 py-1.5";
 
   return (
-    <div className="space-y-8 text-sm text-muted-foreground">
+    <div className="space-y-8 text-sm">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Report copyright infringement
         </h1>
-        <p className="mt-2">
+        <p className="mt-2 text-muted-foreground">
           Use this form for a DMCA-style takedown notice. The full
           procedure and the repeat-infringer policy are on the
           Copyright / DMCA page. Nothing here promises any outcome,
@@ -111,7 +111,7 @@ export default function Report() {
         </p>
       </div>
 
-      <section className="space-y-3 rounded-xl border p-4">
+      <section className="space-y-3 rounded-xl border border-border bg-card p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-foreground">
           Takedown notice
         </h2>
@@ -152,7 +152,7 @@ export default function Report() {
         </label>
         <button
           type="button"
-          className="rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
           onClick={submitNotice}
           disabled={busy}
         >
@@ -161,11 +161,11 @@ export default function Report() {
         {noticeResult && <p>{noticeResult}</p>}
       </section>
 
-      <section className="space-y-3 rounded-xl border p-4">
+      <section className="space-y-3 rounded-xl border border-border bg-card p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-foreground">
           Appeal a strike
         </h2>
-        <p>
+        <p className="text-muted-foreground">
           If your account received a strike, appeal it here with the
           strike id you were given. Appeals move: submitted → under
           review → upheld (the strike stands) or overturned (the strike
@@ -193,7 +193,7 @@ export default function Report() {
         </label>
         <button
           type="button"
-          className="rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center rounded-lg bg-primary px-4 py-2 font-medium text-on-primary disabled:opacity-50"
           onClick={submitAppeal}
           disabled={busy}
         >

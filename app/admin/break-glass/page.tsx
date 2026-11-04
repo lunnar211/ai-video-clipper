@@ -64,8 +64,8 @@ export default function AdminBreakGlass() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Break-glass access</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Break-glass access</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Admins never see video content, transcripts, or tokens by
         default. Break-glass is the only exception: one item, one
@@ -101,7 +101,7 @@ export default function AdminBreakGlass() {
           type="button"
           disabled={busy || !itemId.trim() || reason.trim().length < 10}
           onClick={requestGrant}
-          className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
         >
           Request grant
         </button>
@@ -118,7 +118,7 @@ export default function AdminBreakGlass() {
             type="button"
             disabled={busy || !fetchId.trim()}
             onClick={fetchItem}
-            className="rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
           >
             Fetch item (consumes grant)
           </button>
@@ -129,6 +129,6 @@ export default function AdminBreakGlass() {
           {JSON.stringify(item, null, 2)}
         </pre>
       )}
-    </main>
+    </div>
   );
 }

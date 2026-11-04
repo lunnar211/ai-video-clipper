@@ -127,7 +127,7 @@ export const HOME_FAQS: MarketingFaq[] = [
   },
   {
     q: "What are the size and length limits?",
-    a: "Videos up to 10 minutes and 500 MB. Clips up to 3 minutes. Output is 720×1280 vertical video.",
+    a: "Videos up to 10 minutes and 500 MB. Clips up to 3 minutes. Clips from the clipper are 720×1280 vertical video; generated shorts also come in 1280×720 and 720×720.",
   },
   {
     q: "Do I need an account or payment?",

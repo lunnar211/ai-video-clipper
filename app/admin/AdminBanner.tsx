@@ -62,7 +62,7 @@ export default function AdminBanner() {
         type="button"
         onClick={end}
         disabled={ending}
-        className="mt-2 rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
+        className="mt-2 inline-flex min-h-[44px] items-center rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
       >
         {ending ? "Ending…" : "End view-as"}
       </button>

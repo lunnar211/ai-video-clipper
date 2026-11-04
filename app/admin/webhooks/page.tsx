@@ -107,8 +107,8 @@ export default function AdminWebhooks() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Webhooks</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Webhooks</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         HMAC-signed event payloads (X-ClipForge-Signature +
         X-ClipForge-Timestamp). Verification steps for receivers are in
@@ -157,7 +157,7 @@ export default function AdminWebhooks() {
         <button
           type="button"
           onClick={create}
-          className="mt-3 rounded bg-primary px-3 py-1 text-sm text-on-primary"
+          className="mt-3 inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Create endpoint
         </button>
@@ -203,6 +203,6 @@ export default function AdminWebhooks() {
           </ul>
         </div>
       )}
-    </main>
+    </div>
   );
 }

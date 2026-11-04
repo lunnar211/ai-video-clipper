@@ -1,7 +1,7 @@
 export default function Privacy() {
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <h1 className="text-2xl font-bold text-foreground">Privacy Policy</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Privacy Policy</h1>
       <p>
         AI Video Clipper is built so that as little as possible leaves
         your browser. This page describes what is sent where, in plain

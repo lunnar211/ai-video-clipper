@@ -1,7 +1,7 @@
 export default function Cookies() {
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <h1 className="text-2xl font-bold text-foreground">Cookie Policy</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Cookie Policy</h1>
       <p>
         AI Video Clipper uses as few cookies as possible, and no
         advertising trackers at all.

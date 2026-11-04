@@ -63,8 +63,8 @@ export default function AdminGdpr() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">GDPR export &amp; deletion</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">GDPR export &amp; deletion</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Export downloads everything held about a user (safe columns
         only — never tokens, hashes, secrets, transcripts, or video).
@@ -90,7 +90,7 @@ export default function AdminGdpr() {
           <button
             type="button"
             onClick={runExport}
-            className="rounded bg-primary px-3 py-1 text-sm text-on-primary"
+            className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary"
           >
             Export archive
           </button>
@@ -105,7 +105,7 @@ export default function AdminGdpr() {
           <button
             type="button"
             onClick={runDelete}
-            className="rounded bg-red-700 px-3 py-1 text-sm text-white"
+            className="inline-flex min-h-[44px] items-center rounded bg-red-700 px-3 py-1 text-sm text-white"
           >
             Delete user data
           </button>
@@ -116,6 +116,6 @@ export default function AdminGdpr() {
           {result}
         </pre>
       )}
-    </main>
+    </div>
   );
 }

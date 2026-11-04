@@ -57,7 +57,7 @@ export default function AdminBillingAffiliates() {
       <h2 className="mt-6 text-lg font-semibold">Referrals</h2>
       <ul className="mt-2 space-y-2 text-sm">
         {referrals.map((r) => (
-          <li key={r.id} className="border p-3">
+          <li key={r.id} className="border border-border p-3">
             Code {r.code}: {r.referrer_user_id} referred {r.referred_user_id}
           </li>
         ))}
@@ -68,7 +68,7 @@ export default function AdminBillingAffiliates() {
       <h2 className="mt-6 text-lg font-semibold">Commissions</h2>
       <ul className="mt-2 space-y-2 text-sm">
         {commissions.map((c) => (
-          <li key={c.id} className="border p-3">
+          <li key={c.id} className="border border-border p-3">
             {c.amount_minor} {c.currency} (minor units) — {c.status} — user{" "}
             {c.user_id}
           </li>

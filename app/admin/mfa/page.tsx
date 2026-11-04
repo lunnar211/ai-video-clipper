@@ -88,8 +88,8 @@ export default function AdminMfa() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">MFA setup</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">MFA setup</h1>
       {message && (
         <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message}
@@ -103,7 +103,7 @@ export default function AdminMfa() {
         type="button"
         disabled={busy}
         onClick={setup}
-        className="mt-4 rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
+        className="mt-4 inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
       >
         {status?.enrolled ? "Re-enrol (replaces the old secret)" : "Enrol TOTP"}
       </button>
@@ -130,11 +130,11 @@ export default function AdminMfa() {
           type="button"
           disabled={busy || !/^\d{6}$/.test(code)}
           onClick={verify}
-          className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
         >
           Verify code
         </button>
       </div>
-    </main>
+    </div>
   );
 }

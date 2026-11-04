@@ -1,7 +1,7 @@
 export default function AcceptableUse() {
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <h1 className="text-2xl font-bold text-foreground">Acceptable Use</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">Acceptable Use</h1>
       <p>
         AI Video Clipper is for clipping videos you own or hold a
         licence for. These rules protect other creators and keep the

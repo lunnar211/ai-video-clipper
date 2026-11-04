@@ -41,7 +41,7 @@ export default function AdminBillingInvoices() {
       {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {invoices.map((inv) => (
-          <li key={inv.id} className="border p-3">
+          <li key={inv.id} className="border border-border p-3">
             <p>
               <span className="font-semibold">{inv.number}</span> —{" "}
               {inv.status} — {inv.total_minor} {inv.currency} (minor units)

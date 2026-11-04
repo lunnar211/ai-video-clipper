@@ -120,20 +120,20 @@ function BillingInner() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <h1 className="text-2xl font-bold">Billing</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
       <div className="mt-4 flex gap-2 text-sm">
         <input
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
           placeholder="Your user id"
-          className="border px-2 py-1"
+          className="border border-border px-2 py-1"
         />
         <button
           onClick={() => {
             setMessage(null);
             load(userId);
           }}
-          className="border px-3 py-1"
+          className="border border-border px-3 py-1"
         >
           Load
         </button>
@@ -170,7 +170,7 @@ function BillingInner() {
       <h2 className="mt-8 text-lg font-semibold">Subscriptions</h2>
       <ul className="mt-2 space-y-2 text-sm">
         {subs.map((sub) => (
-          <li key={sub.id} className="border p-3">
+          <li key={sub.id} className="border border-border p-3">
             {sub.plan} — {sub.status}
             {sub.cancel_at_period_end ? " (ends at period end)" : ""}
             {sub.current_period_end
@@ -185,7 +185,7 @@ function BillingInner() {
       <h2 className="mt-8 text-lg font-semibold">Invoices</h2>
       <ul className="mt-2 space-y-2 text-sm">
         {invoices.map((inv) => (
-          <li key={inv.id} className="border p-3">
+          <li key={inv.id} className="border border-border p-3">
             <a
               href={`/billing/invoices/${inv.id}?userId=${encodeURIComponent(userId)}`}
               className="text-primary underline"
@@ -202,7 +202,7 @@ function BillingInner() {
       <h2 className="mt-8 text-lg font-semibold">Notices</h2>
       <ul className="mt-2 space-y-2 text-sm">
         {notifications.map((n) => (
-          <li key={n.id} className="border p-3">
+          <li key={n.id} className="border border-border p-3">
             <span className="font-semibold">{n.title}</span> — {n.body}
           </li>
         ))}
@@ -215,7 +215,7 @@ function BillingInner() {
         Share your code; commissions are records only until the owner
         picks a payout rail — no payout date or method is promised.
       </p>
-      <button onClick={getCode} className="mt-2 border px-3 py-1 text-sm">
+      <button onClick={getCode} className="mt-2 border border-border px-3 py-1 text-sm">
         Get my referral code
       </button>
       {referralCode && (

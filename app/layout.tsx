@@ -44,43 +44,55 @@ export default function RootLayout({
           }}
         />
         <header className="border-b border-border bg-card">
-          <nav className="mx-auto flex max-w-4xl flex-wrap items-center gap-4 px-4 py-3">
-            <Link href="/" className="inline-flex min-h-[44px] items-center text-lg font-bold tracking-tight text-primary">
-              <span
-                aria-hidden="true"
-                className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-accent"
-              />
-              AI Video Clipper
-            </Link>
-            <Link href="/create" className="inline-flex min-h-[44px] items-center text-sm font-semibold text-foreground">
-              Create
-            </Link>
-            <Link href="/generate" className="inline-flex min-h-[44px] items-center text-sm font-semibold text-foreground">
-              AI Video Generation
-            </Link>
-            <Link href="/how-it-works" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
-              How it works
-            </Link>
-            <Link href="/faq" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
-              FAQ
-            </Link>
-            <Link href="/pricing" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
-              Pricing
-            </Link>
-            <Link href="/publish" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
-              Publish
-            </Link>
-            <Link href="/accounts" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
-              Accounts
-            </Link>
-            <Link href="/analytics" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
-              Analytics
-            </Link>
-            <AdminNavLink />
-            <span className="ml-auto flex items-center gap-2">
-              <ThemeToggle />
-              <AuthButtons />
-            </span>
+          {/* Two-row header (Phase 20): row 1 is the brand + theme +
+              auth; row 2 is a single horizontally scrollable link
+              bar. The old one-row flex-wrap header wrapped into
+              4–5 ragged rows on a phone and buried links. Every
+              link keeps a 44px touch height and stays reachable by
+              scrolling the bar — nothing wraps, nothing strands. */}
+          <div className="mx-auto max-w-4xl px-4 pt-3">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="inline-flex min-h-[44px] items-center text-lg font-bold tracking-tight text-primary">
+                <span
+                  aria-hidden="true"
+                  className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-accent"
+                />
+                AI Video Clipper
+              </Link>
+              <span className="ml-auto flex items-center gap-2">
+                <ThemeToggle />
+                <AuthButtons />
+              </span>
+            </div>
+          </div>
+          <nav aria-label="Main" className="mx-auto max-w-4xl px-4">
+            <div className="flex flex-nowrap items-center gap-4 overflow-x-auto pb-3">
+              <Link href="/create" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm font-semibold text-foreground">
+                Create
+              </Link>
+              <Link href="/generate" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm font-semibold text-foreground">
+                AI Video Generation
+              </Link>
+              <Link href="/how-it-works" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm text-muted-foreground">
+                How it works
+              </Link>
+              <Link href="/faq" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm text-muted-foreground">
+                FAQ
+              </Link>
+              <Link href="/pricing" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm text-muted-foreground">
+                Pricing
+              </Link>
+              <Link href="/publish" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm text-muted-foreground">
+                Publish
+              </Link>
+              <Link href="/accounts" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm text-muted-foreground">
+                Accounts
+              </Link>
+              <Link href="/analytics" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm text-muted-foreground">
+                Analytics
+              </Link>
+              <AdminNavLink />
+            </div>
           </nav>
         </header>
         <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>

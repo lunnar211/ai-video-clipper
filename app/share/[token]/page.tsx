@@ -64,15 +64,15 @@ export default function SharePage({
   }, [token]);
 
   return (
-    <main className="mx-auto max-w-2xl space-y-4 p-6">
-      <h1 className="text-2xl font-bold">Shared clip</h1>
+    <div className="space-y-4">
+      <h1 className="text-3xl font-bold tracking-tight">Shared clip</h1>
       {error && (
         <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
           {error}
         </p>
       )}
       {data && (
-        <div className="space-y-3 rounded-xl bg-card p-5 shadow-sm">
+        <div className="space-y-3 rounded-xl border border-border bg-card p-6 shadow-sm">
           <h2 className="text-lg font-semibold">{data.title}</h2>
           <p className="text-sm text-muted-foreground">
             Clip {fmt(data.clipStart)} – {fmt(data.clipEnd)} · {data.views}{" "}
@@ -97,6 +97,6 @@ export default function SharePage({
           </p>
         </div>
       )}
-    </main>
+    </div>
   );
 }

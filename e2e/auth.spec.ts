@@ -30,10 +30,12 @@ test("sign-in page offers email and Google, and no public sign-up", async ({
     page.getByRole("button", { name: "Sign in with email" }),
   ).toBeVisible();
   await expect(
-    // Scoped to the page's own <main> (nested inside the layout's
-    // <main>): the header has its own Google button with the same name.
+    // Scoped to the sign-in page wrapper (Phase 20 replaced the
+    // page's nested <main> with a div — the layout's <main> is the
+    // only landmark now): the header has its own Google button
+    // with the same name.
     page
-      .locator("main main")
+      .locator('[data-testid="signin-page"]')
       .getByRole("button", { name: "Sign in with Google" }),
   ).toBeVisible();
   await expect(page.getByText("there is no public sign-up here")).toBeVisible();

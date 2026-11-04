@@ -69,14 +69,14 @@ export default function AdminBillingDunning() {
         Notifications go in-app; email stays inert until a working
         mail provider lands.
       </p>
-      <button onClick={run} className="mt-4 border px-3 py-1 text-sm">
+      <button onClick={run} className="mt-4 border border-border px-3 py-1 text-sm">
         Run dunning step
       </button>
       {result && <p className="mt-2 text-sm">{result}</p>}
       {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {subs.map((sub) => (
-          <li key={sub.id} className="border p-3">
+          <li key={sub.id} className="border border-border p-3">
             <p>
               <span className="font-semibold">{sub.plan}</span> —{" "}
               {sub.status} — user {sub.user_id}

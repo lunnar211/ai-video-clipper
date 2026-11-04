@@ -83,6 +83,32 @@ body {
   color: var(--color-foreground);
 }
 
+/* Touch targets + phone form text (ClipForge Phase 20).
+   The tool components already used min-h-[44px] on their buttons,
+   but the admin console and older forms did not — so one rule here
+   guarantees every text-like form control is at least 44px tall,
+   the same height as every button. Checkboxes, radios, ranges,
+   color pickers, file inputs, and hidden inputs are excluded: they
+   have their own geometry (a range track stays thin; a file input
+   is styled through its label). */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
+select,
+textarea {
+  min-height: 44px;
+}
+
+/* iOS Safari zooms the page when a focused input is below 16px.
+   The site's forms are text-sm (14px), so on phones only, form
+   text is held at 16px — no zoom is triggered, and desktop text
+   is untouched. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Visible keyboard focus everywhere (WCAG 2.4.7): a single global
    rule beats per-element rings, which risk double outlines. */
 :focus-visible {

@@ -51,7 +51,7 @@ export default function AdminBillingSubscriptions() {
         <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          className="border px-2 py-1"
+          className="border border-border px-2 py-1"
         >
           <option value="">All statuses</option>
           <option value="pending">pending</option>
@@ -62,7 +62,7 @@ export default function AdminBillingSubscriptions() {
         </select>
         <button
           onClick={() => load(status)}
-          className="border px-3 py-1"
+          className="border border-border px-3 py-1"
         >
           Filter
         </button>
@@ -70,7 +70,7 @@ export default function AdminBillingSubscriptions() {
       {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {subs.map((sub) => (
-          <li key={sub.id} className="border p-3">
+          <li key={sub.id} className="border border-border p-3">
             <p>
               <span className="font-semibold">{sub.plan}</span> —{" "}
               {sub.status}

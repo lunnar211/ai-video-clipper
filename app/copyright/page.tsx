@@ -1,7 +1,7 @@
 export default function Copyright() {
   return (
     <div className="space-y-4 text-sm text-muted-foreground">
-      <h1 className="text-2xl font-bold text-foreground">
+      <h1 className="text-3xl font-bold tracking-tight text-foreground">
         Copyright / DMCA
       </h1>
       <p>

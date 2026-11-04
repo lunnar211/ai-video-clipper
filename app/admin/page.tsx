@@ -75,8 +75,8 @@ export default function AdminDashboard() {
 
   if (message) {
     return (
-      <main>
-        <h1 className="text-xl font-bold text-foreground">Admin dashboard</h1>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin dashboard</h1>
         <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
           {message} To set up the admin console: apply
           supabase/clipper-schema.sql, then migrations 001, 002, 003 and
@@ -84,21 +84,21 @@ export default function AdminDashboard() {
           and SUPABASE_SERVICE_ROLE_KEY, and assign owner/admin roles
           in the Table Editor.
         </p>
-      </main>
+      </div>
     );
   }
   if (!metrics) {
     return (
-      <main>
-        <h1 className="text-xl font-bold text-foreground">Admin dashboard</h1>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin dashboard</h1>
         <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">Admin dashboard</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">Admin dashboard</h1>
       <section className="mt-4">
         <h2 className="font-semibold">Activity</h2>
         <p className="text-sm text-muted-foreground">
@@ -232,6 +232,6 @@ export default function AdminDashboard() {
           {metrics.anomalies.length === 0 && <li>No anomalies detected.</li>}
         </ul>
       </section>
-    </main>
+    </div>
   );
 }

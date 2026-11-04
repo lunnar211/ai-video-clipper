@@ -75,8 +75,8 @@ export default function AdminApiKeys() {
   };
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">API keys</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">API keys</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Keys for the public v1 API and MCP. Send the key as
         X-ClipForge-Key or Authorization: Bearer. Scopes: read (lists),
@@ -125,7 +125,7 @@ export default function AdminApiKeys() {
         <button
           type="button"
           onClick={create}
-          className="mt-3 rounded bg-primary px-3 py-1 text-sm text-on-primary"
+          className="mt-3 inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary"
         >
           Create key
         </button>
@@ -152,6 +152,6 @@ export default function AdminApiKeys() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

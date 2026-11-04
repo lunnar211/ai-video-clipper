@@ -80,12 +80,12 @@ export default function AdminBillingCoupons() {
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="CODE"
-          className="border px-2 py-1"
+          className="border border-border px-2 py-1"
         />
         <select
           value={kind}
           onChange={(e) => setKind(e.target.value)}
-          className="border px-2 py-1"
+          className="border border-border px-2 py-1"
         >
           <option value="percent">percent</option>
           <option value="fixed">fixed (minor units)</option>
@@ -94,16 +94,16 @@ export default function AdminBillingCoupons() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="20"
-          className="border px-2 py-1"
+          className="border border-border px-2 py-1"
         />
-        <button onClick={create} className="border px-3 py-1">
+        <button onClick={create} className="border border-border px-3 py-1">
           Create
         </button>
       </div>
       {message && <p className="mt-4 text-sm text-red-700 dark:text-red-300">{message}</p>}
       <ul className="mt-4 space-y-3 text-sm">
         {coupons.map((coupon) => (
-          <li key={coupon.id} className="border p-3">
+          <li key={coupon.id} className="border border-border p-3">
             <p>
               <span className="font-semibold">{coupon.code}</span> —{" "}
               {coupon.kind} {coupon.value}

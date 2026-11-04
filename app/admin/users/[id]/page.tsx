@@ -90,8 +90,8 @@ export default function AdminUserDetail({
 
   if (!data) {
     return (
-      <main>
-        <h1 className="text-xl font-bold text-foreground">User</h1>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">User</h1>
         {message ? (
           <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
             {message}
@@ -99,13 +99,13 @@ export default function AdminUserDetail({
         ) : (
           <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
         )}
-      </main>
+      </div>
     );
   }
 
   return (
-    <main>
-      <h1 className="text-xl font-bold text-foreground">{data.user.email}</h1>
+    <div>
+      <h1 className="text-2xl font-bold tracking-tight text-foreground">{data.user.email}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Plan: {data.user.plan} · Role: {data.user.role} · Status:{" "}
         {data.user.status} · Usage: {data.usageMinutes} min · Clips:{" "}
@@ -170,7 +170,7 @@ export default function AdminUserDetail({
             type="button"
             disabled={busy || !note.trim()}
             onClick={() => act("/notes", { note })}
-            className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
           >
             Add note
           </button>
@@ -206,7 +206,7 @@ export default function AdminUserDetail({
             onClick={() =>
               act("/credits", { deltaClips: Number(delta), reason })
             }
-            className="rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center rounded bg-primary px-3 py-1 text-sm text-on-primary disabled:opacity-50"
           >
             Adjust
           </button>
@@ -217,7 +217,7 @@ export default function AdminUserDetail({
           type="button"
           disabled={busy}
           onClick={() => act("/suspend", { reason: "Suspended from admin console" })}
-          className="rounded bg-red-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center rounded bg-red-600 px-3 py-1 text-sm text-white disabled:opacity-50"
         >
           Suspend
         </button>
@@ -225,7 +225,7 @@ export default function AdminUserDetail({
           type="button"
           disabled={busy}
           onClick={() => act("/restore", {})}
-          className="rounded bg-green-600 px-3 py-1 text-sm text-black disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center rounded bg-green-600 px-3 py-1 text-sm text-black disabled:opacity-50"
         >
           Restore
         </button>
@@ -265,12 +265,12 @@ export default function AdminUserDetail({
               else router.push("/admin");
               setBusy(false);
             }}
-            className="rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center rounded bg-amber-600 px-3 py-1 text-sm text-black disabled:opacity-50"
           >
             View as
           </button>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
