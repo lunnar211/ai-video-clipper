@@ -55,6 +55,9 @@ export default function RootLayout({
             <Link href="/create" className="inline-flex min-h-[44px] items-center text-sm font-semibold text-foreground">
               Create
             </Link>
+            <Link href="/generate" className="inline-flex min-h-[44px] items-center text-sm font-semibold text-foreground">
+              AI Video Generation
+            </Link>
             <Link href="/how-it-works" className="inline-flex min-h-[44px] items-center text-sm text-muted-foreground">
               How it works
             </Link>

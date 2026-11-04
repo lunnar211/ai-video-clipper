@@ -43,7 +43,7 @@ export function pickBestMimeType(): string {
   return "";
 }
 
-function loadVideo(url: string): Promise<HTMLVideoElement> {
+export function loadVideo(url: string): Promise<HTMLVideoElement> {
   return new Promise((resolve, reject) => {
     const video = document.createElement("video");
     video.crossOrigin = "anonymous";
@@ -72,7 +72,7 @@ function seekTo(video: HTMLVideoElement, time: number): Promise<void> {
   });
 }
 
-function drawWrappedText(
+export function drawWrappedText(
   ctx: CanvasRenderingContext2D,
   text: string,
   maxWidth: number,

@@ -28,3 +28,14 @@ export type CcImportMeta = {
 export type CcVerifiedImport = CcImportMeta & {
   files: CcVerifiedFile[];
 };
+
+/** One licence-verified stock visual for a generated short segment. */
+export type GeneratedVisual = {
+  title: string;
+  author: string;
+  license: CcLicense;
+  sourceUrl: string;
+  attribution: string;
+  fileUrl: string;
+  fileName: string;
+};

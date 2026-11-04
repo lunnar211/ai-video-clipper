@@ -268,6 +268,11 @@ export default function Home() {
             Open the clipper
           </a>
         </p>
+        <p className="mt-3 text-sm">
+          <a href="/generate" className="underline">
+            Or generate a short from a topic — no video needed
+          </a>
+        </p>
       </section>
     </div>
   );

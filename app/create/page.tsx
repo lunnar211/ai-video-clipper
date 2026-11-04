@@ -34,6 +34,13 @@ export default function Create() {
         </p>
       </section>
       <OnboardingChecklist />
+      <p className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+        Want a short made from scratch?{" "}
+        <a href="/generate" className="font-medium text-primary underline">
+          Generate one from a topic
+        </a>{" "}
+        — no video upload or link needed.
+      </p>
       <ClipperTool />
       <section className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground shadow-sm">
         <h2 className="text-lg font-semibold text-foreground">
