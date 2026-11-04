@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { generateScript, splitCustomScript } from "@/lib/ai/script";
+import { generateScript, splitCustomScript, resolveScriptLanguage } from "@/lib/ai/script";
+import { TRANSLATION_LANGUAGES } from "@/lib/ai/languages";
 import { AI_NOT_CONNECTED } from "@/lib/ai/providers";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { scheduleAudit } from "@/lib/admin/audit";
@@ -12,6 +13,13 @@ const bodySchema = z.object({
   topic: z.string().trim().min(1).max(200),
   customScript: z.string().max(2000).optional(),
   segmentCount: z.number().int().min(1).max(6).optional(),
+  language: z
+    .string()
+    .refine(
+      (code) => TRANSLATION_LANGUAGES.some((l) => l.code === code),
+      "Unknown script language.",
+    )
+    .optional(),
 });
 
 /**
@@ -45,7 +53,7 @@ export async function POST(req: Request): Promise<Response> {
       { status: 400 },
     );
   }
-  const { topic, customScript, segmentCount } = parsed.data;
+  const { topic, customScript, segmentCount, language } = parsed.data;
   try {
     if (customScript && customScript.trim()) {
       const script = splitCustomScript(customScript);
@@ -57,10 +65,12 @@ export async function POST(req: Request): Promise<Response> {
       }
       return NextResponse.json({ ...script, provider: "custom" });
     }
+    const resolved = resolveScriptLanguage(language);
     const { script, provider } = await generateScript(
       topic,
       segmentCount ?? 4,
       fetch,
+      resolved,
     );
     scheduleAudit({
       actor: "guest",
@@ -70,7 +80,7 @@ export async function POST(req: Request): Promise<Response> {
       ip: getClientIp(req),
       user_agent: req.headers.get("user-agent"),
     });
-    return NextResponse.json({ ...script, provider });
+    return NextResponse.json({ ...script, provider, language: resolved });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Script failed";
     if (message === AI_NOT_CONNECTED) {

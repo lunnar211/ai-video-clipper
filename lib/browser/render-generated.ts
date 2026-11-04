@@ -1,12 +1,15 @@
 import type { TranscriptSegment } from "@/lib/captions";
-import type { CaptionPreset } from "@/lib/captions";
-import { windowForCenterX } from "@/lib/crop";
+import { windowForAspect } from "@/lib/crop";
 import {
-  OUTPUT_WIDTH,
-  OUTPUT_HEIGHT,
+  FORMAT_DIMENSIONS,
+  drawStyledCaption,
+  resolveSubtitleStyle,
+  type GeneratedFormat,
+  type SubtitleStyle,
+} from "@/lib/browser/subtitles";
+import {
   pickBestMimeType,
   loadVideo,
-  drawWrappedText,
 } from "@/lib/browser/render";
 
 /**
@@ -40,7 +43,10 @@ export type RenderGeneratedOptions = {
   /** User-licensed soundtrack, played at full volume, looped. */
   musicUrl?: string;
   watermark?: boolean;
-  captionPreset?: CaptionPreset;
+  /** Output format (default 9:16, the Phase 17 size). */
+  format?: GeneratedFormat;
+  /** Burned-in caption style (default = the Phase 17 look). */
+  subtitleStyle?: SubtitleStyle;
   onProgress?: (frac: number) => void;
 };
 
@@ -49,6 +55,10 @@ export type RenderGeneratedResult = {
   mimeType: string;
   voiceoverOk: boolean;
   totalSec: number;
+  /** Real output size, so the UI can state it honestly. */
+  width: number;
+  height: number;
+  format: GeneratedFormat;
 };
 
 /**
@@ -74,13 +84,16 @@ export function generatedTotalSec(
   return Math.max(0, segmentCount * windowSec);
 }
 
-function drawWatermark(ctx: CanvasRenderingContext2D): void {
+function drawWatermark(
+  ctx: CanvasRenderingContext2D,
+  canvasWidth: number,
+): void {
   ctx.save();
   ctx.font = "700 26px system-ui, sans-serif";
   ctx.textAlign = "right";
   ctx.textBaseline = "top";
   ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.fillText("AI Video Clipper", OUTPUT_WIDTH - 24, 24);
+  ctx.fillText("AI Video Clipper", canvasWidth - 24, 24);
   ctx.restore();
 }
 
@@ -92,10 +105,13 @@ export async function renderGeneratedShort(
     throw new Error("A generated short needs at least one segment.");
   }
   const totalSec = generatedTotalSec(opts.segments.length, windowSec);
+  const format: GeneratedFormat = opts.format ?? "9:16";
+  const dims = FORMAT_DIMENSIONS[format];
+  const subtitleStyle = resolveSubtitleStyle(opts.subtitleStyle ?? {});
 
   const canvas = document.createElement("canvas");
-  canvas.width = OUTPUT_WIDTH;
-  canvas.height = OUTPUT_HEIGHT;
+  canvas.width = dims.width;
+  canvas.height = dims.height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is not available in this browser.");
 
@@ -175,7 +191,7 @@ export async function renderGeneratedShort(
       if (!vw || !vh) {
         throw new Error("Could not read a visual's size.");
       }
-      const win = windowForCenterX(vw, vh, 0.5);
+      const win = windowForAspect(vw, vh, dims.width, dims.height);
       await video.play().catch(() => undefined);
       if (video.paused) {
         throw new Error(
@@ -194,16 +210,17 @@ export async function renderGeneratedShort(
             win.sh,
             0,
             0,
-            OUTPUT_WIDTH,
-            OUTPUT_HEIGHT,
+            dims.width,
+            dims.height,
           );
-          drawWrappedText(
+          drawStyledCaption(
             ctx,
             segment.caption,
-            OUTPUT_WIDTH - 80,
-            opts.captionPreset,
+            dims.width,
+            dims.height,
+            subtitleStyle,
           );
-          if (opts.watermark) drawWatermark(ctx);
+          if (opts.watermark) drawWatermark(ctx, dims.width);
           const doneSec = i * windowSec + Math.min(t, windowSec);
           opts.onProgress?.(
             Math.min(1, Math.max(0, doneSec / totalSec)),
@@ -235,5 +252,8 @@ export async function renderGeneratedShort(
     mimeType: type,
     voiceoverOk,
     totalSec,
+    width: dims.width,
+    height: dims.height,
+    format,
   };
 }

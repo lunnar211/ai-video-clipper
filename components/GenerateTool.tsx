@@ -1,16 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   renderGeneratedShort,
   GENERATED_WINDOW_SEC,
   buildGeneratedCaptions,
 } from "@/lib/browser/render-generated";
-import {
-  segmentsToSrt,
-  segmentsToVtt,
-  captionPresetById,
-} from "@/lib/captions";
+import { segmentsToSrt, segmentsToVtt } from "@/lib/captions";
 import { buildZip } from "@/lib/browser/zip";
 import { combineAttributionLines } from "@/lib/rights/attribution";
 import {
@@ -19,6 +15,26 @@ import {
   recordRenderToday,
   shouldWatermark,
 } from "@/lib/usage/quota";
+import {
+  TRANSLATION_LANGUAGES,
+  languageName,
+} from "@/lib/ai/languages";
+import {
+  FORMAT_DIMENSIONS,
+  GENERATED_FORMATS,
+  SUBTITLE_FONTS,
+  SUBTITLE_COLORS,
+  SUBTITLE_BACKGROUNDS,
+  DEFAULT_SUBTITLE_STYLE,
+  resolveSubtitleStyle,
+  type GeneratedFormat,
+  type SubtitleStyle,
+} from "@/lib/browser/subtitles";
+import {
+  loadHistory,
+  recordGeneration,
+  type GenerationHistoryEntry,
+} from "@/lib/browser/generation-history";
 import MusicPicker from "@/components/MusicPicker";
 import {
   userTrackAttribution,
@@ -67,6 +83,19 @@ type ScriptResponse = {
   hashtags: string[];
   segments: Array<{ text: string; visualKeyword: string }>;
   provider: string;
+  language?: string;
+};
+
+type ScriptSnapshot = {
+  title: string;
+  hashtags: string[];
+  segments: Array<{ text: string; visualKeyword: string }>;
+};
+
+type ServerProject = {
+  id: string;
+  title: string;
+  created_at: string;
 };
 
 function downloadBlob(blob: Blob, filename: string): void {
@@ -93,11 +122,26 @@ const secondaryButtonClass =
 export default function GenerateTool() {
   const [topic, setTopic] = useState("");
   const [customScript, setCustomScript] = useState("");
+  const [language, setLanguage] = useState("en");
   const [title, setTitle] = useState("");
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [provider, setProvider] = useState("");
   const [segments, setSegments] = useState<GenSegment[]>([]);
   const [scriptBusy, setScriptBusy] = useState(false);
+  const [rewriteBusy, setRewriteBusy] = useState(false);
+  const [originalVersion, setOriginalVersion] =
+    useState<ScriptSnapshot | null>(null);
+  const [rewriteVersion, setRewriteVersion] =
+    useState<ScriptSnapshot | null>(null);
+  const [activeVersion, setActiveVersion] = useState<"original" | "rewrite">(
+    "original",
+  );
+  const [format, setFormat] = useState<GeneratedFormat>("9:16");
+  const [subtitleStyle, setSubtitleStyle] = useState<SubtitleStyle>(
+    DEFAULT_SUBTITLE_STYLE,
+  );
+  const [history, setHistory] = useState<GenerationHistoryEntry[]>([]);
+  const [serverProjects, setServerProjects] = useState<ServerProject[]>([]);
   const [voiceoverOn, setVoiceoverOn] = useState(false);
   const [musicTrack, setMusicTrack] = useState<UserTrack | null>(null);
   const [rendering, setRendering] = useState(false);
@@ -108,11 +152,33 @@ export default function GenerateTool() {
     mimeType: string;
     clipId: string;
     totalSec: number;
+    format: GeneratedFormat;
+    width: number;
+    height: number;
+    subtitleStyle: SubtitleStyle;
   } | null>(null);
   const [usedToday, setUsedToday] = useState<number>(() => clipsUsedToday());
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [zipBusy, setZipBusy] = useState(false);
+
+  useEffect(() => {
+    // Client-only read: localStorage does not exist during SSR, so
+    // the history is loaded after mount. Deferred past commit so the
+    // mount sync does not cascade renders during the commit phase.
+    queueMicrotask(() => setHistory(loadHistory()));
+    // Server project records (signed-in only): titles + dates, shown
+    // in history. 401 = guest and 503 = no database are both normal
+    // here — the browser-local history below still works.
+    fetch("/api/projects")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.projects)) {
+          setServerProjects(data.projects as ServerProject[]);
+        }
+      })
+      .catch(() => undefined);
+  }, []);
 
   const generateScript = useCallback(async () => {
     if (!topic.trim()) {
@@ -131,6 +197,7 @@ export default function GenerateTool() {
           topic: topic.trim(),
           customScript: customScript.trim() || undefined,
           segmentCount: 4,
+          language,
         }),
       });
       const data = (await res.json()) as ScriptResponse & { error?: string };
@@ -141,6 +208,15 @@ export default function GenerateTool() {
       setTitle(data.title);
       setHashtags(data.hashtags);
       setProvider(data.provider);
+      if (data.language) setLanguage(data.language);
+      const snapshot: ScriptSnapshot = {
+        title: data.title,
+        hashtags: data.hashtags,
+        segments: data.segments,
+      };
+      setOriginalVersion(snapshot);
+      setRewriteVersion(null);
+      setActiveVersion("original");
       setSegments(
         data.segments.map((s) => ({
           text: s.text,
@@ -156,7 +232,107 @@ export default function GenerateTool() {
     } finally {
       setScriptBusy(false);
     }
-  }, [topic, customScript]);
+  }, [topic, customScript, language]);
+
+  const snapshotOfCurrent = useCallback(
+    (): ScriptSnapshot => ({
+      title,
+      hashtags,
+      segments: segments.map((s) => ({
+        text: s.text,
+        visualKeyword: s.visualKeyword,
+      })),
+    }),
+    [title, hashtags, segments],
+  );
+
+  const loadSnapshot = useCallback((snapshot: ScriptSnapshot) => {
+    setTitle(snapshot.title);
+    setHashtags(snapshot.hashtags);
+    // Visuals belong to a version's keywords, so switching versions
+    // resets them — the user finds visuals again for the new lines.
+    setSegments(
+      snapshot.segments.map((s) => ({
+        text: s.text,
+        visualKeyword: s.visualKeyword,
+        candidates: [],
+        selected: null,
+        visualsLoading: false,
+        visualsNote: null,
+      })),
+    );
+    setRendered(null);
+  }, []);
+
+  const rewriteScript = useCallback(async () => {
+    if (segments.length === 0) return;
+    setRewriteBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/generate/rewrite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          script: snapshotOfCurrent(),
+          language,
+        }),
+      });
+      const data = (await res.json()) as ScriptResponse & { error?: string };
+      if (!res.ok) {
+        setError(data.error ?? "Script rewrite failed.");
+        return;
+      }
+      // Keep the version being rewritten from, then switch to the
+      // rewrite — both stay visible and pickable below.
+      if (activeVersion === "original") {
+        setOriginalVersion(snapshotOfCurrent());
+      } else {
+        setRewriteVersion(snapshotOfCurrent());
+      }
+      const snapshot: ScriptSnapshot = {
+        title: data.title,
+        hashtags: data.hashtags,
+        segments: data.segments,
+      };
+      setRewriteVersion(snapshot);
+      setActiveVersion("rewrite");
+      if (data.language) setLanguage(data.language);
+      setProvider(data.provider);
+      loadSnapshot(snapshot);
+      setNotice(
+        "Rewritten script ready — the original is still below. Pick the version you want to render.",
+      );
+    } catch {
+      setError("Script rewrite failed — try again in a minute.");
+    } finally {
+      setRewriteBusy(false);
+    }
+  }, [segments, snapshotOfCurrent, language, activeVersion, loadSnapshot]);
+
+  const switchVersion = useCallback(
+    (version: "original" | "rewrite") => {
+      if (version === activeVersion) return;
+      const current = snapshotOfCurrent();
+      if (activeVersion === "original") {
+        setOriginalVersion(current);
+      } else {
+        setRewriteVersion(current);
+      }
+      const target =
+        version === "original" ? originalVersion : rewriteVersion;
+      if (!target) return;
+      setActiveVersion(version);
+      loadSnapshot(target);
+    },
+    [
+      activeVersion,
+      snapshotOfCurrent,
+      originalVersion,
+      rewriteVersion,
+      loadSnapshot,
+    ],
+  );
 
   const findVisuals = useCallback(async (index: number) => {
     setSegments((prev) =>
@@ -263,6 +439,22 @@ export default function GenerateTool() {
 
   const missingVisuals = segments.filter((s) => !s.selected).length;
 
+  const attribution = combineAttributionLines([
+    provider === "custom"
+      ? "Script: supplied by the user."
+      : activeVersion === "rewrite"
+        ? `Script: AI-generated from the topic "${topic}", then rewritten (provider: ${provider}).`
+        : `Script: AI-generated from the topic "${topic}" (provider: ${provider}).`,
+    ...segments.map((s) =>
+      s.selected && s.selected.kind === "cc"
+        ? s.selected.visual.attribution
+        : s.selected
+          ? `Footage: "${s.selected.name}" — uploaded by you (you declare you hold the rights to use it).`
+          : null,
+    ),
+    musicTrack ? userTrackAttribution(musicTrack) : null,
+  ]);
+
   const render = useCallback(async () => {
     if (missingVisuals > 0) {
       setError(
@@ -318,20 +510,58 @@ export default function GenerateTool() {
         voiceoverUrl,
         musicUrl: musicTrack?.url,
         watermark: shouldWatermark("free"),
-        captionPreset: captionPresetById("pop"),
+        format,
+        subtitleStyle: resolveSubtitleStyle(subtitleStyle),
         onProgress: setProgress,
       });
       recordRenderToday();
       setUsedToday(clipsUsedToday());
       const url = URL.createObjectURL(result.blob);
       const clipId = `generated-${Date.now()}`;
+      const resolvedStyle = resolveSubtitleStyle(subtitleStyle);
       setRendered({
         url,
         blob: result.blob,
         mimeType: result.mimeType,
         clipId,
         totalSec: result.totalSec,
+        format: result.format,
+        width: result.width,
+        height: result.height,
+        subtitleStyle: resolvedStyle,
       });
+      // History record (browser-local, newest first): the short can
+      // be reopened later from the history section below.
+      const entry = {
+        id: clipId,
+        createdAt: new Date().toISOString(),
+        topic,
+        title: title || topic,
+        hashtags,
+        language,
+        format: result.format,
+        subtitleStyle: resolvedStyle,
+        segments: segments.map((s) => ({
+          text: s.text,
+          visualKeyword: s.visualKeyword,
+          visual:
+            s.selected?.kind === "cc"
+              ? {
+                  kind: "cc" as const,
+                  fileUrl: s.selected.visual.fileUrl,
+                  title: s.selected.visual.title,
+                  license: s.selected.visual.license,
+                  attribution: s.selected.visual.attribution,
+                  sourceUrl: s.selected.visual.sourceUrl,
+                }
+              : s.selected
+                ? { kind: "upload" as const, name: s.selected.name }
+                : null,
+        })),
+        attribution: attribution ?? "",
+      };
+      recordGeneration(entry);
+      setHistory(loadHistory());
       if (voiceoverUrl) URL.revokeObjectURL(voiceoverUrl);
       // Best-effort server project record (never blocks the render):
       // 401 = guest, ignored; 503 = no database, ignored; 403 = the
@@ -357,7 +587,7 @@ export default function GenerateTool() {
     } finally {
       setRendering(false);
     }
-  }, [segments, missingVisuals, voiceoverOn, musicTrack, title, topic]);
+  }, [segments, missingVisuals, voiceoverOn, musicTrack, title, topic, format, subtitleStyle, language, hashtags, attribution]);
 
   const captions = useMemo(
     () =>
@@ -371,20 +601,6 @@ export default function GenerateTool() {
         : [],
     [rendered, segments],
   );
-
-  const attribution = combineAttributionLines([
-    provider === "custom"
-      ? "Script: supplied by the user."
-      : `Script: AI-generated from the topic "${topic}" (provider: ${provider}).`,
-    ...segments.map((s) =>
-      s.selected && s.selected.kind === "cc"
-        ? s.selected.visual.attribution
-        : s.selected
-          ? `Footage: "${s.selected.name}" — uploaded by you (you declare you hold the rights to use it).`
-          : null,
-    ),
-    musicTrack ? userTrackAttribution(musicTrack) : null,
-  ]);
 
   const downloadZip = useCallback(async () => {
     if (!rendered) return;
@@ -422,6 +638,72 @@ export default function GenerateTool() {
       setZipBusy(false);
     }
   }, [rendered, captions, attribution]);
+
+  const reopenHistory = useCallback((entry: GenerationHistoryEntry) => {
+    setTopic(entry.topic);
+    setTitle(entry.title);
+    setHashtags(entry.hashtags);
+    setLanguage(entry.language);
+    setFormat(entry.format);
+    setSubtitleStyle(resolveSubtitleStyle(entry.subtitleStyle));
+    const snapshot: ScriptSnapshot = {
+      title: entry.title,
+      hashtags: entry.hashtags,
+      segments: entry.segments.map((s) => ({
+        text: s.text,
+        visualKeyword: s.visualKeyword,
+      })),
+    };
+    setOriginalVersion(snapshot);
+    setRewriteVersion(null);
+    setActiveVersion("original");
+    setProvider("history");
+    setRendered(null);
+    setError(null);
+    setSegments(
+      entry.segments.map((s) => ({
+        text: s.text,
+        visualKeyword: s.visualKeyword,
+        candidates:
+          s.visual?.kind === "cc"
+            ? [
+                {
+                  title: s.visual.title,
+                  author: "",
+                  license: s.visual.license,
+                  sourceUrl: s.visual.sourceUrl,
+                  attribution: s.visual.attribution,
+                  fileUrl: s.visual.fileUrl,
+                  fileName: s.visual.title,
+                },
+              ]
+            : [],
+        selected:
+          s.visual?.kind === "cc"
+            ? {
+                kind: "cc",
+                visual: {
+                  title: s.visual.title,
+                  author: "",
+                  license: s.visual.license,
+                  sourceUrl: s.visual.sourceUrl,
+                  attribution: s.visual.attribution,
+                  fileUrl: s.visual.fileUrl,
+                  fileName: s.visual.title,
+                },
+              }
+            : null,
+        visualsLoading: false,
+        visualsNote:
+          s.visual?.kind === "upload"
+            ? `Upload "${s.visual.name}" again — browser uploads are not saved in history.`
+            : null,
+      })),
+    );
+    setNotice(
+      `Reopened "${entry.title}" — free-licence visuals are restored; your own uploads need uploading again.`,
+    );
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -465,6 +747,34 @@ export default function GenerateTool() {
             rows={3}
           />
         </div>
+        <div>
+          <label htmlFor="generate-language" className="text-sm font-medium">
+            Script language
+          </label>
+          <select
+            id="generate-language"
+            className={inputClass}
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+          >
+            {TRANSLATION_LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1 text-sm text-muted-foreground">
+            AI-written scripts are written in this language. Quality
+            varies by language and is not guaranteed.
+            {customScript.trim() && language !== "en" && (
+              <>
+                {" "}
+                Your custom script is used as written — language
+                applies to AI-written scripts only.
+              </>
+            )}
+          </p>
+        </div>
         <button
           type="button"
           className={buttonClass}
@@ -480,6 +790,81 @@ export default function GenerateTool() {
           </p>
         )}
       </section>
+
+      {segments.length > 0 && (
+        <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+          <h2 className="font-semibold">Script versions</h2>
+          <p className="text-sm text-muted-foreground">
+            Rewrite keeps the same lines and meaning with fresh
+            wording, in the language picked above. Both versions stay
+            here — pick the one you want to render. Switching
+            versions resets visuals, since the keywords change.
+          </p>
+          <div className="space-y-3">
+            {originalVersion && (
+              <div className="space-y-1 rounded-lg border border-border p-3">
+                <p className="text-sm font-medium">
+                  Original{activeVersion === "original" && " — in use"}
+                </p>
+                <p className="text-sm">{originalVersion.title}</p>
+                {originalVersion.segments.map((s, i) => (
+                  <p key={i} className="text-sm text-muted-foreground">
+                    {i + 1}. {s.text}
+                  </p>
+                ))}
+                <button
+                  type="button"
+                  className={secondaryButtonClass}
+                  onClick={() => switchVersion("original")}
+                  disabled={activeVersion === "original"}
+                >
+                  Use original version
+                </button>
+              </div>
+            )}
+            {rewriteVersion ? (
+              <div className="space-y-1 rounded-lg border border-border p-3">
+                <p className="text-sm font-medium">
+                  Rewritten{activeVersion === "rewrite" && " — in use"}
+                </p>
+                <p className="text-sm">{rewriteVersion.title}</p>
+                {rewriteVersion.segments.map((s, i) => (
+                  <p key={i} className="text-sm text-muted-foreground">
+                    {i + 1}. {s.text}
+                  </p>
+                ))}
+                <button
+                  type="button"
+                  className={secondaryButtonClass}
+                  onClick={() => switchVersion("rewrite")}
+                  disabled={activeVersion === "rewrite"}
+                >
+                  Use rewritten version
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className={secondaryButtonClass}
+                onClick={() => void rewriteScript()}
+                disabled={rewriteBusy}
+              >
+                {rewriteBusy ? "Rewriting…" : "Rewrite script"}
+              </button>
+            )}
+          </div>
+          {rewriteVersion && (
+            <button
+              type="button"
+              className={secondaryButtonClass}
+              onClick={() => void rewriteScript()}
+              disabled={rewriteBusy}
+            >
+              {rewriteBusy ? "Rewriting…" : "Rewrite again"}
+            </button>
+          )}
+        </section>
+      )}
 
       {segments.length > 0 && (
         <section className="space-y-4 rounded-lg border border-border bg-card p-4">
@@ -629,6 +1014,163 @@ export default function GenerateTool() {
             Voiceover narration (when a voice key is connected)
           </label>
           <MusicPicker selected={musicTrack} onSelect={setMusicTrack} />
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Format</p>
+            <div className="flex flex-wrap gap-2">
+              {GENERATED_FORMATS.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  aria-pressed={format === f}
+                  className={
+                    format === f ? buttonClass : secondaryButtonClass
+                  }
+                  onClick={() => setFormat(f)}
+                >
+                  {FORMAT_DIMENSIONS[f].label}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Real output size: {FORMAT_DIMENSIONS[format].width}×
+              {FORMAT_DIMENSIONS[format].height} — not a letterbox.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Subtitle style</p>
+            <div className="flex flex-wrap gap-2">
+              <label className="text-sm">
+                Font{" "}
+                <select
+                  aria-label="Subtitle font"
+                  className={inputClass}
+                  value={subtitleStyle.font}
+                  onChange={(e) =>
+                    setSubtitleStyle((prev) => ({
+                      ...prev,
+                      font: e.target.value,
+                    }))
+                  }
+                >
+                  {SUBTITLE_FONTS.map((f) => (
+                    <option key={f.stack} value={f.stack}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm">
+                Position{" "}
+                <select
+                  aria-label="Subtitle position"
+                  className={inputClass}
+                  value={subtitleStyle.position}
+                  onChange={(e) =>
+                    setSubtitleStyle((prev) => ({
+                      ...prev,
+                      position: e.target.value as SubtitleStyle["position"],
+                    }))
+                  }
+                >
+                  <option value="top">Top</option>
+                  <option value="middle">Middle</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </label>
+              <label className="text-sm">
+                Background{" "}
+                <select
+                  aria-label="Subtitle background"
+                  className={inputClass}
+                  value={subtitleStyle.background}
+                  onChange={(e) =>
+                    setSubtitleStyle((prev) => ({
+                      ...prev,
+                      background: e.target.value as SubtitleStyle["background"],
+                    }))
+                  }
+                >
+                  {SUBTITLE_BACKGROUNDS.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm">Color</span>
+              {SUBTITLE_COLORS.map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  aria-label={`Subtitle color ${c.label}`}
+                  aria-pressed={subtitleStyle.color === c.hex}
+                  className={`h-[44px] w-[44px] rounded-lg border-2 ${
+                    subtitleStyle.color === c.hex
+                      ? "border-primary"
+                      : "border-border"
+                  }`}
+                  style={{ backgroundColor: c.hex }}
+                  onClick={() =>
+                    setSubtitleStyle((prev) => ({ ...prev, color: c.hex }))
+                  }
+                />
+              ))}
+            </div>
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="range"
+                aria-label="Subtitle size"
+                min={28}
+                max={72}
+                step={2}
+                value={subtitleStyle.size}
+                onChange={(e) =>
+                  setSubtitleStyle((prev) => ({
+                    ...prev,
+                    size: Number(e.target.value),
+                  }))
+                }
+              />
+              Size: {subtitleStyle.size}px
+            </label>
+            <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={subtitleStyle.stroke}
+                onChange={(e) =>
+                  setSubtitleStyle((prev) => ({
+                    ...prev,
+                    stroke: e.target.checked,
+                  }))
+                }
+              />
+              Outlined letters (stroke)
+            </label>
+            <p
+              className="rounded-lg px-3 py-2 text-center text-sm font-bold"
+              style={{
+                fontFamily: subtitleStyle.font,
+                color: subtitleStyle.color,
+                backgroundColor:
+                  subtitleStyle.background === "dark"
+                    ? "rgba(0,0,0,0.68)"
+                    : subtitleStyle.background === "light"
+                      ? "rgba(255,255,255,0.85)"
+                      : "transparent",
+                textShadow: subtitleStyle.stroke
+                  ? "1px 0 0 rgba(0,0,0,0.9), -1px 0 0 rgba(0,0,0,0.9), 0 1px 0 rgba(0,0,0,0.9), 0 -1px 0 rgba(0,0,0,0.9)"
+                  : undefined,
+              }}
+            >
+              Your subtitle style preview
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Preview is approximate — the burned-in caption may
+              differ slightly.
+            </p>
+          </div>
           {missingVisuals > 0 && (
             <p className="text-sm text-muted-foreground">
               {missingVisuals} segment{missingVisuals === 1 ? "" : "s"}{" "}
@@ -669,6 +1211,26 @@ export default function GenerateTool() {
             playsInline
             className="max-h-[480px] w-full rounded-lg bg-black"
           />
+          <p className="text-sm text-muted-foreground">
+            Rendered in {FORMAT_DIMENSIONS[rendered.format].label} (
+            {rendered.width}×{rendered.height}).
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Captions:{" "}
+            {SUBTITLE_FONTS.find(
+              (f) => f.stack === rendered.subtitleStyle.font,
+            )?.label ?? "Sans"}
+            , {rendered.subtitleStyle.position},{" "}
+            {SUBTITLE_COLORS.find(
+              (c) => c.hex === rendered.subtitleStyle.color,
+            )?.label ?? rendered.subtitleStyle.color}
+            , {rendered.subtitleStyle.size}px
+            {rendered.subtitleStyle.stroke ? ", outlined" : ""},{" "}
+            {SUBTITLE_BACKGROUNDS.find(
+              (b) => b.id === rendered.subtitleStyle.background,
+            )?.label ?? rendered.subtitleStyle.background}
+            .
+          </p>
           <div className="flex flex-wrap gap-2">
             <a
               href={rendered.url}
@@ -717,7 +1279,7 @@ export default function GenerateTool() {
             </button>
           </div>
           <RightsPanel
-            sourceLine={`AI-generated script (${provider === "custom" ? "supplied by you" : `via ${provider}`}) + ${segments.filter((s) => s.selected?.kind === "cc").length} free-licence visual(s) from Wikimedia Commons + ${segments.filter((s) => s.selected?.kind === "upload").length} own upload(s).`}
+            sourceLine={`AI-generated script (${provider === "custom" ? "supplied by you" : provider === "history" ? "reopened from your generation history" : `via ${provider}`}) + ${segments.filter((s) => s.selected?.kind === "cc").length} free-licence visual(s) from Wikimedia Commons + ${segments.filter((s) => s.selected?.kind === "upload").length} own upload(s).`}
             checkLines={[
               "No music check run — generated visuals are used under their own licences, listed below.",
               "This panel is not a legal guarantee: AI generation does not grant rights in anyone else's material.",
@@ -739,6 +1301,76 @@ export default function GenerateTool() {
           />
         </section>
       )}
+
+      <section className="space-y-3 rounded-lg border border-border bg-card p-4">
+        <h2 className="font-semibold">Generation history</h2>
+        <p className="text-sm text-muted-foreground">
+          Saved on this device only — clearing browser data removes
+          them. Reopening restores the script, format, language, and
+          subtitle style; free-licence visuals come back, but your
+          own uploads need uploading again.
+        </p>
+        {history.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No generations yet — render a short and it will appear
+            here.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {history.map((entry) => (
+              <li
+                key={entry.id}
+                className="space-y-1 rounded-lg border border-border p-3"
+              >
+                <p className="text-sm font-medium">{entry.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(entry.createdAt).toLocaleString()} —{" "}
+                  {FORMAT_DIMENSIONS[entry.format].label},{" "}
+                  {languageName(entry.language)}, {entry.segments.length}{" "}
+                  segment{entry.segments.length === 1 ? "" : "s"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Sources:{" "}
+                  {entry.segments
+                    .map((s) =>
+                      s.visual?.kind === "cc"
+                        ? `${s.visual.title} (${s.visual.license})`
+                        : s.visual
+                          ? `${s.visual.name} (your upload)`
+                          : "no visual",
+                    )
+                    .join("; ")}
+                </p>
+                <button
+                  type="button"
+                  className={secondaryButtonClass}
+                  onClick={() => reopenHistory(entry)}
+                >
+                  Reopen
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {serverProjects.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium">
+              Your saved projects on the server
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Titles only — segment details are not stored
+              server-side, so these entries cannot be reopened here.
+            </p>
+            <ul className="space-y-1">
+              {serverProjects.map((p) => (
+                <li key={p.id} className="text-sm text-muted-foreground">
+                  {p.title} — {new Date(p.created_at).toLocaleString()}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

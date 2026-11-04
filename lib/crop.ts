@@ -47,6 +47,43 @@ export function windowForMode(
   return windowForCenterX(videoWidth, videoHeight, frac);
 }
 
+/**
+ * Centred source window with an arbitrary aspect ratio
+ * (ClipForge Phase 19 — the generated-short composer renders
+ * 9:16, 16:9, and 1:1 from the same visuals). Uses the full frame
+ * height when the frame is wide enough, otherwise the full frame
+ * width, and centres the window in both axes. For 9:16 this is
+ * exactly windowForCenterX at centre 0.5.
+ */
+export function windowForAspect(
+  videoWidth: number,
+  videoHeight: number,
+  aspectWidth: number,
+  aspectHeight: number,
+): CropWindow {
+  if (
+    videoWidth <= 0 ||
+    videoHeight <= 0 ||
+    aspectWidth <= 0 ||
+    aspectHeight <= 0
+  ) {
+    return { sx: 0, sy: 0, sw: 0, sh: 0 };
+  }
+  const target = aspectWidth / aspectHeight;
+  let sh = videoHeight;
+  let sw = sh * target;
+  if (sw > videoWidth) {
+    sw = videoWidth;
+    sh = sw / target;
+  }
+  return {
+    sx: (videoWidth - sw) / 2,
+    sy: (videoHeight - sh) / 2,
+    sw,
+    sh,
+  };
+}
+
 /** Median of numbers (0 when empty). Used to smooth per-second face centres. */
 export function median(values: number[]): number {
   if (values.length === 0) return 0;
