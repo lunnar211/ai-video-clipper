@@ -16,7 +16,9 @@ type PostClipProps = {
   title: string;
   hashtags: string[];
   mimeType: string;
-  /** Loads the rendered clip bytes (browser-local blob URL). */
+  /** Loads the rendered clip bytes, kept in state by the caller
+   * (never fetched back from a blob: URL — the site's CSP
+   * connect-src does not list blob:). */
   getBlob: () => Promise<Blob>;
 };
 

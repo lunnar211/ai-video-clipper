@@ -64,6 +64,12 @@ type Clip = {
 
 type Rendered = {
   url: string;
+  /** The rendered bytes, kept in state: fetching the blob: URL back
+   * would be refused by the site's CSP connect-src, which does not
+   * (and need not) list blob: (ClipForge Phase 18; same pattern as
+   * the Phase 17 generator). ZIP export and the post panel read
+   * from here, never via fetch(). */
+  blob: Blob;
   mimeType: string;
   voiceoverOk: boolean;
   /** The clean-audio treatment actually applied at render time. */
@@ -578,6 +584,7 @@ export default function ClipperTool() {
           ...prev,
           [clip.id]: {
             url,
+            blob: result.blob,
             mimeType: result.mimeType,
             voiceoverOk: voiceoverUrl ? result.voiceoverOk : true,
             audioTreatment: result.audioTreatment,
@@ -741,7 +748,10 @@ export default function ClipperTool() {
       const src = translatedTranscript ?? transcript;
       for (const clip of outs) {
         const out = rendered[clip.id];
-        const buf = await (await fetch(out.url)).arrayBuffer();
+        // Bytes from state, never fetched back from the clip URL:
+        // the site's CSP connect-src does not list blob:, so
+        // fetching the blob: URL back is refused (ClipForge Phase 18).
+        const buf = await out.blob.arrayBuffer();
         const ext = out.mimeType.includes("mp4") ? "mp4" : "webm";
         entries.push({ name: `${clip.id}.${ext}`, data: new Uint8Array(buf) });
         if (src) {
@@ -1650,9 +1660,7 @@ export default function ClipperTool() {
                       title={clip.title}
                       hashtags={clip.hashtags}
                       mimeType={out.mimeType}
-                      getBlob={async () =>
-                        fetch(out.url).then((r) => r.blob())
-                      }
+                      getBlob={async () => out.blob}
                     />
                   )}
                   <MetadataCard transcript={transcript ?? []} clip={clip} />
