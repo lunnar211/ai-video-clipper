@@ -38,10 +38,14 @@ function mimeForName(name: string): string {
 }
 
 function displayName(name: string): string {
+  // Defence in depth for the Issue-1 fix in lib/imports/cc-verify.ts:
+  // a file name must never carry a "?utm_source=…" query string into
+  // the UI or into the File name handed to the tool.
+  const clean = name.split("?")[0].split("#")[0];
   try {
-    return decodeURIComponent(name);
+    return decodeURIComponent(clean);
   } catch {
-    return name;
+    return clean;
   }
 }
 
@@ -184,7 +188,7 @@ export default function CcPasteImport({
         htmlFor={`${idPrefix}-url`}
         className="block text-sm font-medium"
       >
-        Paste a video link
+        Video link
       </label>
       <p className="text-sm text-muted-foreground">
         Wikimedia Commons or Internet Archive links only. The licence

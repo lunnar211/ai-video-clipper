@@ -70,7 +70,16 @@ export default function Publish() {
         // "needs database setup" text (Phase 20 fix).
         if (res.status === 429) {
           setQueueError("Too many requests — try again in a minute.");
+          return;
         }
+        // 503 is the route's own "no database" answer — only then is
+        // the database-setup message true. Any other failure is a
+        // load failure, not missing setup.
+        if (res.status === 503) {
+          setQueueError("Queue needs database setup on the server.");
+          return;
+        }
+        setQueueError("The queue could not be loaded — try again.");
       })
       .catch(() => {
         // Queue is best-effort here; the composer still works.
@@ -420,7 +429,7 @@ export default function Publish() {
         <h2 className="text-lg font-semibold">Queue</h2>
         {!queue ? (
           <p className="mt-2 text-muted-foreground">
-            {queueError ?? "Queue needs database setup on the server."}
+            {queueError ?? "Loading queue…"}
           </p>
         ) : (
           <pre className="mt-2 overflow-auto rounded bg-muted p-3 text-xs">

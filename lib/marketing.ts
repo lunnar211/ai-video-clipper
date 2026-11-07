@@ -79,7 +79,7 @@ export const FEATURES: MarketingFeature[] = [
   },
   {
     title: "Chat-driven clip tools (MCP)",
-    body: "Search your clips and check post status from an AI assistant over MCP. Reads are open; writes stay off unless the owner enables them.",
+    body: "Search your clips and check post status from an AI assistant over MCP. Reads need an API key (created in the admin console); writes stay off unless the owner enables them.",
   },
   {
     title: "Search your own clips",
@@ -131,6 +131,6 @@ export const HOME_FAQS: MarketingFaq[] = [
   },
   {
     q: "Do I need an account or payment?",
-    a: "No. The clipper works without an account in its free browser mode. Sign-in, publishing, and paid tiers exist only when the server is configured for them.",
+    a: "No. The clipper works without an account in its free browser mode. Sign-in and publishing are configured on this server; paid tiers are not configured yet.",
   },
 ];

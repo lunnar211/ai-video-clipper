@@ -58,7 +58,14 @@ values; set them in Vercel (Production + Preview).
 - The highlight pipeline pattern (Whisper timestamps → LLM moment
   scoring → face-tracked reframe → burned captions) follows the
   MIT-licensed OpenShorts approach; AGPL clipper code was not copied.
-- No auth, no database, no payments in MVP.
+- Auth, database, billing, and admin now exist (they were "not in
+  MVP" in the first version): Supabase Auth (Google + email
+  sign-in), Postgres (publish queue, projects, usage history), a
+  billing layer with Paddle / Lemon Squeezy adapters whose prices
+  are unset ("coming soon"), and an owner-only admin console. See
+  `docs/PHASE2.md` (database), `docs/PHASE4.md` (admin),
+  `docs/PHASE6.md` (billing), and `AGENTS.md` for the working
+  conventions.
 
 ## Third-party licences
 
@@ -70,8 +77,11 @@ values; set them in Vercel (Production + Preview).
 ## Follow-ups (not in MVP)
 
 - Vercel project creation on the owner's account + env pastes + redeploy.
-- Sign-in and usage history (needs a database).
-- Paid plans (needs a real price + a payment provider; nothing invented).
+- Paid-plan prices (billing code exists; prices stay unset until
+  the owner confirms them — nothing invented).
+- YouTube OAuth app (channel connect answers 503 until the owner
+  creates it); AI-combo webhook secret and ElevenLabs key are
+  likewise owner taps, never committed.
 - In-browser Whisper-tiny as a no-key transcription fallback
   (transformers.js, Apache 2.0; ~40 MB model download).
 - True speaker-tracked crop (per-second face path instead of a single

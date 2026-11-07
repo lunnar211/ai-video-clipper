@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: "Do I need an account or payment?",
-    a: "The clipper works without an account. Sign-in, publishing, and paid tiers exist only when the server is configured for them (see the Publish and Accounts pages); without that setup the tool keeps working in its free browser mode. See the Pricing page.",
+    a: "The clipper works without an account. Sign-in and publishing are configured on this server (the publish queue is live); paid tiers are not configured yet, and each platform's publishing stays off until its app review is approved. Without an account the tool keeps working in its free browser mode. See the Pricing page.",
   },
   {
     q: "Can I use the clips commercially?",

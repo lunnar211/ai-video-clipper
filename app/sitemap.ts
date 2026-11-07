@@ -5,7 +5,7 @@ const base =
   "https://ai-video-clipper-dipeshkarki8292-3476s-projects.vercel.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/create", "/how-it-works", "/faq", "/pricing", "/publish", "/accounts", "/analytics", "/privacy", "/terms", "/contact", "/copyright", "/cookies", "/acceptable-use", "/report"];
+  const pages = ["", "/create", "/generate", "/how-it-works", "/faq", "/pricing", "/publish", "/accounts", "/analytics", "/privacy", "/terms", "/contact", "/copyright", "/cookies", "/acceptable-use", "/report"];
   return pages.map((p) => ({
     url: `${base}${p}`,
     lastModified: new Date(),

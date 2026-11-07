@@ -213,6 +213,25 @@ describe("searchCommonsVideos", () => {
     expect(result.ok).toBe(false);
   });
 
+  it("quotes multi-word keywords as a phrase (live: unquoted 'ocean waves' returned zero)", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ query: { pages: [] } }), { status: 200 }),
+    );
+    await searchCommonsVideos("ocean waves", {
+      fetchFn: fetchMock as unknown as typeof fetch,
+      lookup,
+    });
+    const calledUrl = String(fetchMock.mock.calls[0][0]);
+    expect(decodeURIComponent(calledUrl)).toContain('filetype:video "ocean waves"');
+    await searchCommonsVideos("ocean", {
+      fetchFn: fetchMock as unknown as typeof fetch,
+      lookup,
+    });
+    const singleUrl = String(fetchMock.mock.calls[1][0]);
+    expect(decodeURIComponent(singleUrl)).toContain("filetype:video ocean");
+    expect(decodeURIComponent(singleUrl)).not.toContain('"');
+  });
+
   it("returns an honest empty result when nothing verifies", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ query: { pages: [] } }), {

@@ -147,6 +147,22 @@ describe("phase 11: verification flows (mocked sources)", () => {
     expect(result.verified.files[0].url).toContain("upload.wikimedia.org");
   });
 
+  it("strips the Commons imageinfo ?utm_source query string from the file name", async () => {
+    const fetchFn = vi.fn(async () =>
+      commonsPage({
+        url: "https://upload.wikimedia.org/wikipedia/commons/a/ab/Example_video.mp4?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      }),
+    );
+    const result = await verifyCcUrl(
+      "https://commons.wikimedia.org/wiki/File:Example_video.mp4",
+      { fetchFn, lookup: publicLookup },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.verified.files).toHaveLength(1);
+    expect(result.verified.files[0].name).toBe("Example_video.mp4");
+  });
+
   it("refuses a non-free Commons licence with a specific reason", async () => {
     const fetchFn = vi.fn(async () =>
       commonsPage({

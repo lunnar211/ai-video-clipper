@@ -28,6 +28,19 @@ export type CommonsSearchResult =
   | { ok: true; visuals: GeneratedVisual[]; note: string | null }
   | { ok: false; message: string };
 
+/**
+ * Commons `gsrsearch` treats a bare multi-word query as loose AND
+ * terms, which returned zero verified videos for "ocean waves"
+ * while the same words as a phrase returned matches (live-verified
+ * 2026-11-08). Multi-word keywords are therefore sent as a quoted
+ * phrase; a keyword that already contains a quote is left alone.
+ */
+export function commonsSearchTerm(keyword: string): string {
+  const trimmed = keyword.trim();
+  if (trimmed.includes('"')) return trimmed;
+  return /\s/.test(trimmed) ? `"${trimmed}"` : trimmed;
+}
+
 const SEARCH_LIMIT = 8;
 const VERIFY_LIMIT = 5;
 const RETURN_LIMIT = 3;
@@ -52,7 +65,7 @@ export async function searchCommonsVideos(
   const verifyFn = deps.verifyFn ?? verifyCcUrl;
   const query =
     `https://commons.wikimedia.org/w/api.php?action=query&generator=search` +
-    `&gsrsearch=${encodeURIComponent(`filetype:video ${keyword}`)}` +
+    `&gsrsearch=${encodeURIComponent(`filetype:video ${commonsSearchTerm(keyword)}`)}` +
     `&gsrnamespace=6&gsrlimit=${SEARCH_LIMIT}` +
     `&prop=imageinfo&iiprop=url|mime&format=json&formatversion=2`;
   let checked: URL;

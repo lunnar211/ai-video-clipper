@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { isYoutubeLink } from "@/lib/imports/youtube-link";
 import {
+  createSupabaseBrowserClient,
+  isSupabaseConfigured,
+} from "@/lib/auth/supabase";
+import {
   verifyYoutubeOwned,
   type YoutubeOwnedMeta,
   type YoutubeOwnedResult,
@@ -51,6 +55,29 @@ export default function YoutubeOwnedImport({
   );
   const [result, setResult] = useState<YoutubeOwnedResult | null>(null);
   const autoRan = useRef(false);
+  // Verification needs a signed-in account (the server answers 401
+  // otherwise), so the Verify button stays disabled until a session
+  // is seen — instead of letting a logged-out visitor paste a link
+  // and only discover the failure after pressing Verify. `null`
+  // means the session check has not answered yet; unconfigured
+  // auth starts false via the initializer (no setState in effect).
+  const [signedIn, setSignedIn] = useState<boolean | null>(() =>
+    isSupabaseConfigured() ? null : false,
+  );
+
+  useEffect(() => {
+    const client = createSupabaseBrowserClient();
+    if (!client) return; // Unconfigured: initial state is already false.
+    client.auth.getSession().then(({ data }) => {
+      setSignedIn(!!data.session?.user);
+    });
+    const { data: listener } = client.auth.onAuthStateChange(
+      (_event, session) => {
+        setSignedIn(!!session?.user);
+      },
+    );
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   // The hero hands the link over after mount (module memory), so
   // the input must follow a late-arriving initialUrl — useState
@@ -96,11 +123,15 @@ export default function YoutubeOwnedImport({
   }, [url, onVerified]);
 
   useEffect(() => {
-    if (autoVerify && initialUrl && !autoRan.current) {
+    // Only auto-run for a signed-in visitor: a logged-out auto-run
+    // would hit the server's 401 before the visitor has read the
+    // sign-in hint above. Waits for the session check (signedIn
+    // starts null) rather than firing on mount.
+    if (autoVerify && initialUrl && signedIn === true && !autoRan.current) {
       autoRan.current = true;
       void check(initialUrl);
     }
-  }, [autoVerify, initialUrl, check]);
+  }, [autoVerify, initialUrl, signedIn, check]);
 
   const failure = result && !result.ok ? result : null;
 
@@ -131,13 +162,34 @@ export default function YoutubeOwnedImport({
         />
         <button
           type="button"
-          className="inline-flex min-h-[44px] cursor-pointer items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:opacity-50"
+          className="inline-flex min-h-[44px] cursor-pointer items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={() => void check()}
-          disabled={phase === "checking"}
+          disabled={phase === "checking" || signedIn === false}
+          title={
+            signedIn === false
+              ? "Sign in first — verification needs a signed-in account"
+              : undefined
+          }
         >
-          {phase === "checking" ? "Verifying ownership…" : "Verify ownership"}
+          {phase === "checking"
+            ? "Verifying ownership…"
+            : signedIn === false
+              ? "Sign in to verify"
+              : "Verify ownership"}
         </button>
       </div>
+      {signedIn === false && (
+        <p className="text-sm text-muted-foreground">
+          Verification needs a signed-in account —{" "}
+          <a href="/signin" className="underline">
+            sign in first
+          </a>
+          , then paste your link again. (Connecting a YouTube
+          channel is also not set up yet, so verification
+          can&apos;t succeed until the owner sets up the YouTube
+          app.)
+        </p>
+      )}
 
       {phase === "verified" && (
         <p className="text-sm text-emerald-800 dark:text-emerald-300">

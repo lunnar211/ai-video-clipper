@@ -11,13 +11,15 @@ export default function Pricing() {
           because paid plans are not configured yet.
         </p>
         <p className="mt-2 text-muted-foreground">
-          The free tier allows 3 rendered clips per day, and free clips
-          carry a small watermark. Sign-in (Google) is available once
-          the owner configures it; until then everyone uses the free
-          tier. If paid plans are added later, they will be announced
-          here first with a real price. Nothing on this page is a
-          promise of a future price, and no payment details are
-          collected anywhere on this site.
+          The free tier allows 3 rendered clips per day, per browser
+          — the count is kept in your browser, so clearing browser
+          data resets it — and free clips carry a small watermark.
+          Sign-in is available on the sign-in page (Google, or email
+          and password); accounts are created by the owner, and until
+          you sign in everyone uses the free tier. If paid plans are
+          added later, they will be announced here first with a real
+          price. Nothing on this page is a promise of a future price,
+          and no payment details are collected anywhere on this site.
         </p>
       </section>
       <section className="rounded-xl border border-border bg-card p-6 shadow-sm">

@@ -70,8 +70,11 @@ const VIDEO_EXTENSIONS = new Set([
 ]);
 
 function fileExtension(name: string): string {
-  const dot = name.lastIndexOf(".");
-  return dot >= 0 ? name.slice(dot).toLowerCase() : "";
+  // Commons' imageinfo URL can carry a "?utm_source=…" query string;
+  // the extension is in the path part only.
+  const path = name.split("?")[0].split("#")[0];
+  const dot = path.lastIndexOf(".");
+  return dot >= 0 ? path.slice(dot).toLowerCase() : "";
 }
 
 function isVideoName(name: string): boolean {
@@ -314,7 +317,18 @@ async function verifyWikimedia(
       ? info.user
       : "Unknown author";
   const sourceUrl = info.descriptionurl ?? `https://commons.wikimedia.org/wiki/${encodeURIComponent(target.title)}`;
-  const filename = info.url.split("/").filter(Boolean).pop() ?? title;
+  // Derive the filename from the URL path only: Commons' imageinfo
+  // `url` now carries a "?utm_source=…&utm_campaign=…" query string,
+  // and that query used to leak into the displayed file name.
+  let filename = title;
+  try {
+    filename =
+      new URL(info.url).pathname.split("/").filter(Boolean).pop() ?? title;
+  } catch {
+    filename =
+      info.url.split("?")[0].split("#")[0].split("/").filter(Boolean).pop() ??
+      title;
+  }
   const meta: CcImportMeta = {
     license,
     author,

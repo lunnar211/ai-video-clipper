@@ -56,9 +56,16 @@ export default function YoutubeJourneySteps({
 
   return (
     <div className="rounded-lg border border-border bg-background p-4">
+      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+        Connecting a YouTube channel isn&apos;t available yet — the
+        owner hasn&apos;t set up the YouTube app — so verification
+        can&apos;t succeed right now. Verification needs a signed-in
+        account with a connected channel. You can still upload a
+        video file directly in step 3 below.
+      </p>
       <ol
         aria-label="Your YouTube video journey"
-        className="space-y-4 text-sm"
+        className="mt-4 space-y-4 text-sm"
       >
         <li>
           <p className="font-semibold">
