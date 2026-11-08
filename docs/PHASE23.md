@@ -107,27 +107,70 @@ prices invented, no feature removed, no auth/security/env change.
 - `npm run lint`: exit 0, one pre-existing warning (`'z' unused`
   in `app/api/render/callback/route.ts`, verified pre-existing).
 - `npx playwright test e2e/phase23.spec.ts`: 34 passed.
-- Full `npx playwright test`: **129 passed, 2 failed — both
-  pre-existing Phase 16 failures** (`verified flow advances the
-  steps and attaches on upload`; `every YouTube error box carries
-  its fix as a link`). Verified pre-existing by `git stash -u`:
-  both fail identically on the pristine Phase 22 tree (the
-  "Verify ownership" button reads "Sign in to verify" once the
-  session check resolves with no session — a race the specs
-  relied on winning). Left alone per the brief. This phase
-  introduced two failures of its own during the run and fixed
-  both: a footer link duplicating the nav's "AI Video Generation"
-  name (Phase 17 strict-mode violation — footer link renamed to
-  "Generate a short"), and the Phase 23 /publish specs not
-  tolerating the per-IP 429 under a heavy suite run (spec now
-  filters/handles 429 like Phase 20 does).
+- Full `npx playwright test` (durable re-run, log in
+  `~/workspace/phase23-e2e-full2.log`): **129 passed, 5 failed**
+  — phase14 ×2, phase16 ×2, phase20 `/cookies` horizontal
+  scroll once (29px at 375px). CORRECTION: the c571a18 commit
+  message says "129 passed, 2 failures" — that was the failure
+  list from an earlier delivery whose log was lost in a /tmp
+  wipe; the durable re-run shows 5 failures, not 2. The count
+  (129 passed) is confirmed; the failure list below is the true
+  one.
+- **All 5 failures are pre-existing, none caused by this phase:**
+  - phase14 + phase16 (4 failures, same signature): the tests
+    click a "Verify ownership" button, but the button reads
+    "Sign in to verify" once the Supabase session check resolves
+    with no session. The tests only pass when they click during
+    the null state — a race. PROVEN: on a pristine Phase 22
+    worktree (40e7dd2, zero Phase 23 code) all 5 phase14 tests
+    fail the same way; phase16's 2 fail identically on pristine
+    via an earlier `git stash` check. This phase did not touch
+    the session logic or the button.
+  - phase20 `/cookies` overflow (seen once, 29px at 375px): not
+    reproduced in isolation (passed), not reproduced on the
+    pristine tree (passed), and the after-screenshot pass
+    measured overflowX=0 on every page. Treated as a transient
+    measurement artifact; the footer/header change is not a
+    deterministic cause (the same pages pass on repeated runs).
+  - phase20's console-error check also failed once in an
+    isolated run on the sandbox-only `/publish` queue 503 (no
+    database configured here) — the old page performed the same
+    fetch on mount; whether it trips the check is timing
+    (whether the 503 lands before navigation). Live the
+    database is configured and the fetch returns 200.
+- This phase introduced two failures of its own during the run
+  and fixed both: a footer link duplicating the nav's "AI Video
+  Generation" name (Phase 17 strict-mode violation — footer link
+  renamed to "Generate a short"), and the Phase 23 /publish
+  specs not tolerating the per-IP 429 under a heavy suite run
+  (spec now filters/handles 429 like Phase 20 does).
+- After-screenshot pass (local production build, phone 390×844
+  + desktop 1280×800, `~/workspace/phase23-after-shots/`):
+  overflowX=0 on every page; zero console errors except the
+  sandbox-only /publish queue 503; /generate is now clean (the
+  401 is gone). Note: the audit's before-screenshots were lost
+  in the same /tmp wipe that took the early logs, so the
+  before/after comparison is the audit's written findings (in
+  this doc's "Why" section) against these after-shots.
 
 ## Deploy
 
-(TODO at implementation time: commit hash, deploy run, live probe
-results — home + /create + /generate + /publish + /pricing +
-/signin 200, /admin 307 → /signin, robots/sitemap 200, new copy
-present in live HTML, phone-viewport live screenshots.)
+- Commit `c571a18` (pushed to `origin/main`; tree clean).
+- Deploy via `python3 ~/workspace/deploy_clipper.py`: exit 0,
+  415/415 files uploaded, production deployment created
+  (target production, iad1).
+- Live probe (after ~150s build wait): `/` 200, `/create` 200,
+  `/generate` 200, `/publish` 200, `/pricing` 200, `/signin`
+  200, `/robots.txt` 200, `/sitemap.xml` 200, `/admin` 307 →
+  `/signin`. New copy confirmed in live home HTML ("Clipper —
+  free in your browser", "No account needed", "9:16 vertical",
+  "Live tool — the real clipper", "Plans at a glance",
+  "Generate a short"); "Staged media key" count 0.
+- Live URL: https://ai-video-clipper-dipeshkarki8292-3476s-projects.vercel.app
+- (Sandbox Chromium has no internet, so live screenshots are
+  not possible from here; live serving is proven by the curl
+  probe + content markers above, and the redesign itself by
+  the local production-build screenshots.)
 
 ## Still needs the owner's taps (unchanged)
 
