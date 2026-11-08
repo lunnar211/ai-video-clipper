@@ -54,36 +54,39 @@ export default function RightsPanel(props: RightsPanelProps) {
       className="rounded-lg border border-border bg-background p-4"
     >
       <h3 className="font-semibold">Before you export — rights check</h3>
+      {/* Rows are individual cards, not one wall of small text:
+          each fact (source, music check, treatment, attribution)
+          reads as its own line. All strings are unchanged. */}
       <dl className="mt-3 space-y-2 text-sm">
-        <div>
-          <dt className="font-medium">Source</dt>
-          <dd className="text-muted-foreground">{props.sourceLine}</dd>
+        <div className="rounded-lg bg-muted/60 p-3">
+          <dt className="font-semibold text-foreground">Source</dt>
+          <dd className="mt-0.5 text-muted-foreground">{props.sourceLine}</dd>
         </div>
-        <div>
-          <dt className="font-medium">Music check</dt>
+        <div className="rounded-lg bg-muted/60 p-3">
+          <dt className="font-semibold text-foreground">Music check</dt>
           {props.checkLines.map((line) => (
-            <dd key={line} className="text-muted-foreground">
+            <dd key={line} className="mt-0.5 text-muted-foreground">
               {line}
             </dd>
           ))}
         </div>
-        <div>
-          <dt className="font-medium">Audio treatment</dt>
-          <dd className="text-muted-foreground">
+        <div className="rounded-lg bg-muted/60 p-3">
+          <dt className="font-semibold text-foreground">Audio treatment</dt>
+          <dd className="mt-0.5 text-muted-foreground">
             {treatmentLine(props)}
           </dd>
           {summary && (
-            <dd className="text-muted-foreground">{summary}</dd>
+            <dd className="mt-0.5 text-muted-foreground">{summary}</dd>
           )}
           {props.treatment === "replaced" && props.trackCredit && (
-            <dd className="text-muted-foreground">
+            <dd className="mt-0.5 text-muted-foreground">
               Track credit shipping in the export: {props.trackCredit}
             </dd>
           )}
         </div>
-        <div>
-          <dt className="font-medium">Attribution shipping in the export</dt>
-          <dd className="text-muted-foreground">
+        <div className="rounded-lg bg-muted/60 p-3">
+          <dt className="font-semibold text-foreground">Attribution shipping in the export</dt>
+          <dd className="mt-0.5 text-muted-foreground">
             {props.attribution ??
               "None yet — no licence or music credit applies."}
           </dd>

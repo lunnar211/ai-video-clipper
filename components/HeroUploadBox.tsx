@@ -58,7 +58,22 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
     }`;
 
   return (
-    <div className="rounded-xl border-2 border-dashed border-primary/50 bg-card p-5">
+    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      {/* Panel header: this is the tool itself, not a placeholder
+          box — a named panel with its state up front. */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border bg-muted/60 px-5 py-3">
+        <span
+          aria-hidden="true"
+          className="inline-block h-2.5 w-2.5 rounded-full bg-accent"
+        />
+        <span className="text-sm font-semibold text-foreground">
+          Clipper — free in your browser
+        </span>
+        <span className="ml-auto rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          No account needed
+        </span>
+      </div>
+      <div className="p-5">
       <div role="tablist" aria-label="Add a video" className="flex gap-2">
         <button
           type="button"
@@ -83,8 +98,8 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
       {mode === "upload" ? (
         <label
           htmlFor={id}
-          className={`mt-3 block cursor-pointer rounded-lg px-4 py-6 text-center transition-colors duration-200 ${
-            dragging ? "bg-primary/10" : ""
+          className={`mt-3 block cursor-pointer rounded-lg border border-border bg-background px-4 py-6 text-center transition-colors duration-200 ${
+            dragging ? "border-primary bg-primary/10" : "hover:border-primary/50"
           }`}
           onDragOver={(e) => {
             e.preventDefault();
@@ -103,6 +118,9 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
           <span className="mt-1 block text-sm text-muted-foreground">
             Up to 10 minutes and 500 MB. Only videos you recorded or own the
             rights to.
+          </span>
+          <span className="mt-4 inline-flex min-h-[44px] items-center rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-on-primary">
+            Choose a video file
           </span>
           <input
             id={id}
@@ -163,11 +181,29 @@ export default function HeroUploadBox({ id = "hero-upload" }: { id?: string }) {
           </p>
         </div>
       )}
+      {/* Format chips: what comes out, stated on the panel so the
+          dropzone never reads as an empty box. */}
+      <ul
+        aria-label="Output format"
+        className="mt-4 flex flex-wrap justify-center gap-2 text-xs font-medium text-muted-foreground"
+      >
+        {["9:16 vertical", "Burned-in captions", "720×1280", "Up to 10 min"].map(
+          (chip) => (
+            <li
+              key={chip}
+              className="rounded-full border border-border bg-background px-2.5 py-1"
+            >
+              {chip}
+            </li>
+          ),
+        )}
+      </ul>
       <p className="mt-3 text-center text-sm">
         <a href="/create" className="inline-flex min-h-[44px] items-center font-semibold text-primary underline">
           Open the clipper without a file
         </a>
       </p>
+      </div>
     </div>
   );
 }

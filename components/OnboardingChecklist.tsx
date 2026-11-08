@@ -47,8 +47,11 @@ export default function OnboardingChecklist() {
       aria-label="First-run guide"
       className="rounded-xl border border-primary/25 bg-primary/5 p-5 dark:bg-primary/10"
     >
-      <div className="flex items-start justify-between gap-4">
-        <h2 className="text-lg font-semibold text-foreground">
+      <div className="flex items-start justify-between gap-3">
+        {/* Title takes the free width (text-base on phones): the old
+            text-lg title wrapped mid-phrase around the Dismiss
+            button on a 390px screen. */}
+        <h2 className="min-w-0 flex-1 text-base font-semibold text-foreground sm:text-lg">
           First time here? Four steps to your first clip
         </h2>
         <button

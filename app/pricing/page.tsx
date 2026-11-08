@@ -1,15 +1,25 @@
+import PlanCards from "@/components/PlanCards";
+import { getPlans } from "@/lib/billing/plans";
+
 export default function Pricing() {
+  const plans = getPlans();
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Pricing</h1>
+      <p className="text-muted-foreground">
+        This tool is free to use in its current version: upload your own
+        video, transcribe, find highlights, and render vertical clips
+        with captions. There is no price, no checkout, and no paid plan
+        — because paid plans are not configured yet.
+      </p>
+
+      {/* Plan cards — the same cards as the homepage, so the two
+          never disagree. No prices are invented: paid plans show
+          "Coming soon" until the owner confirms a price. */}
+      <PlanCards plans={plans} />
+
       <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <h2 className="text-lg font-semibold">Free — for now</h2>
-        <p className="mt-2 text-muted-foreground">
-          This tool is free to use in its current version: upload your own
-          video, transcribe, find highlights, and render vertical clips
-          with captions. There is no price, no checkout, and no paid plan —
-          because paid plans are not configured yet.
-        </p>
         <p className="mt-2 text-muted-foreground">
           The free tier allows 3 rendered clips per day, per browser
           — the count is kept in your browser, so clearing browser

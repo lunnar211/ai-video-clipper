@@ -51,22 +51,28 @@ export default function RootLayout({
               link keeps a 44px touch height and stays reachable by
               scrolling the bar — nothing wraps, nothing strands. */}
           <div className="mx-auto max-w-4xl px-4 pt-3">
-            <div className="flex items-center gap-4">
-              <Link href="/" className="inline-flex min-h-[44px] items-center text-lg font-bold tracking-tight text-primary">
+            <div className="flex items-center gap-3">
+              {/* Brand never wraps: on a 390px phone the old text-lg
+                  wordmark broke into two lines and crowded the auth
+                  area. text-base on phones, text-lg from sm up. */}
+              <Link href="/" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-base font-bold tracking-tight text-primary sm:text-lg">
                 <span
                   aria-hidden="true"
-                  className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-accent"
+                  className="mr-2 inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-accent"
                 />
                 AI Video Clipper
               </Link>
-              <span className="ml-auto flex items-center gap-2">
+              <span className="ml-auto flex min-w-0 items-center gap-2">
                 <ThemeToggle />
                 <AuthButtons />
               </span>
             </div>
           </div>
           <nav aria-label="Main" className="mx-auto max-w-4xl px-4">
-            <div className="flex flex-nowrap items-center gap-4 overflow-x-auto pb-3">
+            {/* The bar scrolls horizontally on phones; a fade at the
+                right edge shows there is more to scroll to — the old
+                bar just cut links off with no cue. */}
+            <div className="flex flex-nowrap items-center gap-4 overflow-x-auto pb-3 [mask-image:linear-gradient(to_right,black_92%,transparent_100%)]">
               <Link href="/create" className="inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap text-sm font-semibold text-foreground">
                 Create
               </Link>
@@ -97,21 +103,59 @@ export default function RootLayout({
         </header>
         <main className="mx-auto max-w-4xl px-4 py-8">{children}</main>
         <footer className="border-t border-border bg-card">
-          <div className="mx-auto max-w-4xl px-4 py-6 text-sm text-muted-foreground">
-            <p>
+          <div className="mx-auto max-w-4xl px-4 py-8 text-sm text-muted-foreground">
+            {/* Structured footer: brand + three link columns instead
+                of one flat wrap of links. Same links, same compliance
+                paragraph, same MediaPipe credit — only the layout
+                changed. */}
+            <div className="grid gap-6 sm:grid-cols-[1.4fr_1fr_1fr_1fr]">
+              <div>
+                <p className="inline-flex items-center font-bold text-foreground">
+                  <span
+                    aria-hidden="true"
+                    className="mr-2 inline-block h-2.5 w-2.5 rounded-full bg-accent"
+                  />
+                  AI Video Clipper
+                </p>
+                <p className="mt-2">
+                  Turn videos you own into captioned vertical clips —
+                  in your browser.
+                </p>
+              </div>
+              <nav aria-label="Product">
+                <p className="font-semibold text-foreground">Product</p>
+                <ul className="mt-2 space-y-1">
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/create">Create clips</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/generate">Generate a short</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/publish">Publish</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/pricing">Pricing</a></li>
+                </ul>
+              </nav>
+              <nav aria-label="Learn">
+                <p className="font-semibold text-foreground">Learn</p>
+                <ul className="mt-2 space-y-1">
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/how-it-works">How it works</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/faq">FAQ</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/contact">Contact</a></li>
+                </ul>
+              </nav>
+              <nav aria-label="Legal">
+                <p className="font-semibold text-foreground">Legal</p>
+                <ul className="mt-2 space-y-1">
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/privacy">Privacy Policy</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/terms">Terms of Use</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/copyright">Copyright / DMCA</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/cookies">Cookie Policy</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/acceptable-use">Acceptable Use</a></li>
+                  <li><a className="inline-flex min-h-[32px] items-center underline" href="/report">Report infringement</a></li>
+                </ul>
+              </nav>
+            </div>
+            <p className="mt-6 border-t border-border pt-4">
               Clip your own videos only — you must own the rights to
               the video you clip, or use a link to a video with a
               verified free licence. This tool never downloads videos
               from YouTube, TikTok, or Instagram.
-            </p>
-            <p className="mt-2 flex flex-wrap gap-4">
-              <a className="inline-flex min-h-[44px] items-center underline" href="/privacy">Privacy Policy</a>
-              <a className="inline-flex min-h-[44px] items-center underline" href="/terms">Terms of Use</a>
-              <a className="inline-flex min-h-[44px] items-center underline" href="/contact">Contact</a>
-              <a className="inline-flex min-h-[44px] items-center underline" href="/copyright">Copyright / DMCA</a>
-              <a className="inline-flex min-h-[44px] items-center underline" href="/cookies">Cookie Policy</a>
-              <a className="inline-flex min-h-[44px] items-center underline" href="/acceptable-use">Acceptable Use</a>
-              <a className="inline-flex min-h-[44px] items-center underline" href="/report">Report infringement</a>
             </p>
             <p className="mt-2">
               Face detection uses MediaPipe (Apache 2.0); content-aware

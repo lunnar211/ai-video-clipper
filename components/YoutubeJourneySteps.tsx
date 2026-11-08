@@ -151,9 +151,17 @@ export default function YoutubeJourneySteps({
                   ? "Upload the Studio download here — same file the main upload box takes."
                   : "Upload a video file here, or verify first in step 1 to attach a source record."}
               </p>
+              {/* Styled picker, same as the main dropzone: the raw
+                  browser input rendered as plain text. */}
+              <label
+                htmlFor="yt-journey-upload"
+                className="mt-2 inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-colors duration-200 hover:opacity-90"
+              >
+                Choose a video file
+              </label>
               <input
                 id="yt-journey-upload"
-                className="mt-2 block w-full max-w-full text-sm"
+                className="sr-only"
                 type="file"
                 accept="video/*"
                 onChange={(e) => {

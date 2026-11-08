@@ -929,8 +929,21 @@ export default function ClipperTool() {
           Up to 10 minutes, up to 500 MB. MP4, MOV, WebM and other browser
           formats. The video stays in this browser.
         </p>
+        {/* Styled file picker: the raw browser file input rendered
+            as plain "Choose File / No file chosen" text — the
+            single cheapest-looking element on the page. The input
+            stays (same accept + handler), hidden, driven by a real
+            button label; the chosen file name still shows below in
+            the same "{name} — {MB} MB" wording. */}
+        <label
+          htmlFor="clipper-file"
+          className="mt-4 inline-flex min-h-[44px] cursor-pointer items-center rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-on-primary transition-colors duration-200 hover:opacity-90"
+        >
+          Choose a video file
+        </label>
         <input
-          className="mt-4 block w-full max-w-full"
+          id="clipper-file"
+          className="sr-only"
           type="file"
           accept="video/*"
           onChange={(e) => {

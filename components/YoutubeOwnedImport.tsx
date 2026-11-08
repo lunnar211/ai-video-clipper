@@ -180,14 +180,14 @@ export default function YoutubeOwnedImport({
       </div>
       {signedIn === false && (
         <p className="text-sm text-muted-foreground">
+          {/* Short hint only: the journey box above already states
+              the YouTube app is not set up yet — repeating it here
+              made the section read the same warning three times. */}
           Verification needs a signed-in account —{" "}
           <a href="/signin" className="underline">
             sign in first
           </a>
-          , then paste your link again. (Connecting a YouTube
-          channel is also not set up yet, so verification
-          can&apos;t succeed until the owner sets up the YouTube
-          app.)
+          , then paste your link again.
         </p>
       )}
 

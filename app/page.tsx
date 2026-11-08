@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import HeroUploadBox from "@/components/HeroUploadBox";
+import FeatureIcon from "@/components/FeatureIcon";
+import PlanCards from "@/components/PlanCards";
 import { getPlans } from "@/lib/billing/plans";
 import {
   FEATURES,
@@ -41,10 +43,6 @@ export const metadata: Metadata = {
   },
 };
 
-function formatLimit(value: number): string {
-  return value === -1 ? "Unlimited" : String(value);
-}
-
 export default function Home() {
   const plans = getPlans();
   const faqJsonLd = {
@@ -64,25 +62,31 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      {/* Hero */}
-      <section aria-labelledby="hero-title" className="space-y-4">
-        <p className="text-sm font-semibold tracking-wide text-primary uppercase">
-          {HERO.eyebrow}
-        </p>
-        <h1 id="hero-title" className="text-4xl font-bold tracking-tight text-foreground md:text-5xl md:leading-tight">
-          {HERO.title}
-        </h1>
-        <p className="text-lg text-muted-foreground">{HERO.sub}</p>
-        <HeroUploadBox />
-        <p className="text-sm font-medium text-foreground">
-          {PLATFORM_STRIP}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {HERO.reassurance}
-        </p>
-        <p className="text-sm font-medium text-foreground">
-          {HERO.rightsNote}
-        </p>
+      {/* Hero: copy left, the real tool panel right (desktop). The
+          panel is the same upload box — on a phone it stacks below
+          the copy, in the same order as before. */}
+      <section aria-labelledby="hero-title" className="lg:grid lg:grid-cols-[1fr_1.05fr] lg:items-start lg:gap-10">
+        <div className="space-y-4">
+          <p className="text-sm font-semibold tracking-wide text-primary uppercase">
+            {HERO.eyebrow}
+          </p>
+          <h1 id="hero-title" className="text-4xl font-bold tracking-tight text-foreground md:text-5xl md:leading-tight">
+            {HERO.title}
+          </h1>
+          <p className="text-lg text-muted-foreground">{HERO.sub}</p>
+          <p className="text-sm font-medium text-foreground">
+            {PLATFORM_STRIP}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {HERO.reassurance}
+          </p>
+          <p className="text-sm font-medium text-foreground">
+            {HERO.rightsNote}
+          </p>
+        </div>
+        <div className="mt-6 lg:mt-0">
+          <HeroUploadBox />
+        </div>
       </section>
 
       {/* Value strip */}
@@ -96,7 +100,10 @@ export default function Home() {
         <p className="mt-1 text-on-primary/90">{VALUE_STRIP.body}</p>
       </section>
 
-      {/* See it work: the real tool, not a preview (Phase 10). */}
+      {/* See it work: the real tool, not a preview (Phase 10).
+          The box is the same upload entry as the hero, so it sits
+          in a distinct dark "live tool" frame — the two entries
+          must never look like a copy-paste of each other. */}
       <section aria-labelledby="see-it-work-title" className="space-y-4">
         <h2 id="see-it-work-title" className="text-2xl font-bold tracking-tight text-foreground">
           See it work
@@ -107,21 +114,49 @@ export default function Home() {
           where transcription, moments, captions, and rendering happen
           for real, on your own recording.
         </p>
-        <HeroUploadBox id="see-it-work-upload" />
+        <div className="rounded-xl border border-border bg-primary p-1.5 shadow-sm sm:p-2">
+          <p className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-on-primary">
+            <span
+              aria-hidden="true"
+              className="inline-block h-2.5 w-2.5 rounded-full bg-accent"
+            />
+            Live tool — the real clipper, not a preview
+          </p>
+          <div className="rounded-lg bg-background">
+            <HeroUploadBox id="see-it-work-upload" />
+          </div>
+        </div>
       </section>
 
-      {/* Feature grid */}
+      {/* Feature grid: each feature gets its own drawn icon so the
+          grid stops reading as ten identical text cards. The first
+          feature spans the row on desktop — it is the core of the
+          product. Copy is unchanged (pinned by marketing tests). */}
       <section aria-labelledby="features-title" className="space-y-4">
         <h2 id="features-title" className="text-2xl font-bold tracking-tight text-foreground">
           What the clipper does
         </h2>
         <div className="grid gap-5 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
+          {FEATURES.map((feature, index) => (
             <article
               key={feature.title}
-              className="rounded-xl border border-border bg-card p-6 shadow-sm transition-colors duration-200 hover:border-primary/40"
+              className={`rounded-xl border bg-card p-6 shadow-sm transition-colors duration-200 hover:border-primary/40 ${
+                index === 0
+                  ? "border-primary/40 sm:col-span-2"
+                  : "border-border"
+              }`}
             >
-              <h3 className="text-lg font-semibold text-foreground">
+              <span
+                aria-hidden="true"
+                className={`inline-flex h-11 w-11 items-center justify-center rounded-lg ${
+                  index === 0
+                    ? "bg-accent text-on-accent"
+                    : "bg-muted text-foreground"
+                }`}
+              >
+                <FeatureIcon title={feature.title} className="h-6 w-6" />
+              </span>
+              <h3 className="mt-3 text-lg font-semibold text-foreground">
                 {feature.title}
               </h3>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
@@ -132,26 +167,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3 steps */}
+      {/* 3 steps: a numbered timeline, not three identical cards. */}
       <section aria-labelledby="steps-title" className="space-y-4">
         <h2 id="steps-title" className="text-2xl font-bold tracking-tight text-foreground">
           Three steps to a posted clip
         </h2>
-        <ol className="space-y-4">
+        <ol className="space-y-6">
           {STEPS.map((step, index) => (
             <li
               key={step.title}
-              className="rounded-xl border border-border bg-card p-6 shadow-sm"
+              className="flex gap-4 rounded-xl border border-border bg-card p-6 shadow-sm"
             >
-              <h3 className="text-lg font-semibold text-foreground">
-                Step {index + 1}: {step.title}
-              </h3>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                {step.body}
-              </p>
-              <p className="mt-1 text-sm font-medium text-foreground">
-                {step.proof}
-              </p>
+              <span
+                aria-hidden="true"
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base font-bold text-on-accent"
+              >
+                {index + 1}
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Step {index + 1}: {step.title}
+                </h3>
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {step.body}
+                </p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  {step.proof}
+                </p>
+              </div>
             </li>
           ))}
         </ol>
@@ -165,52 +208,14 @@ export default function Home() {
         </p>
       </section>
 
-      {/* Plans comparison (this site's own plans — no competitor numbers) */}
+      {/* Plans comparison (this site's own plans — no competitor numbers).
+          Cards, not a six-column table: the table squeezed into a
+          phone viewport and read as a placeholder grid. */}
       <section aria-labelledby="plans-title" className="space-y-4">
         <h2 id="plans-title" className="text-2xl font-bold tracking-tight text-foreground">
           Plans at a glance
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th scope="col" className="px-4 py-3 text-foreground">Plan</th>
-                <th scope="col" className="px-4 py-3 text-foreground">Source minutes / month</th>
-                <th scope="col" className="px-4 py-3 text-foreground">Projects</th>
-                <th scope="col" className="px-4 py-3 text-foreground">Seats</th>
-                <th scope="col" className="px-4 py-3 text-foreground">Publish targets</th>
-                <th scope="col" className="px-4 py-3 text-foreground">Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(["free", "pro", "agency"] as const).map((id) => (
-                <tr
-                  key={id}
-                  className="border-b border-border transition-colors duration-200 last:border-0 hover:bg-muted/60"
-                >
-                  <th scope="row" className="px-4 py-3 font-semibold capitalize text-foreground">
-                    {id}
-                  </th>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatLimit(plans[id].minutesPerMonth)}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatLimit(plans[id].projects)}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatLimit(plans[id].seats)}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatLimit(plans[id].publishTargets)}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    Coming soon
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <PlanCards plans={plans} />
         <p className="text-sm text-muted-foreground">
           {PLANS_NOTE}{" "}
           <a href="/pricing" className="underline">

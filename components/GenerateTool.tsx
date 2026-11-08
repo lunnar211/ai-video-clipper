@@ -43,6 +43,7 @@ import {
 import RightsPanel from "@/components/RightsPanel";
 import PostClip from "@/components/PostClip";
 import type { GeneratedVisual } from "@/lib/imports/cc-types";
+import { createSupabaseBrowserClient } from "@/lib/auth/supabase";
 
 /**
  * AI Generate Short (ClipForge Phase 17).
@@ -168,16 +169,27 @@ export default function GenerateTool() {
     // mount sync does not cascade renders during the commit phase.
     queueMicrotask(() => setHistory(loadHistory()));
     // Server project records (signed-in only): titles + dates, shown
-    // in history. 401 = guest and 503 = no database are both normal
-    // here — the browser-local history below still works.
-    fetch("/api/projects")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data.projects)) {
-          setServerProjects(data.projects as ServerProject[]);
-        }
-      })
-      .catch(() => undefined);
+    // in history. Phase 23: guests have no session, so the fetch
+    // would answer 401 and log a console error before the visitor
+    // has done anything. Only ask the server when a session
+    // actually exists; a 503 (no database) is still normal here —
+    // the browser-local history below still works.
+    (async () => {
+      const supabase = createSupabaseBrowserClient();
+      if (!supabase) return;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return;
+      fetch("/api/projects")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && Array.isArray(data.projects)) {
+            setServerProjects(data.projects as ServerProject[]);
+          }
+        })
+        .catch(() => undefined);
+    })();
   }, []);
 
   const generateScript = useCallback(async () => {
